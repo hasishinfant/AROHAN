@@ -216,9 +216,10 @@ async def driver_report(
         shipment_id=body.shipment_id,
         route_id=body.route_id,
         condition=body.condition,
+        verification_status="UNVERIFIED",
         notes=body.notes,
-        lat=body.lat,
-        lon=body.lon,
+        lat=body.lat or 25.82,
+        lon=body.lon or 91.95,
     )
     db.add(report)
 

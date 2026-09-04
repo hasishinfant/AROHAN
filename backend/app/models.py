@@ -129,6 +129,8 @@ class DriverReport(Base):
     route_id: Mapped[int] = mapped_column(Integer, ForeignKey("routes.id"))
     segment_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("road_segments.id"), nullable=True)
     condition: Mapped[str] = mapped_column(String(20))  # CLEAR | SLOW | PARTIAL | BLOCKED
+    verification_status: Mapped[str] = mapped_column(String(30), default="UNVERIFIED")
+    # UNVERIFIED | CORROBORATED | VERIFIED | CONFLICTING | REJECTED | EXPIRED
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     lon: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
