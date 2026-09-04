@@ -1,6 +1,6 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { Activity, ShieldCheck, Database, Radio, Server, CloudRain, CheckCircle2, Layers, Cpu } from 'lucide-react';
+import { Activity, ShieldCheck, Database, Radio, Server, CloudRain, CheckCircle2, Layers, Cpu, GitBranch } from 'lucide-react';
 
 export function SystemHealth() {
   const { isConnected } = useArohanStore();
@@ -48,8 +48,62 @@ export function SystemHealth() {
         <div>
           <h1 className="page-title">SYSTEM HEALTH & ARCHITECTURE POSITIONING</h1>
           <div className="page-description">
-            Operational Service Telemetry · Recommended Tech Stack · Data Provenance Matrix
+            Operational Service Telemetry · Recommended Tech Stack · End-to-End System Flow
           </div>
+        </div>
+      </div>
+
+      {/* SYSTEM ARCHITECTURE FLOW DIAGRAM CARD */}
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
+            <GitBranch size={18} style={{ color: 'var(--primary-teal)' }} />
+            <span>AROHAN END-TO-END OPERATIONAL ARCHITECTURE FLOW</span>
+          </div>
+          <span className="data-tag data-tag-real">SYSTEM PIPELINE</span>
+        </div>
+
+        <div style={{ backgroundColor: '#0f172a', color: '#38bdf8', padding: 20, borderRadius: 12, overflowX: 'auto', fontFamily: 'monospace', fontSize: '0.82rem', lineHeight: 1.45 }}>
+          <pre>{`React + TypeScript + Vite
+Tailwind + shadcn/ui
+MapLibre
+FastAPI + Pydantic
+PostgreSQL + PostGIS
+OSRM + NetworkX
+Python ML (scikit-learn/XGBoost)
+PWA + IndexedDB
+WebSockets                    AROHAN
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+   AROHAN COMMAND             AROHAN FIELD
+   Operator portal             Driver portal
+          │                         │
+          └────────────┬────────────┘
+                       │
+                 FastAPI Backend
+                       │
+              ┌────────┼────────┐
+              │        │        │
+          Decision    Risk    Replanning
+           Engine     Engine     Engine
+              │        │        │
+              └────────┼────────┘
+                       │
+                PostgreSQL/PostGIS
+                       │
+       ┌───────────────┼────────────────┐
+       │               │                │
+    Weather          Roads            Terrain
+    /Hazards        /GIS              /DEM
+       │               │                │
+       └───────────────┼────────────────┘
+                       │
+                 Field Feedback
+                       ↓
+                 Network State
+                       ↓
+                    REPLAN`}</pre>
         </div>
       </div>
 
