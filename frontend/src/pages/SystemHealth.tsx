@@ -1,9 +1,30 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { Activity, ShieldCheck, Database, Radio, Server, CloudRain, CheckCircle2, Layers } from 'lucide-react';
+import { Activity, ShieldCheck, Database, Radio, Server, CloudRain, CheckCircle2, Layers, Cpu } from 'lucide-react';
 
 export function SystemHealth() {
   const { isConnected } = useArohanStore();
+
+  const techStack = [
+    { layer: 'Command + Field Frontend', tech: 'React + TypeScript + Vite', purpose: 'Two portals with one shared frontend codebase' },
+    { layer: 'UI', tech: 'Tailwind CSS + shadcn/ui', purpose: 'Professional Command UI + simple Field UI' },
+    { layer: 'Maps/GIS', tech: 'MapLibre GL JS', purpose: 'Interactive NER map, route/segment visualization' },
+    { layer: 'Backend API', tech: 'Python + FastAPI + Pydantic', purpose: 'Missions, decisions, field reports, replanning' },
+    { layer: 'Database', tech: 'PostgreSQL + PostGIS', purpose: 'Missions, roads, warehouses, vehicles, geospatial state' },
+    { layer: 'Routing', tech: 'OSRM + NetworkX', purpose: 'Route generation, route graph, remaining-journey analysis' },
+    { layer: 'Optimization', tech: 'Google OR-Tools', purpose: 'Mission-aware route/constraint optimization where needed' },
+    { layer: 'Risk/ML', tech: 'Python + scikit-learn / XGBoost', purpose: 'Future accessibility-risk prediction' },
+    { layer: 'GIS processing', tech: 'GeoPandas + Shapely', purpose: 'Spatial analysis and road/terrain processing' },
+    { layer: 'Terrain', tech: 'Rasterio', purpose: 'DEM/terrain analysis when required' },
+    { layer: 'Real-time communication', tech: 'WebSockets', purpose: 'Mission/vehicle/network-state updates' },
+    { layer: 'Offline Field', tech: 'PWA + Service Worker + IndexedDB', purpose: 'Cached mission, route, field reports, offline queue' },
+    { layer: 'Background jobs', tech: 'Celery + Redis / FastAPI workers', purpose: 'Data refresh/recalculation; choose the simpler option for MVP' },
+    { layer: 'Authentication', tech: 'JWT + RBAC', purpose: 'Command vs Field authorization' },
+    { layer: 'Deployment', tech: 'Docker', purpose: 'Reproducible deployment' },
+    { layer: 'Frontend hosting', tech: 'Vercel / equivalent', purpose: 'MVP frontend' },
+    { layer: 'Backend hosting', tech: 'Render / Railway / equivalent', purpose: 'MVP backend' },
+    { layer: 'Database hosting', tech: 'Managed PostgreSQL/PostGIS', purpose: 'Production-style persistence' },
+  ];
 
   const services = [
     { name: 'IMD Weather Data Provider', status: 'CONNECTED', desc: 'Real-time rainfall intensity & 24h cumulative precipitation grid', icon: CloudRain, tag: 'REAL' },
@@ -27,8 +48,40 @@ export function SystemHealth() {
         <div>
           <h1 className="page-title">SYSTEM HEALTH & ARCHITECTURE POSITIONING</h1>
           <div className="page-description">
-            Operational Service Telemetry · MDoNER Decision Layer Positioning · Data Provenance Matrix
+            Operational Service Telemetry · Recommended Tech Stack · Data Provenance Matrix
           </div>
+        </div>
+      </div>
+
+      {/* RECOMMENDED AROHAN TECH STACK TABLE */}
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
+            <Cpu size={18} style={{ color: 'var(--primary-teal)' }} />
+            <span>RECOMMENDED AROHAN SYSTEM TECH STACK</span>
+          </div>
+          <span className="data-tag data-tag-real">SIH 2026 ARCHITECTURE</span>
+        </div>
+
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>SYSTEM LAYER</th>
+                <th>TECHNOLOGY</th>
+                <th>PURPOSE & SCOPE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {techStack.map((item) => (
+                <tr key={item.layer}>
+                  <td><strong>{item.layer}</strong></td>
+                  <td><span className="badge badge-info">{item.tech}</span></td>
+                  <td>{item.purpose}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
