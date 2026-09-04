@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapView } from '../components/Map/MapView';
 import { RiskGauge } from '../components/RiskGauge';
 import { EventTimeline } from '../components/EventTimeline';
@@ -16,7 +16,12 @@ import {
   CheckCircle2,
   Sliders,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  Truck,
+  MapPin,
+  RefreshCw,
+  GitCompare,
+  FileText
 } from 'lucide-react';
 
 export function CommandCenter() {
@@ -30,18 +35,111 @@ export function CommandCenter() {
     rainfall_data,
     scenario_step,
     kpis,
+    isConnected,
     approveDecision
   } = useArohanStore();
   const navigate = useNavigate();
+
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-US', { hour12: false }));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const step = scenario_step ?? -1;
   const riskA = risk_results ? Object.values(risk_results).find((r: any) => r.route_label === 'A') : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Top Hero Section: Featured Pastel Mint Card (Matching Ref Image Top Left) + Quick Overview */}
+      
+      {/* 1. LIVE SYSTEM OPERATIONAL CLOCK & PROVENANCE BAR */}
+      <div
+        className="card"
+        style={{
+          padding: '14px 20px',
+          backgroundColor: '#ffffff',
+          borderRadius: 20,
+          border: '1px solid #cbd5e1',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 16,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: isConnected ? '#10b981' : '#ef4444', display: 'inline-block' }} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>
+              {isConnected ? 'LIVE WEBSOCKET STREAM' : 'CONNECTING...'}
+            </span>
+          </div>
+
+          <div style={{ width: 1, height: 18, backgroundColor: '#cbd5e1' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', fontWeight: 700, color: '#047857' }}>
+            <Clock size={16} />
+            <span>SYSTEM TIME: {currentTime} IST</span>
+          </div>
+        </div>
+
+        {/* Data Classification Badges */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="data-tag data-tag-real">LIVE IMD RAINFALL</span>
+          <span className="data-tag data-tag-real">REAL OSM GEOMETRY</span>
+          <span className="data-tag data-tag-derived">DERIVED DECISION ENGINE</span>
+        </div>
+      </div>
+
+      {/* 2. LIVE OPERATIONS METRICS COUNTERS STRIP */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14 }}>
+        <div className="card" style={{ padding: 14, backgroundColor: '#ffffff', borderRadius: 16 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>ACTIVE MISSIONS</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0b2545', marginTop: 2 }}>1</div>
+          <div style={{ fontSize: '0.65rem', color: '#047857', fontWeight: 700, marginTop: 2 }}>SHP-001 (Medical)</div>
+        </div>
+
+        <div className="card" style={{ padding: 14, backgroundColor: step >= 2 ? '#fef2f2' : '#ffffff', borderColor: step >= 2 ? '#fecaca' : '#cbd5e1', borderRadius: 16 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: step >= 2 ? '#991b1b' : '#64748b', textTransform: 'uppercase' }}>AT-RISK MISSIONS</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: step >= 2 ? '#b91c1c' : '#0b2545', marginTop: 2 }}>{step >= 2 ? 1 : 0}</div>
+          <div style={{ fontSize: '0.65rem', color: step >= 2 ? '#b91c1c' : '#64748b', fontWeight: 700, marginTop: 2 }}>{step >= 2 ? 'Route A NH-6 78%' : 'Nominal'}</div>
+        </div>
+
+        <div className="card" style={{ padding: 14, backgroundColor: current_decision?.status === 'PENDING' ? '#fffbeb' : '#ffffff', borderColor: current_decision?.status === 'PENDING' ? '#fde68a' : '#cbd5e1', borderRadius: 16 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: current_decision?.status === 'PENDING' ? '#9a3412' : '#64748b', textTransform: 'uppercase' }}>PENDING DECISIONS</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: current_decision?.status === 'PENDING' ? '#d97706' : '#0b2545', marginTop: 2 }}>
+            {current_decision?.status === 'PENDING' ? 1 : 0}
+          </div>
+          <div style={{ fontSize: '0.65rem', color: current_decision?.status === 'PENDING' ? '#d97706' : '#64748b', fontWeight: 700, marginTop: 2 }}>
+            {current_decision?.status === 'PENDING' ? 'Action Required' : 'All Clear'}
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: 14, backgroundColor: '#ffffff', borderRadius: 16 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>CRITICAL CORRIDORS</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0b2545', marginTop: 2 }}>1</div>
+          <div style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700, marginTop: 2 }}>Guwahati–Shillong</div>
+        </div>
+
+        <div className="card" style={{ padding: 14, backgroundColor: step >= 7 ? '#fef2f2' : '#ffffff', borderRadius: 16 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>FIELD REPORTS</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: step >= 7 ? '#b91c1c' : '#0b2545', marginTop: 2 }}>{step >= 7 ? 1 : 0}</div>
+          <div style={{ fontSize: '0.65rem', color: step >= 7 ? '#b91c1c' : '#64748b', fontWeight: 700, marginTop: 2 }}>{step >= 7 ? 'Route A BLOCKED' : 'No Reports'}</div>
+        </div>
+
+        <div className="card" style={{ padding: 14, backgroundColor: '#ffffff', borderRadius: 16 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>ROUTE CHANGES</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#047857', marginTop: 2 }}>{step >= 5 ? 1 : 0}</div>
+          <div style={{ fontSize: '0.65rem', color: '#047857', fontWeight: 700, marginTop: 2 }}>{step >= 5 ? 'Route B Approved' : 'Original Route'}</div>
+        </div>
+      </div>
+
+      {/* 3. HERO DECISION FEATURE & ACTIVE MISSION BANNER */}
       <div className="grid-command-center">
-        {/* Featured Mint Pastel Card (Ref Image Left Featured Card) */}
+        {/* Featured Decision Card */}
         <div className="card-featured-mint" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -60,7 +158,7 @@ export function CommandCenter() {
             </div>
           </div>
 
-          {/* Metric Pills inside Featured Card (Matching Lime Pill Metric Badges in Ref Image) */}
+          {/* Metric Pills inside Featured Card */}
           <div className="grid-2" style={{ gap: 12, marginTop: 16 }}>
             <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', padding: 12, borderRadius: 'var(--radius-md)', backdropFilter: 'blur(6px)' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase' }}>DELAY AVOIDED</div>
@@ -89,8 +187,8 @@ export function CommandCenter() {
         <div className="card" style={{ justifyContent: 'space-between' }}>
           <div className="card-header" style={{ marginBottom: 8, paddingBottom: 8 }}>
             <div className="card-title">
-              <Shield size={16} />
-              <span>ACTIVE MISSION & VEHICLE</span>
+              <Truck size={16} />
+              <span>ACTIVE MISSION & VEHICLE TELEMETRY</span>
             </div>
             {shipment && <StatusBadge status={shipment.status} />}
           </div>
@@ -151,7 +249,7 @@ export function CommandCenter() {
         </div>
       </div>
 
-      {/* Main Map & Intelligence Section (Ref Matched Rounded Panels) */}
+      {/* 4. MAIN MAP & INTELLIGENCE SECTION */}
       <div className="grid-command-center">
         {/* Map View Panel */}
         <div className="card" style={{ padding: 12 }}>
@@ -208,7 +306,7 @@ export function CommandCenter() {
             </div>
           )}
 
-          {/* Event History Log */}
+          {/* Operational Event History Log */}
           <div className="card" style={{ flex: 1 }}>
             <div className="card-header">
               <div className="card-title">
