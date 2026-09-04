@@ -191,6 +191,97 @@ async def get_thresholds() -> dict:
     }
 
 
+# ── Providers (External Real-Data Ingestion) ──────────────────────────────────
+
+@router.get("/providers/imd")
+async def get_imd_telemetry(district: str = "Ri-Bhoi") -> dict:
+    from app.providers.imd_provider import imd_provider
+    pkg = await imd_provider.fetch_district_telemetry(district)
+    return pkg.model_dump()
+
+
+@router.get("/providers/osm")
+async def get_osm_geometry(route_label: str = "A") -> dict:
+    from app.providers.osm_provider import osm_provider
+    pkg = await osm_provider.fetch_route_geometry(route_label)
+    return pkg.model_dump()
+
+
+@router.get("/providers/dem")
+async def get_dem_terrain(route_label: str = "A") -> dict:
+    from app.providers.dem_provider import dem_provider
+    pkg = await dem_provider.derive_route_terrain(route_label)
+    return pkg.model_dump()
+
+
+@router.get("/providers/hazard")
+async def get_hazard_catalog(corridor_ref: str = "NH-6") -> dict:
+    from app.providers.hazard_provider import hazard_provider
+    pkg = await hazard_provider.fetch_corridor_hazard_history(corridor_ref)
+    return pkg.model_dump()
+
+
+@router.get("/providers/status")
+async def get_all_provider_statuses() -> dict:
+    from app.providers.imd_provider import imd_provider
+    from app.providers.osm_provider import osm_provider
+    from app.providers.dem_provider import dem_provider
+    from app.providers.hazard_provider import hazard_provider
+
+    imd_data = await imd_provider.fetch_district_telemetry("Ri-Bhoi")
+    osm_data = await osm_provider.fetch_route_geometry("A")
+    dem_data = await dem_provider.derive_route_terrain("A")
+    hazard_data = await hazard_provider.fetch_corridor_hazard_history("NH-6")
+
+    return {
+        "providers": [
+            {
+                "name": "India Meteorological Department (IMD)",
+                "type": "METEOROLOGICAL_TELEMETRY",
+                "source": imd_data.source,
+                "status": imd_data.status,
+                "freshness_seconds": imd_data.freshness_seconds,
+                "retrieved_at": imd_data.retrieved_at.isoformat(),
+                "observed_at": imd_data.observed_at.isoformat(),
+                "details": f"AWS Rainfall: {imd_data.current_observation.rainfall_intensity_mmh} mm/h ({imd_data.current_observation.district})"
+            },
+            {
+                "name": "OpenStreetMap (OSM) Road Network",
+                "type": "GEOSPATIAL_ROAD_GEOMETRY",
+                "source": osm_data.source,
+                "status": osm_data.status,
+                "freshness_seconds": osm_data.freshness_seconds,
+                "retrieved_at": osm_data.retrieved_at.isoformat(),
+                "observed_at": osm_data.observed_at.isoformat(),
+                "details": f"Road Way: {osm_data.road_geometry.name} ({osm_data.road_geometry.total_length_km} km)"
+            },
+            {
+                "name": "Copernicus DEM 30m Terrain Model",
+                "type": "RASTER_ELEVATION_SLOPE",
+                "source": dem_data.source,
+                "status": dem_data.status,
+                "freshness_seconds": dem_data.freshness_seconds,
+                "retrieved_at": dem_data.retrieved_at.isoformat(),
+                "observed_at": dem_data.observed_at.isoformat(),
+                "details": f"Peak Slope: {dem_data.peak_slope_degrees}° (Mean Elev: {dem_data.mean_elevation_m}m)"
+            },
+            {
+                "name": "GSI & NDMA Historical Hazard Archive",
+                "type": "AUTHORITATIVE_HAZARD_CATALOG",
+                "source": hazard_data.source,
+                "status": hazard_data.status,
+                "freshness_seconds": hazard_data.freshness_seconds,
+                "retrieved_at": hazard_data.retrieved_at.isoformat(),
+                "observed_at": hazard_data.observed_at.isoformat(),
+                "details": f"Disruption Index: {hazard_data.zonation.historical_disruption_index} ({hazard_data.zonation.total_archived_incidents} incidents)"
+            }
+        ]
+    }
+
+
+# ── Driver ────────────────────────────────────────────────────────────────────
+
+
 # ── Driver ────────────────────────────────────────────────────────────────────
 
 @router.post("/driver/acknowledge")

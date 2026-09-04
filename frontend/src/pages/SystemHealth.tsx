@@ -1,14 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { Activity, ShieldCheck, Database, Radio, Server, CloudRain, CheckCircle2, Layers } from 'lucide-react';
+import { Activity, ShieldCheck, Database, Radio, Server, CloudRain, CheckCircle2, Layers, RefreshCw, Clock, AlertTriangle } from 'lucide-react';
+
+interface ProviderStatus {
+  name: string;
+  type: string;
+  source: string;
+  status: 'LIVE' | 'RECENT' | 'STALE' | 'UNAVAILABLE' | 'HISTORICAL' | 'SIMULATED' | 'DERIVED';
+  freshness_seconds: number;
+  retrieved_at: string;
+  observed_at: string;
+  details: string;
+}
 
 export function SystemHealth() {
   const { isConnected } = useArohanStore();
+  const [providers, setProviders] = useState<ProviderStatus[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [lastRefreshed, setLastRefreshed] = useState<string>('');
 
-  const services = [
-    { name: 'IMD Weather Data Provider', status: 'CONNECTED', desc: 'Real-time rainfall intensity & 24h cumulative precipitation grid', icon: CloudRain, tag: 'REAL' },
-    { name: 'OSM Road Network Provider', status: 'AVAILABLE', desc: 'North Eastern Region GIS geometry & topological road graph', icon: Layers, tag: 'REAL' },
-    { name: 'Terrain Hazard Telemetry', status: 'AVAILABLE', desc: 'Slope vulnerability & historical landslide susceptibility index', icon: Radio, tag: 'REAL' },
+  const fetchProviderStatuses = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/providers/status');
+      if (res.ok) {
+        const data = await res.json();
+        setProviders(data.providers || []);
+        setLastRefreshed(new Date().toLocaleTimeString());
+      }
+    } catch (e) {
+      console.error('Failed to fetch provider status:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProviderStatuses();
+    const interval = setInterval(fetchProviderStatuses, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'LIVE':
+        return <span className="badge badge-success" style={{ backgroundColor: '#10b981', color: '#fff' }}><CheckCircle2 size={12} /> LIVE</span>;
+      case 'RECENT':
+        return <span className="badge badge-info"><Clock size={12} /> RECENT</span>;
+      case 'STALE':
+        return <span className="badge badge-warning"><AlertTriangle size={12} /> STALE</span>;
+      case 'HISTORICAL':
+        return <span className="badge" style={{ backgroundColor: '#64748b', color: '#fff' }}><Clock size={12} /> HISTORICAL</span>;
+      case 'DERIVED':
+        return <span className="badge" style={{ backgroundColor: '#0f766e', color: '#fff' }}><Activity size={12} /> DERIVED</span>;
+      case 'UNAVAILABLE':
+        return <span className="badge badge-danger"><AlertTriangle size={12} /> UNAVAILABLE</span>;
+      default:
+        return <span className="badge badge-info">{status}</span>;
+    }
+  };
+
+  const getTagClass = (status: string) => {
+    if (['LIVE', 'RECENT', 'HISTORICAL'].includes(status)) return 'data-tag-real';
+    if (status === 'SIMULATED') return 'data-tag-simulated';
+    return 'data-tag-derived';
+  };
+
+  const coreServices = [
     { name: 'Arohan Core Database (PostGIS)', status: 'HEALTHY', desc: 'Async SQLite / PostGIS relational persistence & audit store', icon: Database, tag: 'SYSTEM' },
     { name: 'Proactive Decision Engine', status: 'HEALTHY', desc: 'Loss objective optimizer & risk threshold trigger engine', icon: ShieldCheck, tag: 'DERIVED' },
     { name: 'WebSocket & PWA Dispatcher', status: isConnected ? 'HEALTHY' : 'CONNECTING', desc: 'Real-time state broadcast & driver mobile PWA push queue', icon: Server, tag: 'SYSTEM' },
@@ -25,10 +83,58 @@ export function SystemHealth() {
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">SYSTEM HEALTH</h1>
+          <h1 className="page-title">SYSTEM HEALTH & EXTERNAL INGESTION PIPELINE</h1>
           <div className="page-description">
-            Operational Service Telemetry · Live Core Integration Health · Data Classification & Provenance
+            Live External Telemetry Adapters · Provider Freshness & Validation · Core Engine Status
           </div>
+        </div>
+        <button className="btn btn-secondary" onClick={fetchProviderStatuses} disabled={loading} style={{ fontSize: '0.8rem', gap: 6 }}>
+          <RefreshCw size={14} className={loading ? 'spin' : ''} />
+          <span>Refresh Freshness</span>
+        </button>
+      </div>
+
+      {/* External Real-Data Provider Adapters */}
+      <div>
+        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>EXTERNAL GEOSPATIAL & METEOROLOGICAL PROVIDER ADAPTERS</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Last Polled: {lastRefreshed || 'Just now'}</span>
+        </div>
+
+        <div className="grid-2">
+          {providers.map((p) => (
+            <div key={p.name} className="card">
+              <div className="card-header" style={{ marginBottom: 8, paddingBottom: 8 }}>
+                <div className="card-title" style={{ fontSize: '0.88rem' }}>
+                  <CloudRain size={16} style={{ color: 'var(--primary-navy)' }} />
+                  <span>{p.name}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <span className={`data-tag ${getTagClass(p.status)}`}>{p.source.split(' ')[0]}</span>
+                  {getStatusBadge(p.status)}
+                </div>
+              </div>
+
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-main)', marginBottom: 8, fontWeight: 500 }}>
+                {p.details}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-light)', paddingTop: 6 }}>
+                <div>
+                  <span>Retrieved: </span>
+                  <strong>{p.retrieved_at ? new Date(p.retrieved_at).toLocaleTimeString() : 'N/A'}</strong>
+                </div>
+                <div>
+                  <span>Observed: </span>
+                  <strong>{p.observed_at ? new Date(p.observed_at).toLocaleTimeString() : 'N/A'}</strong>
+                </div>
+                <div>
+                  <span>Freshness: </span>
+                  <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>{p.freshness_seconds}s</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -40,7 +146,7 @@ export function SystemHealth() {
         </div>
 
         <div className="grid-3">
-          {services.map((srv) => {
+          {coreServices.map((srv) => {
             const Icon = srv.icon;
             return (
               <div key={srv.name} className="card">
