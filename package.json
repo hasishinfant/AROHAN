@@ -1,0 +1,12 @@
+{
+  "name": "arohan",
+  "version": "1.0.0",
+  "description": "AROHAN — Adaptive Logistics Orchestration Network (SIH 2026)",
+  "scripts": {
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && source venv/bin/activate && uvicorn app.main:app --reload --port 8000 --host 0.0.0.0",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && pip install greenlet"
+  }
+}

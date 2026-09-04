@@ -1,0 +1,295 @@
+"""
+All API routes for AROHAN.
+
+Endpoints:
+  GET  /api/state                 → full app state snapshot
+  GET  /api/routes                → all routes
+  GET  /api/shipments/{id}        → shipment detail
+  GET  /api/events                → event timeline
+  GET  /api/decisions             → decision list
+  GET  /api/risk                  → latest risk predictions
+  GET  /api/kpis                  → KPI summary
+  GET  /api/config/thresholds     → show configurable thresholds
+  POST /api/scenario/start        → start demo scenario
+  POST /api/scenario/next         → advance one step
+  POST /api/scenario/pause        → pause scenario
+  POST /api/scenario/resume       → resume scenario
+  POST /api/scenario/reset        → full reset
+  POST /api/decisions/{id}/approve
+  POST /api/decisions/{id}/reject
+  POST /api/decisions/{id}/modify
+  POST /api/driver/acknowledge
+  POST /api/driver/report
+"""
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, desc
+from typing import Any
+
+from app.database import get_db
+from app.models import (
+    Route, Shipment, NetworkEvent, Decision, RiskPrediction, RoadSegment
+)
+from app.schemas import (
+    RouteOut, ShipmentOut, NetworkEventOut, DecisionOut,
+    RiskPredictionOut, DecisionApproveRequest, DecisionRejectRequest,
+    DecisionModifyRequest, DriverReportCreate,
+)
+from app.engines.decision_engine import approve_decision, reject_decision
+from app.scenario.demo_scenario import (
+    advance_step, reset_scenario, pause_scenario, resume_scenario,
+    get_current_state, memory, STEPS
+)
+from app.config import settings
+
+router = APIRouter()
+
+
+# ── State ─────────────────────────────────────────────────────────────────────
+
+@router.get("/state")
+async def get_state(db: AsyncSession = Depends(get_db)) -> dict:
+    """Full app state — used on initial load and polling fallback."""
+    base = get_current_state()
+
+    # Enrich with DB data
+    routes = (await db.execute(select(Route))).scalars().all()
+    routes_out = [RouteOut.model_validate(r) for r in routes]
+
+    shipment = (await db.execute(select(Shipment).limit(1))).scalar_one_or_none()
+    shipment_out = ShipmentOut.model_validate(shipment) if shipment else None
+
+    events = (
+        await db.execute(
+            select(NetworkEvent).order_by(NetworkEvent.created_at.asc())
+        )
+    ).scalars().all()
+    events_out = [NetworkEventOut.model_validate(e) for e in events]
+
+    decision = None
+    if memory.current_decision_id:
+        d = (
+            await db.execute(select(Decision).where(Decision.id == memory.current_decision_id))
+        ).scalar_one_or_none()
+        if d:
+            decision = DecisionOut.model_validate(d)
+
+    base["routes"] = [r.model_dump() for r in routes_out]
+    base["shipment"] = shipment_out.model_dump() if shipment_out else None
+    base["events"] = [e.model_dump() for e in events_out]
+    base["current_decision"] = decision.model_dump() if decision else None
+
+    return base
+
+
+# ── Routes ────────────────────────────────────────────────────────────────────
+
+@router.get("/routes")
+async def get_routes(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    routes = (await db.execute(select(Route))).scalars().all()
+    return [RouteOut.model_validate(r).model_dump() for r in routes]
+
+
+# ── Shipments ─────────────────────────────────────────────────────────────────
+
+@router.get("/shipments/{shipment_id}")
+async def get_shipment(shipment_id: int, db: AsyncSession = Depends(get_db)) -> dict:
+    s = (await db.execute(select(Shipment).where(Shipment.id == shipment_id))).scalar_one_or_none()
+    if not s:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+    return ShipmentOut.model_validate(s).model_dump()
+
+
+# ── Events ────────────────────────────────────────────────────────────────────
+
+@router.get("/events")
+async def get_events(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    events = (
+        await db.execute(select(NetworkEvent).order_by(NetworkEvent.created_at.asc()))
+    ).scalars().all()
+    return [NetworkEventOut.model_validate(e).model_dump() for e in events]
+
+
+# ── Decisions ─────────────────────────────────────────────────────────────────
+
+@router.get("/decisions")
+async def get_decisions(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    decisions = (
+        await db.execute(select(Decision).order_by(desc(Decision.created_at)))
+    ).scalars().all()
+    return [DecisionOut.model_validate(d).model_dump() for d in decisions]
+
+
+@router.post("/decisions/{decision_id}/approve")
+async def approve(
+    decision_id: int,
+    body: DecisionApproveRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    try:
+        decision = await approve_decision(db, decision_id, body.dispatcher_id, body.notes)
+        return {"status": "approved", "decision": DecisionOut.model_validate(decision).model_dump()}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/decisions/{decision_id}/reject")
+async def reject(
+    decision_id: int,
+    body: DecisionRejectRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    try:
+        decision = await reject_decision(db, decision_id, body.dispatcher_id, body.reason)
+        return {"status": "rejected", "decision": DecisionOut.model_validate(decision).model_dump()}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+# ── Risk ──────────────────────────────────────────────────────────────────────
+
+@router.get("/risk")
+async def get_risk(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    preds = (
+        await db.execute(
+            select(RiskPrediction).order_by(desc(RiskPrediction.created_at))
+        )
+    ).scalars().all()
+    return [RiskPredictionOut.model_validate(p).model_dump() for p in preds]
+
+
+# ── KPIs ──────────────────────────────────────────────────────────────────────
+
+@router.get("/kpis")
+async def get_kpis() -> dict:
+    return memory.kpis
+
+
+# ── Config / Thresholds ───────────────────────────────────────────────────────
+
+@router.get("/config/thresholds")
+async def get_thresholds() -> dict:
+    return {
+        "disruption_probability_threshold": settings.DISRUPTION_PROB_THRESHOLD,
+        "horizon_hours_threshold": settings.HORIZON_HOURS_THRESHOLD,
+        "mission_score_delta_threshold": settings.MISSION_SCORE_DELTA_THRESHOLD,
+        "min_confidence_for_proactive": settings.MIN_CONFIDENCE_FOR_PROACTIVE,
+        "risk_model_weights": {
+            "rainfall_intensity": settings.W_RAINFALL_INTENSITY,
+            "cumulative_rain": settings.W_CUMULATIVE_RAIN,
+            "slope": settings.W_SLOPE,
+            "historical": settings.W_HISTORICAL,
+            "vulnerability": settings.W_VULNERABILITY,
+        },
+        "mission_score_weights": {
+            "base_time_multiplier": settings.BASE_TIME_MULTIPLIER,
+            "delay_multiplier": settings.DELAY_MULTIPLIER,
+            "urgency_risk_multiplier": settings.URGENCY_RISK_MULTIPLIER,
+            "max_blockage_delay_h": settings.MAX_BLOCKAGE_DELAY_H,
+        },
+    }
+
+
+# ── Driver ────────────────────────────────────────────────────────────────────
+
+@router.post("/driver/acknowledge")
+async def driver_acknowledge(db: AsyncSession = Depends(get_db)) -> dict:
+    from app.models import Shipment
+    ship = (await db.execute(select(Shipment).limit(1))).scalar_one_or_none()
+    if ship:
+        ship.status = "DRIVER_ACKNOWLEDGED"
+        await db.commit()
+    memory.driver_status = "ACKNOWLEDGED"
+    memory.kpis["driver_acknowledged"] = True
+    return {"status": "acknowledged"}
+
+
+@router.post("/driver/report")
+async def driver_report(
+    body: DriverReportCreate,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    from app.models import DriverReport
+    report = DriverReport(
+        driver_id=body.driver_id,
+        shipment_id=body.shipment_id,
+        route_id=body.route_id,
+        condition=body.condition,
+        notes=body.notes,
+        lat=body.lat,
+        lon=body.lon,
+    )
+    db.add(report)
+
+    # Update segment status
+    seg_result = await db.execute(
+        select(RoadSegment)
+        .where(RoadSegment.route_id == body.route_id, RoadSegment.is_risk_zone == True)
+        .limit(1)
+    )
+    seg = seg_result.scalar_one_or_none()
+    if seg:
+        seg.status = body.condition if body.condition in ("CLEAR", "SLOW", "PARTIAL", "BLOCKED") else "SLOW"
+
+    await db.commit()
+    memory.segment_statuses[body.route_id] = body.condition
+    memory.driver_status = "REPORTING"
+
+    return {"status": "report_received", "condition": body.condition}
+
+
+# ── Scenario ──────────────────────────────────────────────────────────────────
+
+@router.post("/scenario/start")
+async def scenario_start(db: AsyncSession = Depends(get_db)) -> dict:
+    if memory.status not in ("IDLE", "PAUSED"):
+        return {"status": memory.status, "message": "Scenario already running"}
+    if memory.status == "IDLE":
+        # Start from step 0
+        state = await advance_step(db)
+    else:
+        resume_scenario()
+        state = get_current_state()
+    return state
+
+
+@router.post("/scenario/next")
+async def scenario_next(db: AsyncSession = Depends(get_db)) -> dict:
+    if memory.status == "COMPLETE":
+        return {"status": "COMPLETE", "message": "Scenario complete. Reset to restart."}
+    state = await advance_step(db)
+    return state
+
+
+@router.post("/scenario/pause")
+async def scenario_pause() -> dict:
+    pause_scenario()
+    return {"status": memory.status}
+
+
+@router.post("/scenario/resume")
+async def scenario_resume() -> dict:
+    resume_scenario()
+    return {"status": memory.status}
+
+
+@router.post("/scenario/reset")
+async def scenario_reset(db: AsyncSession = Depends(get_db)) -> dict:
+    state = await reset_scenario(db)
+    return state
+
+
+@router.get("/scenario/status")
+async def scenario_status() -> dict:
+    step_def = STEPS[memory.current_step] if 0 <= memory.current_step < len(STEPS) else None
+    return {
+        "current_step": memory.current_step,
+        "status": memory.status,
+        "total_steps": len(STEPS),
+        "step_label": step_def["label"] if step_def else None,
+        "all_steps": [
+            {"index": s["index"], "label": s["label"], "time_label": s["time_label"]}
+            for s in STEPS
+        ],
+    }
