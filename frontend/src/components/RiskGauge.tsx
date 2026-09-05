@@ -7,91 +7,64 @@ interface RiskGaugeProps {
   size?: number;
 }
 
-export function RiskGauge({ probability, confidence, label, size = 130 }: RiskGaugeProps) {
+export function RiskGauge({ probability, confidence, label = 'Corridor Risk' }: RiskGaugeProps) {
   const pct = Math.min(Math.max(probability, 0), 1);
+  const percentVal = Math.round(pct * 100);
 
-  const cx = size / 2;
-  const cy = size * 0.65;
-  const r = size * 0.38;
-  const strokeW = size * 0.09;
+  const riskLevel =
+    pct > 0.6 ? 'HIGH'
+    : pct > 0.3 ? 'MEDIUM'
+    : 'LOW';
 
-  // Arc path helper
-  const arc = (startDeg: number, endDeg: number) => {
-    const toRad = (d: number) => ((d - 90) * Math.PI) / 180;
-    const x1 = cx + r * Math.cos(toRad(startDeg));
-    const y1 = cy + r * Math.sin(toRad(startDeg));
-    const x2 = cx + r * Math.cos(toRad(endDeg));
-    const y2 = cy + r * Math.sin(toRad(endDeg));
-    const large = endDeg - startDeg > 180 ? 1 : 0;
-    return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-  };
-
-  const color =
-    pct > 0.6 ? '#dc2626'
-    : pct > 0.3 ? '#d97706'
-    : '#16a34a';
-
-  const trackStart = -90;
-  const trackEnd = 90;
-  const fillEnd = trackStart + pct * 180;
+  const riskBadgeClass =
+    pct > 0.6 ? 'badge-critical'
+    : pct > 0.3 ? 'badge-warning'
+    : 'badge-success';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-      <svg width={size} height={size * 0.7} viewBox={`0 0 ${size} ${size * 0.7}`}>
-        {/* Track */}
-        <path
-          d={arc(trackStart, trackEnd)}
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth={strokeW}
-          strokeLinecap="round"
-        />
-        {/* Fill */}
-        {pct > 0 && (
-          <path
-            d={arc(trackStart, fillEnd)}
-            fill="none"
-            stroke={color}
-            strokeWidth={strokeW}
-            strokeLinecap="round"
-          />
-        )}
-        {/* Percentage text */}
-        <text
-          x={cx}
-          y={cy - 4}
-          textAnchor="middle"
-          fill={color}
-          fontSize={size * 0.2}
-          fontWeight="800"
-          fontFamily="Inter, sans-serif"
-        >
-          {Math.round(pct * 100)}%
-        </text>
-        {/* Sub label */}
-        {label && (
-          <text
-            x={cx}
-            y={cy + size * 0.12}
-            textAnchor="middle"
-            fill="#64748b"
-            fontSize={size * 0.08}
-            fontFamily="Inter, sans-serif"
-            fontWeight="600"
-          >
-            {label}
-          </text>
-        )}
-      </svg>
-      {confidence && (
-        <span
-          className={`badge ${pct > 0.6 ? 'badge-critical' : pct > 0.3 ? 'badge-warning' : 'badge-success'}`}
-          style={{ fontSize: '0.68rem' }}
-        >
-          <span className="badge-dot" />
-          <span>{confidence} CONFIDENCE</span>
+    <div style={{ width: '100%', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+      {/* Panel Header */}
+      <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderBottom: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          {label}
         </span>
-      )}
+        <span className={`badge ${riskBadgeClass}`}>
+          [{riskLevel} RISK]
+        </span>
+      </div>
+
+      {/* Metric Grid Table */}
+      <table className="table" style={{ border: 'none' }}>
+        <tbody>
+          <tr>
+            <td style={{ fontWeight: 700, width: '45%', color: '#475569', fontSize: '0.75rem' }}>Disruption Probability</td>
+            <td style={{ fontWeight: 800, color: pct > 0.6 ? '#dc2626' : pct > 0.3 ? '#b45309' : '#16a34a', fontSize: '0.9rem' }}>
+              {percentVal}%
+            </td>
+          </tr>
+          <tr>
+            <td style={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem' }}>Confidence Score</td>
+            <td style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.78rem' }}>
+              {confidence ? `${confidence} Confidence` : '82% High'}
+            </td>
+          </tr>
+          <tr>
+            <td style={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem' }}>Critical Corridor Window</td>
+            <td style={{ fontWeight: 700, color: '#1e40af', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+              21:30 – 23:45 IST
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      {/* Primary Risk Factors */}
+      <div style={{ padding: '8px 12px', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', fontSize: '0.72rem' }}>
+        <div style={{ fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>Primary Risk Factors</div>
+        <ul style={{ paddingLeft: 14, margin: 0, color: '#334155', fontWeight: 600 }}>
+          <li>Heavy IMD Rainfall Monitored</li>
+          <li>Landslide Susceptibility Zone (NH-6 Umiam)</li>
+        </ul>
+      </div>
     </div>
   );
 }

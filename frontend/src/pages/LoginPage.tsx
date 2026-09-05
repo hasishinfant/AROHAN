@@ -1,22 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../stores/arohanStore';
-import {
-  Shield,
-  Smartphone,
-  Lock,
-  Mail,
-  Eye,
-  EyeOff,
-  UserCheck,
-  ArrowRight,
-  Mountain,
-  Sparkles,
-  CheckCircle2,
-  AlertTriangle,
-  Globe,
-  Activity
-} from 'lucide-react';
+import { Shield, Smartphone, Lock, Mail, Eye, EyeOff, LogIn } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -67,85 +52,94 @@ export function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#e2e8f0',
-        padding: 24,
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        backgroundColor: 'var(--bg-canvas)',
+        padding: 16,
+        fontFamily: "'Inter', sans-serif",
       }}
     >
-      {/* Main Split-Screen Container Card */}
+      {/* Main Split Container */}
       <div
         style={{
           width: '100%',
-          maxWidth: 1100,
+          maxWidth: 960,
           backgroundColor: '#ffffff',
-          borderRadius: 28,
-          boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.15)',
+          border: '1px solid var(--border-medium)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-md)',
           overflow: 'hidden',
           display: 'grid',
           gridTemplateColumns: '1.1fr 1fr',
-          minHeight: 680,
+          minHeight: 540,
         }}
       >
-        {/* LEFT COLUMN: FORM & DEMO MAIL IDS */}
+        {/* LEFT COLUMN: FORM & DEMO ACCOUNTS */}
         <div
           style={{
-            padding: '44px 48px',
+            padding: '32px 36px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
           }}
         >
           <div>
-            {/* Top Brand Logo */}
+            {/* Brand Title */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
                 cursor: 'pointer',
-                marginBottom: 32,
+                marginBottom: 24,
               }}
               onClick={() => navigate('/')}
             >
               <div
                 style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 10,
-                  backgroundColor: '#047857',
+                  width: 32,
+                  height: 32,
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--primary-navy)',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  fontWeight: 900,
+                  border: '1px solid #1d4ed8',
                 }}
               >
-                <Mountain size={22} />
+                A
               </div>
-              <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f2942', letterSpacing: '-0.02em' }}>
-                AROHAN
-              </span>
+              <div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-navy)', letterSpacing: '0.04em' }}>
+                  AROHAN
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                  GOVERNMENT LOGISTICS SYSTEM
+                </div>
+              </div>
             </div>
 
-            {/* Welcome Header */}
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#0f2942', letterSpacing: '-0.02em' }}>
-                Welcome to AROHAN
+            {/* Header Text */}
+            <div style={{ marginBottom: 20 }}>
+              <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary-navy)', textTransform: 'uppercase' }}>
+                SYSTEM LOGIN PORTAL
               </h1>
-              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 6, lineHeight: 1.5 }}>
-                Start your experience with AROHAN by selecting your role or signing in.
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                Select operational role and authenticate to access system tools.
               </p>
             </div>
 
-            {/* Role Switcher Pill Bar (Sign In / Sign Up Style) */}
+            {/* Rectangular Role Switcher Tabs */}
             <div
               style={{
-                backgroundColor: '#f1f5f9',
-                padding: 4,
-                borderRadius: 30,
+                backgroundColor: 'var(--bg-panel)',
+                padding: 3,
+                border: '1px solid var(--border-medium)',
+                borderRadius: 'var(--radius-sm)',
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gap: 4,
-                marginBottom: 24,
+                marginBottom: 20,
               }}
             >
               <button
@@ -153,23 +147,22 @@ export function LoginPage() {
                 onClick={() => handleRoleChange('ADMIN')}
                 style={{
                   border: 'none',
-                  padding: '10px 16px',
-                  borderRadius: 24,
-                  backgroundColor: activeRole === 'ADMIN' ? '#ffffff' : 'transparent',
-                  color: activeRole === 'ADMIN' ? '#0f2942' : '#64748b',
+                  padding: '8px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: activeRole === 'ADMIN' ? 'var(--primary-navy)' : 'transparent',
+                  color: activeRole === 'ADMIN' ? '#ffffff' : 'var(--text-secondary)',
                   fontWeight: 800,
-                  fontSize: '0.82rem',
+                  fontSize: '0.78rem',
                   cursor: 'pointer',
-                  boxShadow: activeRole === 'ADMIN' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 6,
+                  textTransform: 'uppercase',
                 }}
               >
-                <Shield size={16} style={{ color: activeRole === 'ADMIN' ? '#047857' : '#64748b' }} />
-                <span>Command Portal</span>
+                <Shield size={14} />
+                <span>COMMAND PORTAL</span>
               </button>
 
               <button
@@ -177,338 +170,215 @@ export function LoginPage() {
                 onClick={() => handleRoleChange('DRIVER')}
                 style={{
                   border: 'none',
-                  padding: '10px 16px',
-                  borderRadius: 24,
-                  backgroundColor: activeRole === 'DRIVER' ? '#ffffff' : 'transparent',
-                  color: activeRole === 'DRIVER' ? '#0f2942' : '#64748b',
+                  padding: '8px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: activeRole === 'DRIVER' ? 'var(--primary-navy)' : 'transparent',
+                  color: activeRole === 'DRIVER' ? '#ffffff' : 'var(--text-secondary)',
                   fontWeight: 800,
-                  fontSize: '0.82rem',
+                  fontSize: '0.78rem',
                   cursor: 'pointer',
-                  boxShadow: activeRole === 'DRIVER' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 6,
+                  textTransform: 'uppercase',
                 }}
               >
-                <Smartphone size={16} style={{ color: activeRole === 'DRIVER' ? '#047857' : '#64748b' }} />
-                <span>Field Driver</span>
+                <Smartphone size={14} />
+                <span>FIELD DRIVER</span>
               </button>
             </div>
 
             {/* Form Fields */}
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {error && (
-                <div
-                  style={{
-                    backgroundColor: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    color: '#991b1b',
-                    padding: '10px 14px',
-                    borderRadius: 12,
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                  }}
-                >
+                <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-sm)', color: '#991b1b', padding: '8px 10px', fontSize: '0.75rem', fontWeight: 700 }}>
                   {error}
                 </div>
               )}
 
               {/* Email Address */}
-              <div>
-                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: 6 }}>
-                  Email Address <span style={{ color: '#047857' }}>*</span>
-                </label>
+              <div className="form-group">
+                <label className="form-label">Email Address / Official ID</label>
                 <div style={{ position: 'relative' }}>
                   <Mail
-                    size={18}
-                    style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
+                    size={15}
+                    style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
                   />
                   <input
                     type="email"
+                    className="form-input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
+                    placeholder="Enter official email address"
                     required
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px 12px 46px',
-                      borderRadius: 24,
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                      transition: 'border-color 0.2s ease',
-                    }}
+                    style={{ paddingLeft: 34 }}
                   />
                 </div>
               </div>
 
               {/* Password */}
-              <div>
-                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: 6 }}>
-                  Password <span style={{ color: '#047857' }}>*</span>
-                </label>
+              <div className="form-group">
+                <label className="form-label">Password</label>
                 <div style={{ position: 'relative' }}>
                   <Lock
-                    size={18}
-                    style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
+                    size={15}
+                    style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
                   />
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    className="form-input"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Enter account password"
                     required
-                    style={{
-                      width: '100%',
-                      padding: '12px 46px 12px 46px',
-                      borderRadius: 24,
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
+                    style={{ paddingLeft: 34, paddingRight: 34 }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     style={{
                       position: 'absolute',
-                      right: 16,
+                      right: 10,
                       top: '50%',
                       transform: 'translateY(-50%)',
                       border: 'none',
                       background: 'none',
                       cursor: 'pointer',
-                      color: '#94a3b8',
+                      color: 'var(--text-muted)',
                     }}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>
 
-              {/* Sign In Primary Button */}
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  backgroundColor: '#047857',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
-                  padding: '14px',
-                  borderRadius: 30,
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(4, 120, 87, 0.25)',
-                  marginTop: 6,
-                  transition: 'backgroundColor 0.2s ease',
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#065f46')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#047857')}
-              >
-                Sign In
+              {/* Submit Button */}
+              <button type="submit" className="btn btn-blue btn-lg" style={{ marginTop: 4 }}>
+                <LogIn size={15} />
+                <span>SIGN IN TO SYSTEM</span>
               </button>
             </form>
 
-            {/* Divider */}
-            <div style={{ display: 'flex', alignItems: 'center', margin: '22px 0 16px 0', gap: 12 }}>
-              <div style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>Or sign in with Demo Email</span>
-              <div style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
-            </div>
+            {/* Quick Demo Access Table */}
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 4 }}>
+                QUICK DEMO ACCOUNTS
+              </div>
 
-            {/* Demo Mail IDs Buttons (Replaces Social Login Buttons) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('ADMIN', 'admin@arohan.gov.in')}
-                style={{
-                  width: '100%',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: 20,
-                  padding: '10px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800 }}>
-                    A
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('ADMIN', 'admin@arohan.gov.in')}
+                  style={{
+                    backgroundColor: 'var(--bg-panel)',
+                    border: '1px solid var(--border-medium)',
+                    padding: '8px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-sm)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-main)' }}>Arjun Sharma (Dispatcher)</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>admin@arohan.gov.in</div>
                   </div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f2942' }}>Arjun Sharma (Dispatcher)</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>admin@arohan.gov.in</div>
-                  </div>
-                </div>
-                <span className="badge badge-info" style={{ fontSize: '0.65rem' }}>Portal 1</span>
-              </button>
+                  <span className="badge badge-info">[PORTAL 1: COMMAND]</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('DRIVER', 'driver.rahul@arohan.gov.in')}
-                style={{
-                  width: '100%',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: 20,
-                  padding: '10px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#047857', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800 }}>
-                    R
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('DRIVER', 'driver.rahul@arohan.gov.in')}
+                  style={{
+                    backgroundColor: 'var(--bg-panel)',
+                    border: '1px solid var(--border-medium)',
+                    padding: '8px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-sm)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-main)' }}>Rahul Kumar (Driver)</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>driver.rahul@arohan.gov.in</div>
                   </div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f2942' }}>Rahul Kumar (Driver)</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>driver.rahul@arohan.gov.in</div>
-                  </div>
-                </div>
-                <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>Portal 2</span>
-              </button>
+                  <span className="badge badge-success">[PORTAL 2: FIELD]</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Footer Copyright & Policies */}
-          <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', marginTop: 24 }}>
-            Copyright © AROHAN, All Rights Reserved &nbsp;·&nbsp;
-            <span style={{ color: '#047857', fontWeight: 600, cursor: 'pointer' }}> Term & Condition</span> &nbsp;|&nbsp;
-            <span style={{ color: '#047857', fontWeight: 600, cursor: 'pointer' }}> Privacy & Policy</span>
+          {/* Footer Copyright */}
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 16 }}>
+            © 2026 AROHAN Logistics Risk Intelligence System · NIC & MDoNER Aligned
           </div>
         </div>
 
-        {/* RIGHT COLUMN: SCENIC NER FEATURE CARD */}
+        {/* RIGHT COLUMN: INSTITUTIONAL SPECIFICATION CARD */}
         <div
           style={{
-            position: 'relative',
-            background: 'linear-gradient(145deg, #064e3b 0%, #047857 50%, #0284c7 100%)',
-            padding: 36,
+            backgroundColor: 'var(--primary-navy)',
+            color: '#ffffff',
+            padding: 32,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            color: '#ffffff',
-            borderRadius: '0 28px 28px 0',
-            overflow: 'hidden',
+            borderLeft: '2px solid #1d4ed8',
           }}
         >
-          {/* Top Layered Mini Previews over Scenic Background */}
-          <div style={{ position: 'relative', height: 280 }}>
-            {/* Background Image Layer */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url('/ner_hero.png')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                borderRadius: 20,
-                opacity: 0.35,
-                filter: 'brightness(0.9)',
-              }}
-            />
-
-            {/* Layered Glass Dashboard Mock Cards */}
-            <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 10 }}>
-              {/* Card 1: Risk Forecast */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: 16,
-                  padding: 14,
-                  maxWidth: 320,
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                  alignSelf: 'flex-start',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0f2942' }}>NH-6 Umiam Corridor</span>
-                  <span className="badge badge-critical" style={{ fontSize: '0.65rem' }}>Risk 78%</span>
-                </div>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#b91c1c' }}>⚠️ Heavy Rain & Landslide Hazard</div>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 2 }}>Proactive Reroute Triggered (Alternate B)</div>
-              </div>
-
-              {/* Card 2: Mission Telemetry */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: 16,
-                  padding: 14,
-                  maxWidth: 340,
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                  alignSelf: 'flex-end',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f2942' }}>Mission M1042</div>
-                    <div style={{ fontSize: '0.68rem', color: '#047857', fontWeight: 700 }}>Guwahati → Shillong → Aizawl</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0284c7' }}>ETA 16:10</div>
-                    <span className="badge badge-success" style={{ fontSize: '0.6rem' }}>On Route</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Branding & Mission Text */}
-          <div style={{ position: 'relative', zIndex: 2, marginTop: 20 }}>
-            {/* White Mountain Icon Badge */}
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 14,
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(8px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 16,
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-              }}
-            >
-              <Mountain size={28} style={{ color: '#ffffff' }} />
+          <div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+              GOVERNMENT LOGISTICS SYSTEM SPECIFICATION
             </div>
 
-            <h2 style={{ fontSize: '1.65rem', fontWeight: 800, lineHeight: 1.25, letterSpacing: '-0.02em', marginBottom: 12 }}>
-              A Unified Hub for Smarter <br />
-              Logistics Decision-Making
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, textTransform: 'uppercase', lineHeight: 1.25, marginBottom: 14 }}>
+              Proactive Decision Intelligence for Vulnerable Corridors
             </h2>
 
-            <p style={{ fontSize: '0.88rem', color: '#e2e8f0', lineHeight: 1.6, maxWidth: 420 }}>
-              AROHAN empowers the North Eastern Region with proactive decision intelligence—delivering real-time risk forecasts and 360° visibility for every mission.
-            </p>
+            <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+              AROHAN combines real-time weather telemetry, terrain exposure models, and loss objective optimization to protect freight supply chains in the North Eastern Region.
+            </div>
 
-            {/* Slider Dots Bar */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
-              <div style={{ width: 40, height: 4, backgroundColor: '#ffffff', borderRadius: 2 }} />
-              <div style={{ width: 12, height: 4, backgroundColor: 'rgba(255, 255, 255, 0.3)', borderRadius: 2 }} />
-              <div style={{ width: 12, height: 4, backgroundColor: 'rgba(255, 255, 255, 0.3)', borderRadius: 2 }} />
-              <div style={{ width: 12, height: 4, backgroundColor: 'rgba(255, 255, 255, 0.3)', borderRadius: 2 }} />
+            {/* Feature Table */}
+            <div className="table-container" style={{ marginTop: 20, borderColor: '#334155' }}>
+              <table className="table" style={{ backgroundColor: '#1e293b' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#0f172a' }}>
+                    <th style={{ color: '#ffffff', borderColor: '#334155' }}>MODULE</th>
+                    <th style={{ color: '#ffffff', borderColor: '#334155' }}>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ color: '#cbd5e1', borderColor: '#334155' }}>IMD Rainfall Pipeline</td>
+                    <td style={{ borderColor: '#334155' }}><span className="badge badge-success">[ACTIVE]</span></td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#cbd5e1', borderColor: '#334155' }}>OSM Route Network GIS</td>
+                    <td style={{ borderColor: '#334155' }}><span className="badge badge-success">[ACTIVE]</span></td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#cbd5e1', borderColor: '#334155' }}>Loss Objective Engine</td>
+                    <td style={{ borderColor: '#334155' }}><span className="badge badge-success">[ACTIVE]</span></td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#cbd5e1', borderColor: '#334155' }}>PWA Driver Mobile Push</td>
+                    <td style={{ borderColor: '#334155' }}><span className="badge badge-success">[ACTIVE]</span></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
+          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+            SIH26002 Problem Statement Solution · National Logistics Policy Aligned
+          </div>
         </div>
 
       </div>

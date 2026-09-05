@@ -1,12 +1,11 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
 import { MissionScoreCard } from '../components/MissionScoreCard';
-import { RiskGauge } from '../components/RiskGauge';
 import { StatusBadge } from '../components/StatusBadge';
-import { Package, Shield, Route, ArrowRight } from 'lucide-react';
+import { Package, Route, Truck } from 'lucide-react';
 
 export function MissionDetail() {
-  const { shipment, routes, risk_results, mission_scores, current_recommendation, rainfall_data, scenario_step } = useArohanStore();
+  const { shipment, shipmentsList, selectedShipmentId, selectShipment, routes, risk_results, mission_scores, current_recommendation, scenario_step } = useArohanStore();
   const step = scenario_step ?? -1;
 
   const scoreA = mission_scores ? Object.values(mission_scores).find((s: any) => s.route_label === 'A') : null;
@@ -19,50 +18,79 @@ export function MissionDetail() {
   const winner = current_recommendation?.recommended_route_label;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">MISSION DETAIL & ROUTE EVALUATION</h1>
+          <h1 className="page-title">MISSION DOSSIER & ROUTE EVALUATION</h1>
           <div className="page-description">
-            Guwahati → Shillong Logistics Corridor · Multi-Route Risk & Mission Loss Tradeoff Analysis
+            Technical Route Risk & Loss Score Analysis · Active Focus: {shipment?.shipment_code} ({shipment?.origin.split(' ')[0]} → {shipment?.destination.split(' ')[0]})
           </div>
         </div>
         {shipment && <StatusBadge status={shipment.status} />}
       </div>
 
-      {/* Active Shipment Information Summary */}
+      {/* Interactive Shipment Tabs (CLICK TAB TO VIEW PARTICULAR SHIPMENT ALONE) */}
+      <div className="card" style={{ padding: 8 }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 6 }}>
+          SELECT PARTICULAR MISSION TO INSPECT:
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {shipmentsList?.map((s) => {
+            const isSelected = (selectedShipmentId || 1) === s.id;
+            return (
+              <button
+                key={s.id}
+                onClick={() => selectShipment(s.id)}
+                className={`btn btn-sm ${isSelected ? 'btn-blue' : 'btn-secondary'}`}
+                style={{ fontSize: '0.72rem' }}
+              >
+                <Truck size={12} />
+                <span>{s.shipment_code}: {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Shipment Specification Sheet for Particular Selected Shipment */}
       {shipment && (
-        <div className="card">
+        <div className="card" style={{ border: '2px solid #1d4ed8' }}>
           <div className="card-header">
             <div className="card-title">
-              <Package size={18} style={{ color: 'var(--primary-navy)' }} />
-              <span>SHIPMENT SPECIFICATION — {shipment.shipment_code}</span>
+              <Package size={14} style={{ color: '#1d4ed8' }} />
+              <span>SHIPMENT DOSSIER — PARTICULAR FOCUS: {shipment.shipment_code}</span>
             </div>
-            <span className="data-tag data-tag-simulated">SIMULATED SHIPMENT</span>
+            <span className="data-tag data-tag-real">PARTICULAR SHIPMENT</span>
           </div>
-          <div className="grid-4">
-            <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CARGO TYPE</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, marginTop: 2 }}>{shipment.cargo_type}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>TOTAL WEIGHT</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, marginTop: 2 }}>{shipment.weight_kg} kg</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>PRIORITY / URGENCY</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--status-critical-accent)', marginTop: 2 }}>
-                Level {shipment.urgency} / 5
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CURRENT ASSIGNED ROUTE</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-navy)', marginTop: 2 }}>
-                Route {routes?.find((r) => r.id === shipment.assigned_route_id)?.label ?? 'A'}
-                {step >= 5 && winner && ` → Route ${winner} (Updated)`}
-              </div>
-            </div>
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>CARGO TYPE</th>
+                  <th>TOTAL WEIGHT</th>
+                  <th>PRIORITY / URGENCY</th>
+                  <th>ORIGIN DEPOT</th>
+                  <th>DESTINATION HUB</th>
+                  <th>ASSIGNED CORRIDOR ROUTE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ fontWeight: 800 }}>{shipment.cargo_type}</td>
+                  <td style={{ fontWeight: 700 }}>{shipment.weight_kg} kg</td>
+                  <td style={{ fontWeight: 800, color: shipment.urgency >= 4 ? '#dc2626' : '#b45309' }}>
+                    Level {shipment.urgency}/5 ({shipment.urgency >= 4 ? 'High Priority' : 'Standard Priority'})
+                  </td>
+                  <td style={{ fontWeight: 700 }}>{shipment.origin}</td>
+                  <td style={{ fontWeight: 700 }}>{shipment.destination}</td>
+                  <td style={{ fontWeight: 800, color: 'var(--primary-navy)' }}>
+                    Route {routes?.find((r) => r.id === shipment.assigned_route_id)?.label ?? 'A'}
+                    {step >= 5 && winner && (selectedShipmentId === 1) && ` → Route ${winner} (Updated)`}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -70,8 +98,8 @@ export function MissionDetail() {
       {/* Side-by-Side Mission Loss Score Cards */}
       {scoreA && scoreB && (
         <div>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-navy)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span>LOGISTICS MISSION LOSS SCORE COMPARISON</span>
+          <div className="section-header">
+            <span>LOGISTICS MISSION LOSS SCORE ANALYSIS — {shipment?.shipment_code}</span>
             <span className="data-tag data-tag-derived">DERIVED OPTIMIZATION MODEL</span>
           </div>
           <div className="grid-2">
@@ -87,14 +115,14 @@ export function MissionDetail() {
         </div>
       )}
 
-      {/* Detailed Technical Comparison Table */}
+      {/* Technical Comparison Table */}
       <div className="card">
         <div className="card-header">
           <div className="card-title">
-            <Route size={18} style={{ color: 'var(--primary-navy)' }} />
+            <Route size={14} />
             <span>TECHNICAL ROUTE COMPARISON MATRIX</span>
           </div>
-          <span className="data-tag data-tag-real">REAL GIS GEOMETRY</span>
+          <span className="data-tag data-tag-real">REAL GIS NETWORK</span>
         </div>
 
         <div className="table-container">
@@ -102,9 +130,9 @@ export function MissionDetail() {
             <thead>
               <tr>
                 <th>ATTRIBUTE / PARAMETER</th>
-                <th>ROUTE A — NH-6 via Umiam</th>
-                <th>ROUTE B — Ridge via Sonapur</th>
-                <th>DATA CLASSIFICATION</th>
+                <th>ROUTE A — Main Corridor</th>
+                <th>ROUTE B — Alternate Ridge Bypass</th>
+                <th>CLASSIFICATION</th>
               </tr>
             </thead>
             <tbody>
@@ -115,57 +143,41 @@ export function MissionDetail() {
                 <td><span className="data-tag data-tag-real">REAL</span></td>
               </tr>
               <tr>
-                <td><strong>Base Travel Duration (hours)</strong></td>
-                <td>{routeA?.base_duration_h ?? 3.0} h</td>
-                <td>{routeB?.base_duration_h ?? 4.2} h</td>
+                <td><strong>Base Travel Duration</strong></td>
+                <td>{routeA?.base_duration_h ?? 3.0} hrs</td>
+                <td>{routeB?.base_duration_h ?? 4.2} hrs</td>
                 <td><span className="data-tag data-tag-real">REAL</span></td>
               </tr>
               <tr>
                 <td><strong>Corridor Description</strong></td>
-                <td>{routeA?.via_description ?? 'NH-6 main arterial road'}</td>
-                <td>{routeB?.via_description ?? 'Ridge bypass highland route'}</td>
+                <td>{routeA?.via_description ?? 'Main arterial road'}</td>
+                <td>{routeB?.via_description ?? 'Highland ridge bypass route'}</td>
                 <td><span className="data-tag data-tag-real">REAL</span></td>
               </tr>
               <tr>
                 <td><strong>Terrain Vulnerability Index</strong></td>
-                <td style={{ color: 'var(--status-critical-text)', fontWeight: 700 }}>High (0.85)</td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 700 }}>Low (0.25)</td>
+                <td style={{ color: '#dc2626', fontWeight: 800 }}>High Exposure (0.85)</td>
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>Low Exposure (0.25)</td>
                 <td><span className="data-tag data-tag-real">REAL</span></td>
               </tr>
               <tr>
                 <td><strong>Disruption Risk Probability</strong></td>
-                <td style={{ color: 'var(--status-critical-text)', fontWeight: 700 }}>
+                <td style={{ color: '#dc2626', fontWeight: 800 }}>
                   {riskA ? `${(riskA.disruption_probability * 100).toFixed(0)}%` : 'Baseline Monitoring'}
                 </td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 700 }}>
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>
                   {riskB ? `${(riskB.disruption_probability * 100).toFixed(0)}%` : 'Baseline Monitoring'}
                 </td>
                 <td><span className="data-tag data-tag-derived">DERIVED ML</span></td>
               </tr>
               <tr>
-                <td><strong>Expected Delay (hours)</strong></td>
-                <td style={{ color: 'var(--status-critical-text)', fontWeight: 700 }}>
-                  {scoreA ? `+${scoreA.expected_delay_h.toFixed(1)} h` : '—'}
+                <td><strong>Expected Delay Impact</strong></td>
+                <td style={{ color: '#dc2626', fontWeight: 800 }}>
+                  {scoreA ? `+${scoreA.expected_delay_h.toFixed(1)} hrs` : '—'}
                 </td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 700 }}>
-                  {scoreB ? `+${scoreB.expected_delay_h.toFixed(1)} h` : '—'}
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>
+                  {scoreB ? `+${scoreB.expected_delay_h.toFixed(1)} hrs` : '—'}
                 </td>
-                <td><span className="data-tag data-tag-derived">DERIVED</span></td>
-              </tr>
-              <tr>
-                <td><strong>Calculated Mission Loss Score</strong></td>
-                <td style={{ color: 'var(--status-critical-text)', fontWeight: 800 }}>
-                  {scoreA ? scoreA.mission_score.toFixed(0) : '—'}
-                </td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 800 }}>
-                  {scoreB ? scoreB.mission_score.toFixed(0) : '—'}
-                </td>
-                <td><span className="data-tag data-tag-derived">DERIVED</span></td>
-              </tr>
-              <tr>
-                <td><strong>System Recommendation Status</strong></td>
-                <td>{winner === 'A' ? 'RECOMMENDED' : 'HIGH RISK — AVOID'}</td>
-                <td>{winner === 'B' ? 'RECOMMENDED OPTION' : 'ALTERNATIVE'}</td>
                 <td><span className="data-tag data-tag-derived">DERIVED</span></td>
               </tr>
             </tbody>

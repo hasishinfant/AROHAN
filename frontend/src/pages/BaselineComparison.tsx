@@ -1,6 +1,6 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { BarChart3, TrendingUp, ShieldCheck, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
 export function BaselineComparison() {
   const { kpis, scenario_step } = useArohanStore();
@@ -9,136 +9,116 @@ export function BaselineComparison() {
   const strategies = [
     {
       name: 'BASELINE 1: SHORTEST ROUTE',
-      type: 'Naive Strategy',
+      type: 'Naive Fixed Route',
       route: 'Route A (NH-6 via Umiam)',
       distance: '102 km',
-      expectedDelay: '+9.4 hours',
+      expectedDelay: '+9.4 hrs',
       riskExposure: '78% (High)',
-      leadTime: '0 hours (No prediction)',
+      leadTime: '0 hrs (No prediction)',
       missionSuccess: '33% (Failure on landslip)',
       lossScore: '88 pts',
-      bgClass: 'var(--status-critical-bg)',
-      borderClass: 'var(--status-critical-border)',
-      textClass: 'var(--status-critical-text)',
+      bgClass: '#fef2f2',
+      borderClass: '#fecaca',
+      textClass: '#dc2626',
       tagClass: 'badge-critical',
     },
     {
       name: 'BASELINE 2: REACTIVE REROUTE',
-      type: 'Post-Failure Strategy',
-      route: 'Route A → Route B (Only after blockage)',
+      type: 'Post-Failure Reaction',
+      route: 'Route A → Route B (Only post-blockage)',
       distance: '102 km → 128 km',
-      expectedDelay: '+6.5 hours',
+      expectedDelay: '+6.5 hrs',
       riskExposure: '78% Initial',
-      leadTime: '0 hours (Reacts post-blockage)',
+      leadTime: '0 hrs (Post-blockage)',
       missionSuccess: '67% (Traffic bottleneck)',
       lossScore: '75 pts',
-      bgClass: 'var(--status-warning-bg)',
-      borderClass: 'var(--status-warning-border)',
-      textClass: 'var(--status-warning-text)',
-      tagClass: 'badge-warning',
+      bgClass: '#fff7ed',
+      borderClass: '#ffedd5',
+      textClass: '#ea580c',
+      tagClass: 'badge-amber',
     },
     {
       name: 'AROHAN: PROACTIVE STRATEGY',
       type: 'Risk-Aware Predictive Engine',
       route: 'Route B (Ridge via Sonapur)',
       distance: '128 km (Pre-diverted)',
-      expectedDelay: '+1.5 hours',
+      expectedDelay: '+1.5 hrs',
       riskExposure: '21% (Low)',
-      leadTime: '18 hours (Pre-disruption)',
+      leadTime: '18 hrs (Pre-disruption)',
       missionSuccess: '100% (Guaranteed delivery)',
       lossScore: '34 pts',
-      bgClass: 'var(--status-success-bg)',
-      borderClass: 'var(--status-success-border)',
-      textClass: 'var(--status-success-text)',
+      bgClass: '#f0fdf4',
+      borderClass: '#bbf7d0',
+      textClass: '#16a34a',
       tagClass: 'badge-success',
     },
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">BASELINE COMPARISON & EXPERIMENT MODE</h1>
+          <h1 className="page-title">BASELINE COMPARISON & BENCHMARKING</h1>
           <div className="page-description">
             Quantitative Evaluation: Naive Shortest Route vs Reactive Reroute vs AROHAN Proactive Decision Layer
           </div>
         </div>
       </div>
 
-      {/* Primary KPI Highlights */}
+      {/* KPI Counters */}
       <div className="grid-4">
         <div className="kpi-tile">
-          <div className="kpi-label">
-            <span>EXPECTED DELAY AVOIDED</span>
-            <span className="data-tag data-tag-derived">DERIVED</span>
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--status-success-text)' }}>
-            7.9 Hours
-          </div>
+          <div className="kpi-label">EXPECTED DELAY AVOIDED</div>
+          <div className="kpi-value" style={{ color: '#16a34a' }}>7.9 Hours</div>
           <div className="kpi-subtext">vs Baseline Shortest Route</div>
         </div>
 
         <div className="kpi-tile">
-          <div className="kpi-label">
-            <span>RISK EXPOSURE DELTA</span>
-            <span className="data-tag data-tag-derived">DERIVED</span>
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--status-info-text)' }}>
-            -57%
-          </div>
+          <div className="kpi-label">RISK EXPOSURE DELTA</div>
+          <div className="kpi-value" style={{ color: '#1e40af' }}>-57%</div>
           <div className="kpi-subtext">Exposure reduction</div>
         </div>
 
         <div className="kpi-tile">
-          <div className="kpi-label">
-            <span>DECISION LEAD TIME</span>
-            <span className="data-tag data-tag-real">REAL TIME</span>
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--primary-navy)' }}>
-            18 Hours
-          </div>
-          <div className="kpi-subtext">Before physical failure</div>
+          <div className="kpi-label">DECISION LEAD TIME</div>
+          <div className="kpi-value" style={{ color: 'var(--primary-navy)' }}>18 Hours</div>
+          <div className="kpi-subtext">Pre-disruption window</div>
         </div>
 
         <div className="kpi-tile">
-          <div className="kpi-label">
-            <span>MISSION SUCCESS RATE</span>
-            <span className="data-tag data-tag-derived">DERIVED</span>
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--status-success-text)' }}>
-            100%
-          </div>
-          <div className="kpi-subtext">Proactive delivery assurance</div>
+          <div className="kpi-label">MISSION SUCCESS RATE</div>
+          <div className="kpi-value" style={{ color: '#16a34a' }}>100%</div>
+          <div className="kpi-subtext">Delivery assurance</div>
         </div>
       </div>
 
-      {/* 3-Way Strategy Comparison Cards */}
+      {/* 3-Way Strategy Comparison Grid */}
       <div>
-        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="section-header">
           <span>SIDE-BY-SIDE STRATEGY BENCHMARKING</span>
-          <span className="data-tag data-tag-simulated">SIMULATED BENCHMARK</span>
+          <span className="data-tag data-tag-simulated">BENCHMARK DATA</span>
         </div>
 
         <div className="grid-3">
           {strategies.map((strat) => (
             <div key={strat.name} className="card" style={{ backgroundColor: strat.bgClass, borderColor: strat.borderClass }}>
-              <div className="card-header" style={{ borderBottomColor: strat.borderClass, paddingBottom: 10 }}>
+              <div className="card-header" style={{ borderBottomColor: strat.borderClass, paddingBottom: 6 }}>
                 <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: strat.textClass }}>{strat.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>{strat.type}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: strat.textClass }}>{strat.name}</div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{strat.type}</div>
                 </div>
-                <span className={`badge ${strat.tagClass}`}>{strat.lossScore}</span>
+                <span className={`badge ${strat.tagClass}`}>[{strat.lossScore}]</span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.82rem', marginTop: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.75rem', marginTop: 6 }}>
                 <div>
-                  <span style={{ color: 'var(--text-muted)' }}>Assigned Corridor:</span><br />
+                  <span style={{ color: 'var(--text-muted)' }}>Assigned Route:</span><br />
                   <strong>{strat.route}</strong>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Normal Distance:</span>
+                  <span>Distance:</span>
                   <strong>{strat.distance}</strong>
                 </div>
 
@@ -157,7 +137,7 @@ export function BaselineComparison() {
                   <strong>{strat.leadTime}</strong>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 6, borderTop: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 4, borderTop: '1px solid var(--border-subtle)' }}>
                   <span>Mission Success:</span>
                   <strong style={{ color: strat.textClass }}>{strat.missionSuccess}</strong>
                 </div>
@@ -171,8 +151,8 @@ export function BaselineComparison() {
       <div className="card">
         <div className="card-header">
           <div className="card-title">
-            <BarChart3 size={18} />
-            <span>BENCHMARKING MATRIX SUMMARY</span>
+            <BarChart3 size={14} />
+            <span>BENCHMARKING MATRIX SUMMARY TABLE</span>
           </div>
           <span className="data-tag data-tag-derived">DECISION ENGINE METRICS</span>
         </div>
@@ -182,7 +162,7 @@ export function BaselineComparison() {
             <thead>
               <tr>
                 <th>DECISION STRATEGY</th>
-                <th>DECISION TIMING</th>
+                <th>TIMING MODE</th>
                 <th>EXPECTED DELAY</th>
                 <th>RISK EXPOSURE</th>
                 <th>LEAD TIME</th>
@@ -193,26 +173,26 @@ export function BaselineComparison() {
               <tr>
                 <td><strong>Baseline 1 (Shortest Route)</strong></td>
                 <td>No decision (Fixed route)</td>
-                <td style={{ color: 'var(--status-critical-text)', fontWeight: 700 }}>+9.4 hours</td>
-                <td style={{ color: 'var(--status-critical-text)' }}>78%</td>
-                <td>0 hours</td>
-                <td style={{ color: 'var(--status-critical-text)', fontWeight: 800 }}>88 pts</td>
+                <td style={{ color: '#dc2626', fontWeight: 800 }}>+9.4 hrs</td>
+                <td style={{ color: '#dc2626' }}>78%</td>
+                <td>0 hrs</td>
+                <td style={{ color: '#dc2626', fontWeight: 800 }}>88 pts</td>
               </tr>
               <tr>
                 <td><strong>Baseline 2 (Reactive Reroute)</strong></td>
                 <td>Post-disruption (After blockage)</td>
-                <td style={{ color: 'var(--status-warning-text)', fontWeight: 700 }}>+6.5 hours</td>
+                <td style={{ color: '#ea580c', fontWeight: 800 }}>+6.5 hrs</td>
                 <td>78% Initial</td>
-                <td>0 hours</td>
-                <td style={{ color: 'var(--status-warning-text)', fontWeight: 800 }}>75 pts</td>
+                <td>0 hrs</td>
+                <td style={{ color: '#ea580c', fontWeight: 800 }}>75 pts</td>
               </tr>
-              <tr style={{ backgroundColor: 'var(--status-success-bg)' }}>
-                <td><strong style={{ color: 'var(--status-success-text)' }}>AROHAN Proactive Strategy</strong></td>
-                <td><strong style={{ color: 'var(--status-success-text)' }}>Pre-disruption (18h forecast)</strong></td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 800 }}>+1.5 hours</td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 700 }}>21%</td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 700 }}>18 hours</td>
-                <td style={{ color: 'var(--status-success-text)', fontWeight: 800 }}>34 pts</td>
+              <tr style={{ backgroundColor: '#f0fdf4' }}>
+                <td><strong style={{ color: '#16a34a' }}>AROHAN Proactive Strategy</strong></td>
+                <td><strong style={{ color: '#16a34a' }}>Pre-disruption (18h forecast)</strong></td>
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>+1.5 hrs</td>
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>21%</td>
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>18 hrs</td>
+                <td style={{ color: '#16a34a', fontWeight: 800 }}>34 pts</td>
               </tr>
             </tbody>
           </table>

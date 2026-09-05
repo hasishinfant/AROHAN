@@ -12,6 +12,7 @@ import { DecisionHistory } from './pages/DecisionHistory';
 import { DemoController } from './pages/DemoController';
 import { BaselineComparison } from './pages/BaselineComparison';
 import { SystemHealth } from './pages/SystemHealth';
+import { ReportPage } from './pages/ReportPage';
 import { LoginPage } from './pages/LoginPage';
 import { useArohanStore } from './stores/arohanStore';
 import { useWebSocket } from './hooks/useWebSocket';
@@ -48,6 +49,7 @@ function AppShell() {
             <Route path="/mission" element={<MissionDetail />} />
             <Route path="/action" element={<ActionCenter />} />
             <Route path="/replan" element={<ReplanningView />} />
+            <Route path="/reports" element={<ReportPage />} />
             <Route path="/history" element={<DecisionHistory />} />
             <Route path="/baseline" element={<BaselineComparison />} />
             <Route path="/demo" element={<DemoController />} />

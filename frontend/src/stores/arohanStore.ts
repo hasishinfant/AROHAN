@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { AppState, ScenarioStatus } from '../types';
+import { AppState, ScenarioStatus, ShipmentData } from '../types';
+import { GPSUpdate, gpsSimulationService } from '../services/gpsSimulationService';
 
 const API = '/api';
 
@@ -20,7 +21,6 @@ const getInitialUser = (): AuthUser | null => {
   } catch (e) {
     // fallback
   }
-  // Default to Admin logged in for smooth demo experience
   return {
     id: 1,
     name: 'Arjun Sharma',
@@ -30,13 +30,117 @@ const getInitialUser = (): AuthUser | null => {
   };
 };
 
+const DEFAULT_SHIPMENTS: ShipmentData[] = [
+  {
+    id: 1,
+    shipment_code: 'SHP-001',
+    cargo_type: 'Emergency Medical & Disaster Relief Supplies',
+    weight_kg: 4200,
+    urgency: 4,
+    origin: 'Guwahati GST Depot (Assam)',
+    destination: 'Shillong Core Hub (Meghalaya)',
+    status: 'IN_TRANSIT',
+    assigned_route_id: 1,
+    assigned_driver_id: 1,
+    planned_departure: '08:00 IST',
+    planned_eta: '11:00 IST',
+    updated_eta: '13:12 IST',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    shipment_code: 'SHP-002',
+    cargo_type: 'Food Grains & Essential Grain Commodities',
+    weight_kg: 8500,
+    urgency: 5,
+    origin: 'Guwahati Inland Port (Assam)',
+    destination: 'Silchar Freight Terminal (Assam - Barak Valley)',
+    status: 'IN_TRANSIT',
+    assigned_route_id: 2,
+    assigned_driver_id: 2,
+    planned_departure: '06:00 IST',
+    planned_eta: '17:30 IST',
+    updated_eta: '18:45 IST',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    shipment_code: 'SHP-003',
+    cargo_type: 'High-Altitude Emergency Oxygen Cylinders',
+    weight_kg: 3100,
+    urgency: 5,
+    origin: 'Shillong Central Depot (Meghalaya)',
+    destination: 'Agartala Civil Hospital Hub (Tripura)',
+    status: 'DISPATCHED',
+    assigned_route_id: 1,
+    assigned_driver_id: 3,
+    planned_departure: '07:30 IST',
+    planned_eta: '19:45 IST',
+    updated_eta: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 4,
+    shipment_code: 'SHP-004',
+    cargo_type: 'Cold-Chain Vaccines & Biological Specimen',
+    weight_kg: 1800,
+    urgency: 4,
+    origin: 'Guwahati Medical Depot (Assam)',
+    destination: 'Tezpur Regional Hospital (Assam)',
+    status: 'IN_TRANSIT',
+    assigned_route_id: 2,
+    assigned_driver_id: 4,
+    planned_departure: '09:00 IST',
+    planned_eta: '13:15 IST',
+    updated_eta: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 5,
+    shipment_code: 'SHP-005',
+    cargo_type: 'Infrastructure Heavy Cable & Road Repair Gear',
+    weight_kg: 12400,
+    urgency: 3,
+    origin: 'Guwahati Industrial Park (Assam)',
+    destination: 'Itanagar Capital Depot (Arunachal Pradesh)',
+    status: 'PLANNED',
+    assigned_route_id: 1,
+    assigned_driver_id: 5,
+    planned_departure: '11:00 IST',
+    planned_eta: '21:00 IST',
+    updated_eta: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 6,
+    shipment_code: 'SHP-006',
+    cargo_type: 'Disaster Recovery Fuel & Silent Power Generators',
+    weight_kg: 6700,
+    urgency: 4,
+    origin: 'Silchar Distribution Hub (Assam)',
+    destination: 'Aizawl Zuangtui Logistics Hub (Mizoram)',
+    status: 'DISRUPTED',
+    assigned_route_id: 2,
+    assigned_driver_id: 6,
+    planned_departure: '05:30 IST',
+    planned_eta: '14:20 IST',
+    updated_eta: '18:50 IST',
+    created_at: new Date().toISOString(),
+  },
+];
+
 interface ArohanStore extends Partial<AppState> {
   isConnected: boolean;
   isLoading: boolean;
   error: string | null;
   user: AuthUser | null;
+  shipmentsList: ShipmentData[];
+  selectedShipmentId: number;
+  gpsUpdate: GPSUpdate | null;
 
   // Actions
+  setGpsUpdate: (update: GPSUpdate | null) => void;
+  selectShipment: (id: number) => void;
   fetchState: () => Promise<void>;
   scenarioStart: () => Promise<void>;
   scenarioNext: () => Promise<void>;
@@ -68,10 +172,41 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
   isLoading: false,
   error: null,
   user: getInitialUser(),
+  shipmentsList: DEFAULT_SHIPMENTS,
+  selectedShipmentId: 1,
+  gpsUpdate: gpsSimulationService.getLastUpdate(),
+
+  setGpsUpdate: (update) => set({ gpsUpdate: update }),
+
+  selectShipment: (id: number) => {
+    const list = get().shipmentsList;
+    const target = list.find((s) => s.id === id);
+    if (target) {
+      gpsSimulationService.setShipment(id);
+      set({ selectedShipmentId: id, shipment: target, gpsUpdate: gpsSimulationService.getLastUpdate() });
+    }
+  },
 
   setConnected: (v) => set({ isConnected: v }),
 
-  applyWsUpdate: (data) => set((s) => ({ ...s, ...data, error: null })),
+  applyWsUpdate: (data) => set((s) => {
+    let updatedList = s.shipmentsList;
+    if (data.shipment) {
+      updatedList = updatedList.map((item) =>
+        item.id === 1 ? { ...item, ...data.shipment } : item
+      );
+    }
+    const currentSelectedId = s.selectedShipmentId || 1;
+    const activeShipment = currentSelectedId === 1 && data.shipment ? data.shipment : updatedList.find(x => x.id === currentSelectedId) || data.shipment || updatedList[0];
+
+    return {
+      ...s,
+      ...data,
+      shipmentsList: updatedList,
+      shipment: activeShipment,
+      error: null,
+    };
+  }),
 
   login: (role, email) => {
     const newUser: AuthUser =
@@ -105,7 +240,23 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const data = await patch('/state', 'GET');
-      set({ ...data, isLoading: false, error: null });
+      const s = get();
+      let updatedList = s.shipmentsList;
+      if (data.shipment) {
+        updatedList = updatedList.map((item) =>
+          item.id === 1 ? { ...item, ...data.shipment } : item
+        );
+      }
+      const currentSelectedId = s.selectedShipmentId || 1;
+      const activeShipment = currentSelectedId === 1 && data.shipment ? data.shipment : updatedList.find(x => x.id === currentSelectedId) || data.shipment || updatedList[0];
+
+      set({
+        ...data,
+        shipmentsList: updatedList,
+        shipment: activeShipment,
+        isLoading: false,
+        error: null,
+      });
     } catch (e) {
       set({ isLoading: false, error: String(e) });
     }

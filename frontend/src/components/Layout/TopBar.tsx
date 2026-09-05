@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../../stores/arohanStore';
-import { Shield, AlertTriangle, CheckCircle2, Clock, Radio, Search, Bell, LogOut } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle2, Clock, Radio, Search, LogOut, Truck } from 'lucide-react';
 
 export function TopBar() {
   const navigate = useNavigate();
-  const { shipment, scenario_status, scenario_step, isConnected, user, logout } = useArohanStore();
+  const { shipment, shipmentsList, selectedShipmentId, selectShipment, scenario_status, scenario_step, user, logout } = useArohanStore();
 
   const systemStatus = () => {
     const step = scenario_step ?? -1;
-    if (step >= 7) return { badgeClass: 'badge-critical', label: 'FIELD OBSTRUCTION REPORTED', Icon: AlertTriangle };
+    if (step >= 7) return { badgeClass: 'badge-critical', label: 'OBSTRUCTION REPORTED', Icon: AlertTriangle };
     if (step >= 4) return { badgeClass: 'badge-warning', label: 'PROACTIVE REROUTE ACTIVE', Icon: Shield };
     if (step >= 2) return { badgeClass: 'badge-warning', label: 'RISK THRESHOLD EXCEEDED', Icon: AlertTriangle };
     if (step >= 0) return { badgeClass: 'badge-info', label: 'MISSION ACTIVE', Icon: Radio };
@@ -17,7 +17,6 @@ export function TopBar() {
   };
 
   const sys = systemStatus();
-  const Icon = sys.Icon;
 
   const handleLogout = () => {
     logout();
@@ -25,62 +24,161 @@ export function TopBar() {
   };
 
   return (
-    <header className="topbar">
-      {/* Left Branding */}
-      <div className="topbar-branding">
-        <div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            {shipment ? `${shipment.shipment_code} — ${shipment.cargo_type}` : 'Guwahati → Shillong Logistics Corridor'}
+    <header className="topbar" style={{ height: 64, padding: '0 20px', borderBottom: '1px solid #cbd5e1', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+      {/* 1. LEFT BRANDING */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f172a', letterSpacing: '0.04em', lineHeight: 1.1 }}>
+            AROHAN
           </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            Proactive Logistics Decision Engine · North Eastern Region
+          <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            NER GIS CONTROL ROOM
+          </div>
+        </div>
+
+        <div style={{ width: 1, height: 28, backgroundColor: '#e2e8f0' }} />
+
+        {/* 2. CENTER: CURRENT MISSION CONTEXT & SELECTOR */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              CURRENT MISSION
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: '#1d4ed8' }}>{shipment?.shipment_code || 'SHP-002'}</span>
+              <span style={{ color: '#cbd5e1' }}>·</span>
+              <span>{shipment ? `${shipment.origin.split(' ')[0]} → ${shipment.destination.split(' ')[0]}` : 'Guwahati → Silchar'}</span>
+              {shipment?.cargo_type && (
+                <>
+                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>{shipment.cargo_type.split(' ')[0]}</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Compact Mission Selector Dropdown */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            backgroundColor: '#f8fafc',
+            border: '1px solid #cbd5e1',
+            borderRadius: 6,
+            padding: '3px 8px',
+            width: 240
+          }}>
+            <Truck size={13} style={{ color: '#1d4ed8', flexShrink: 0 }} />
+            <select
+              value={selectedShipmentId || 1}
+              onChange={(e) => selectShipment(Number(e.target.value))}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                color: '#0f172a',
+                outline: 'none',
+                cursor: 'pointer',
+                width: '100%',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {shipmentsList?.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.shipment_code} · {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
 
-      {/* Center Search Pill Bar */}
-      <div className="topbar-search-pill">
-        <Search size={16} style={{ color: 'var(--text-muted)' }} />
-        <input
-          type="text"
-          className="topbar-search-input"
-          placeholder="Search corridor telemetry, routes, risk predictions..."
-        />
-      </div>
+      {/* 3. RIGHT META ACTIONS & OPERATIONAL STATUS */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Search */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          backgroundColor: '#ffffff',
+          border: '1px solid #cbd5e1',
+          borderRadius: 6,
+          padding: '4px 10px',
+          width: 220
+        }}>
+          <Search size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />
+          <input
+            type="text"
+            placeholder="Search corridor telemetry..."
+            style={{
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+              fontSize: '0.75rem',
+              color: '#0f172a',
+              background: 'transparent'
+            }}
+          />
+        </div>
 
-      {/* Right Meta Pill Actions */}
-      <div className="topbar-meta">
-        <div className={`badge ${sys.badgeClass}`}>
-          <div className="badge-dot" />
-          <Icon size={12} />
+        {/* Operational Status Pill */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontSize: '0.72rem',
+          fontWeight: 800,
+          padding: '4px 10px',
+          borderRadius: 4,
+          backgroundColor: sys.badgeClass.includes('critical') ? '#fef2f2' : sys.badgeClass.includes('warning') ? '#fff7ed' : '#eff6ff',
+          color: sys.badgeClass.includes('critical') ? '#dc2626' : sys.badgeClass.includes('warning') ? '#ea580c' : '#1d4ed8',
+          border: `1px solid ${sys.badgeClass.includes('critical') ? '#fecaca' : sys.badgeClass.includes('warning') ? '#ffedd5' : '#bfdbfe'}`,
+          letterSpacing: '0.02em'
+        }}>
+          <span style={{
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            backgroundColor: sys.badgeClass.includes('critical') ? '#dc2626' : sys.badgeClass.includes('warning') ? '#ea580c' : '#1d4ed8'
+          }} />
           <span>{sys.label}</span>
         </div>
 
+        {/* Journey Step Indicator */}
         {scenario_status && scenario_status !== 'IDLE' && (
-          <div className="pill-button" style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
-            STEP {(scenario_step ?? -1) + 1} / 9
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2px 8px', backgroundColor: '#f1f5f9', borderRadius: 4, border: '1px solid #cbd5e1' }}>
+            <span style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>JOURNEY</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a', fontFamily: 'monospace' }}>
+              {(scenario_step ?? -1) + 1} / 9
+            </span>
           </div>
         )}
 
+        {/* Dynamic ETA */}
         {shipment && (
-          <div className="pill-button" style={{ gap: 6, color: shipment.updated_eta ? 'var(--status-warning-accent)' : 'var(--text-main)' }}>
-            <Clock size={14} />
-            <span>{shipment.updated_eta ?? shipment.planned_eta}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '2px 8px', backgroundColor: '#f8fafc', borderRadius: 4, border: '1px solid #cbd5e1' }}>
+            <span style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>ETA</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: shipment.updated_eta ? '#dc2626' : '#0f172a', fontFamily: 'monospace' }}>
+              {shipment.updated_eta ?? shipment.planned_eta}
+            </span>
           </div>
         )}
 
-        {/* User Badge & Logout Pill */}
-        <div className="pill-button" style={{ padding: '4px 12px 4px 6px', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--bg-dark-pill)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800 }}>
+        {/* Compact User Block */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6 }}>
+          <div style={{ backgroundColor: '#0f172a', color: '#ffffff', padding: '2px 6px', fontSize: '0.68rem', fontWeight: 800, borderRadius: 4 }}>
             {user?.avatarText || 'AS'}
           </div>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{user?.name || 'Arjun Sharma'}</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>{user?.name || 'Arjun Sharma'}</span>
           <button
             onClick={handleLogout}
             title="Log Out"
-            style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-muted)', marginLeft: 4 }}
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b', marginLeft: 2 }}
           >
-            <LogOut size={14} />
+            <LogOut size={13} />
           </button>
         </div>
       </div>

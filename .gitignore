@@ -1,25 +1,35 @@
+# Dependencies
 node_modules/
-.env
-.venv/
-venv/
-__pycache__/
-.DS_Store
+**/node_modules/
+frontend/node_modules/
+
+# Build outputs
 dist/
+**/dist/
 build/
-.next/
-node_modules/
-.env
-.DS_Store
-.venv/
-venv/
+*.egg-info/
+
+# Python & Virtual Environments
 __pycache__/
-dist/
-build/
-node_modules/
-.env
-.DS_Store
-.venv/
+*.pyc
+*.pyo
 venv/
-__pycache__/
-dist/
-build/
+.venv/
+env/
+
+# Database & Storage
+*.db
+*.sqlite
+*.sqlite3
+arohan.db
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# IDE & OS Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

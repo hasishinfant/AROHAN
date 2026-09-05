@@ -9,24 +9,21 @@ import {
   Clock,
   Send,
   LogOut,
-  MapPin,
-  Volume2,
-  Lock,
-  Layers,
-  Radio,
-  UserCheck
+  Volume2
 } from 'lucide-react';
 
+import { MapView } from '../components/Map/MapView';
+
 const CONDITIONS = [
-  { key: 'CLEAR', label: 'CLEAR', color: '#047857', bg: '#ecfdf5', desc: 'Passable road, normal flow' },
-  { key: 'SLOW', label: 'SLOW', color: '#d97706', bg: '#fffbeb', desc: 'Passable but heavily delayed' },
-  { key: 'PARTIAL', label: 'PARTLY BLOCKED', color: '#c05621', bg: '#fff7ed', desc: 'Single lane open only' },
-  { key: 'BLOCKED', label: 'BLOCKED', color: '#b91c1c', bg: '#fef2f2', desc: 'Total obstruction / landslip' },
+  { key: 'CLEAR', label: 'CLEAR', color: '#15803d', bg: '#f0fdf4', desc: 'Passable road, normal flow' },
+  { key: 'SLOW', label: 'SLOW', color: '#b45309', bg: '#fffbeb', desc: 'Passable but heavily delayed' },
+  { key: 'PARTIAL', label: 'PARTLY BLOCKED', color: '#ea580c', bg: '#fff7ed', desc: 'Single lane open only' },
+  { key: 'BLOCKED', label: 'BLOCKED', color: '#dc2626', bg: '#fef2f2', desc: 'Total obstruction / landslip' },
 ];
 
 export function DriverInterface() {
   const navigate = useNavigate();
-  const { shipment, routes, driver_status, driverAcknowledge, driverReport, scenario_step, current_recommendation, logout } = useArohanStore();
+  const { shipment, routes, driver_status, driverAcknowledge, driverReport, scenario_step, current_recommendation, gpsUpdate, logout } = useArohanStore();
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [reportSent, setReportSent] = useState(false);
@@ -36,7 +33,7 @@ export function DriverInterface() {
   const step = scenario_step ?? -1;
   const assignedRoute = routes?.find((r) => r.id === shipment?.assigned_route_id);
   const showAcknowledge = step >= 5 && driver_status === 'NOTIFIED';
-  const showReport = step >= 6 && (driver_status === 'ACKNOWLEDGED' || driver_status === 'REPORTING');
+  const showReport = true;
   const showRouteChange = step >= 5 && current_recommendation;
 
   const handleReport = async () => {
@@ -95,38 +92,29 @@ export function DriverInterface() {
   const t = textMap[lang];
 
   return (
-    <div style={{ backgroundColor: '#f0f4f2', minHeight: '100vh', padding: '16px 12px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div style={{ maxWidth: 520, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ backgroundColor: 'var(--bg-canvas)', minHeight: '100vh', padding: '12px', fontFamily: "'Inter', sans-serif" }}>
+      <div className="driver-container">
         
-        {/* Mobile Header Bar */}
-        <div
-          style={{
-            backgroundColor: '#0f4c42',
-            color: '#ffffff',
-            borderRadius: 20,
-            padding: 20,
-            boxShadow: '0 8px 24px rgba(15, 76, 66, 0.25)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#a7f3d0' }}>
-              PORTAL 2 — AROHAN FIELD PWA
+        {/* Field App Header Bar */}
+        <div className="driver-header">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#93c5fd' }}>
+              AROHAN FIELD MOBILE CONSOLE
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Language Switcher Toggle */}
-              <div style={{ display: 'flex', gap: 2, backgroundColor: 'rgba(255, 255, 255, 0.15)', padding: 2, borderRadius: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {/* Language Switcher */}
+              <div style={{ display: 'flex', gap: 2, backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 2 }}>
                 <button
                   type="button"
                   onClick={() => setLang('en')}
                   style={{
                     border: 'none',
                     background: lang === 'en' ? '#ffffff' : 'transparent',
-                    color: lang === 'en' ? '#0f4c42' : '#ffffff',
-                    fontSize: '0.72rem',
+                    color: lang === 'en' ? '#0f172a' : '#ffffff',
+                    fontSize: '0.68rem',
                     fontWeight: 800,
-                    padding: '4px 10px',
-                    borderRadius: 14,
+                    padding: '2px 6px',
                     cursor: 'pointer',
                   }}
                 >
@@ -138,11 +126,10 @@ export function DriverInterface() {
                   style={{
                     border: 'none',
                     background: lang === 'as' ? '#ffffff' : 'transparent',
-                    color: lang === 'as' ? '#0f4c42' : '#ffffff',
-                    fontSize: '0.72rem',
+                    color: lang === 'as' ? '#0f172a' : '#ffffff',
+                    fontSize: '0.68rem',
                     fontWeight: 800,
-                    padding: '4px 10px',
-                    borderRadius: 14,
+                    padding: '2px 6px',
                     cursor: 'pointer',
                   }}
                 >
@@ -150,17 +137,16 @@ export function DriverInterface() {
                 </button>
               </div>
 
-              {/* Voice Assistance Button */}
+              {/* Voice Assistance */}
               <button
                 type="button"
                 onClick={toggleAudioHelp}
                 style={{
                   border: 'none',
-                  backgroundColor: audioAnnounced ? '#ea580c' : 'rgba(255, 255, 255, 0.2)',
+                  backgroundColor: audioAnnounced ? '#ea580c' : 'rgba(255, 255, 255, 0.15)',
                   color: '#ffffff',
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
+                  width: 28,
+                  height: 28,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -168,7 +154,7 @@ export function DriverInterface() {
                 }}
                 title="Voice Assistance"
               >
-                <Volume2 size={16} />
+                <Volume2 size={14} />
               </button>
 
               <button
@@ -178,9 +164,8 @@ export function DriverInterface() {
                   border: 'none',
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
                   color: '#ffffff',
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
+                  width: 28,
+                  height: 28,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -188,23 +173,23 @@ export function DriverInterface() {
                 }}
                 title="Logout"
               >
-                <LogOut size={14} />
+                <LogOut size={13} />
               </button>
             </div>
           </div>
 
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff', textTransform: 'uppercase' }}>
             {t.title}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#a7f3d0', marginTop: 2, fontWeight: 600 }}>
+          <div style={{ fontSize: '0.72rem', color: '#93c5fd', marginTop: 2, fontWeight: 700 }}>
             {t.subtitle} &nbsp;·&nbsp; {t.driverName}
           </div>
         </div>
 
         {/* Audio Announcement Alert Banner */}
         {audioAnnounced && (
-          <div className="alert alert-info" style={{ backgroundColor: '#fff7ed', borderColor: '#fdba74', color: '#9a3412', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Volume2 size={20} style={{ flexShrink: 0, color: '#ea580c' }} />
+          <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fdba74', padding: '8px 12px', color: '#7c2d12', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Volume2 size={16} style={{ flexShrink: 0, color: '#ea580c' }} />
             <div>
               <strong>🔊 Voice Assistant Spoken Audio:</strong>
               <div>"{t.audioMsg}"</div>
@@ -212,202 +197,195 @@ export function DriverInterface() {
           </div>
         )}
 
-        {/* Active Mission Overview Card */}
-        {shipment ? (
-          <div className="card" style={{ padding: 20, backgroundColor: '#ffffff', borderRadius: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, borderBottom: '1px solid #e2e8f0', paddingBottom: 10 }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Smartphone size={18} style={{ color: '#0f4c42' }} />
-                <span>MISSION {shipment.shipment_code}</span>
-              </div>
-              <span className={`badge ${driver_status === 'ACKNOWLEDGED' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.72rem', padding: '4px 10px' }}>
-                {driver_status}
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.88rem' }}>
-              <div>
-                <span style={{ color: '#64748b' }}>{t.destination}</span>{' '}
-                <strong style={{ color: '#0f172a', fontSize: '1rem' }}>{shipment.destination}</strong>
-              </div>
-
-              <div>
-                <span style={{ color: '#64748b' }}>{t.assignedRoute}</span>{' '}
-                <strong style={{ color: '#0f4c42' }}>{assignedRoute?.name ?? 'NH-6 Corridor'}</strong>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: '#ecfdf5', padding: '10px 14px', borderRadius: 12, color: '#047857', fontWeight: 800 }}>
-                <Clock size={18} />
-                <span>{t.eta} {shipment.updated_eta ?? shipment.planned_eta}</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="card" style={{ textAlign: 'center', padding: 24, color: '#64748b' }}>
-            No active shipment loaded.
-          </div>
-        )}
-
-        {/* Proactive Reroute Instruction Box */}
-        {showRouteChange && (
-          <div className="card" style={{ backgroundColor: '#fffbeb', borderColor: '#fde68a', borderRadius: 20, padding: 20 }}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <Shield size={24} style={{ color: '#ea580c', flexShrink: 0, marginTop: 2 }} />
-              <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#9a3412', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {t.updateAlert}
+        {/* Active Journey Information Table & Real-Time Telemetry */}
+        <div style={{ padding: '12px' }}>
+          {shipment ? (
+            <div className="card" style={{ padding: '12px', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-medium)', paddingBottom: 6 }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase' }}>
+                  <Smartphone size={14} />
+                  <span>MY JOURNEY — {shipment.shipment_code}</span>
                 </div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: 4 }}>
-                  {t.newRoute} <strong>Route B (Ridge Bypass via Sonapur)</strong>
+                <span className={`badge ${gpsUpdate?.simulated_status === 'DELIVERED' ? 'badge-success' : 'badge-info'}`}>
+                  [{gpsUpdate?.simulated_status || driver_status}]
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              {gpsUpdate && (
+                <div style={{ backgroundColor: '#f8fafc', padding: 8, border: '1px solid var(--border-medium)', borderRadius: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 800, marginBottom: 4 }}>
+                    <span>JOURNEY PROGRESS</span>
+                    <span style={{ color: 'var(--primary-blue)' }}>{gpsUpdate.progress_pct}% ({gpsUpdate.distance_covered_km} / {gpsUpdate.total_distance_km} km)</span>
+                  </div>
+                  <div style={{ width: '100%', height: 8, backgroundColor: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ width: `${gpsUpdate.progress_pct}%`, height: '100%', backgroundColor: gpsUpdate.progress_pct >= 100 ? '#16a34a' : '#2563eb', transition: 'width 0.4s ease' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 700 }}>
+                    <span>Speed: {gpsUpdate.speed_kmh} km/h ({gpsUpdate.heading_cardinal})</span>
+                    <span>ETA: {gpsUpdate.eta_formatted}</span>
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: '#475569', marginTop: 6, lineHeight: 1.5 }}>
-                  Reason: {current_recommendation?.reason}
+              )}
+
+              <div className="table-container">
+                <table className="table">
+                  <tbody>
+                    <tr>
+                      <td style={{ fontWeight: 800, width: '40%', color: 'var(--text-muted)' }}>{t.destination}</td>
+                      <td style={{ fontWeight: 800, color: 'var(--text-main)' }}>{shipment.destination}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{t.assignedRoute}</td>
+                      <td style={{ fontWeight: 800, color: 'var(--primary-navy)' }}>{assignedRoute?.name ?? 'NH-6 Corridor'}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{t.eta}</td>
+                      <td style={{ fontWeight: 800, color: '#16a34a', fontFamily: 'monospace' }}>{gpsUpdate?.eta_formatted ?? (shipment.updated_eta ?? shipment.planned_eta)}</td>
+                    </tr>
+                    {gpsUpdate?.current_risk_level && (
+                      <tr>
+                        <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>CURRENT RISK</td>
+                        <td style={{ fontWeight: 800, color: gpsUpdate.current_risk_level === 'HIGH' ? '#dc2626' : '#16a34a' }}>
+                          [{gpsUpdate.current_risk_level} RISK]
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Embedded GIS Navigation Map View */}
+              <div style={{ marginTop: 4, height: 280, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border-medium)' }}>
+                <MapView />
+              </div>
+            </div>
+          ) : (
+            <div className="card" style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+              No active shipment assigned.
+            </div>
+          )}
+
+          {/* Proactive Reroute Instruction Panel */}
+          {showRouteChange && (
+            <div className="card" style={{ backgroundColor: '#fff7ed', borderColor: '#ffedd5', marginTop: 10 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <Shield size={18} style={{ color: '#ea580c', flexShrink: 0, marginTop: 2 }} />
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#7c2d12', textTransform: 'uppercase' }}>
+                    {t.updateAlert}
+                  </div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
+                    {t.newRoute} <strong>Route B (Ridge Bypass via Sonapur)</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: 4 }}>
+                    Reason: {current_recommendation?.reason}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Large Primary Action Button: ACKNOWLEDGE */}
-        {showAcknowledge && (
-          <button
-            type="button"
-            className="btn btn-success btn-lg"
-            onClick={driverAcknowledge}
-            style={{
-              width: '100%',
-              padding: '18px 0',
-              fontSize: '1.05rem',
-              fontWeight: 900,
-              borderRadius: 24,
-              boxShadow: '0 8px 20px rgba(4, 120, 87, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-            }}
-          >
-            <CheckCircle2 size={24} />
-            <span>{t.ackButton}</span>
-          </button>
-        )}
-
-        {/* LOW-FRICTION FIELD CONDITION REPORTING CARD */}
-        {showReport && (
-          <div className="card" style={{ padding: 20, backgroundColor: '#ffffff', borderRadius: 20 }}>
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <AlertTriangle size={18} style={{ color: '#ea580c' }} />
-                <span>{t.reportTitle}</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 4 }}>
-                {t.autoTelemetry}
-              </div>
-            </div>
-
-            {/* Auto Telemetry Attachment Metadata Banner */}
-            <div
-              style={{
-                backgroundColor: '#f1f5f9',
-                border: '1px solid #cbd5e1',
-                borderRadius: 14,
-                padding: '10px 14px',
-                fontSize: '0.72rem',
-                color: '#334155',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4,
-                marginBottom: 16,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 800 }}>
-                <span style={{ color: '#0f4c42' }}>📍 AUTO-ATTACHED GROUND TELEMETRY</span>
-                <span className="badge badge-info" style={{ fontSize: '0.6rem' }}>UNVERIFIED OBSERVATION</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 2 }}>
-                <div>• <strong>GPS:</strong> 25.82°N, 91.95°E (KM 42)</div>
-                <div>• <strong>Driver:</strong> DRIVER-07 (Rahul Kumar)</div>
-                <div>• <strong>Mission:</strong> SHP-001 (M1042)</div>
-                <div>• <strong>Segment:</strong> SEG-03 (Umiam Pass)</div>
-              </div>
-            </div>
-
-            {/* 4 Large Touch Condition Buttons (SEE -> TAP -> CONFIRM) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-              {CONDITIONS.map((cond) => {
-                const isSelected = selectedCondition === cond.key;
-                return (
-                  <button
-                    key={cond.key}
-                    type="button"
-                    onClick={() => setSelectedCondition(cond.key)}
-                    style={{
-                      border: isSelected ? `3px solid ${cond.color}` : '1.5px solid #cbd5e1',
-                      backgroundColor: isSelected ? cond.bg : '#ffffff',
-                      borderRadius: 16,
-                      padding: 16,
-                      minHeight: 80,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      boxShadow: isSelected ? `0 4px 14px ${cond.color}33` : '0 2px 6px rgba(0,0,0,0.02)',
-                      transition: 'all 0.15s ease',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <div style={{ fontSize: '1rem', fontWeight: 900, color: cond.color }}>
-                      {cond.label}
-                    </div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', marginTop: 4 }}>
-                      {cond.desc}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Optional Field Notes (Not mandatory) */}
-            <input
-              className="form-input"
-              type="text"
-              placeholder="Optional field notes (or leave blank)..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              style={{ borderRadius: 16, padding: '12px 16px', fontSize: '0.85rem', marginBottom: 14 }}
-            />
-
-            {/* Primary Submit Button */}
+          {/* Large Action Button: ACKNOWLEDGE */}
+          {showAcknowledge && (
             <button
               type="button"
-              className="btn btn-primary btn-lg"
-              onClick={handleReport}
-              disabled={!selectedCondition || reportSent}
+              className="btn btn-success btn-lg"
+              onClick={driverAcknowledge}
               style={{
                 width: '100%',
-                padding: '16px',
-                borderRadius: 20,
-                fontSize: '0.95rem',
-                fontWeight: 800,
-                backgroundColor: reportSent ? '#047857' : '#0f4c42',
+                padding: '12px 0',
+                marginTop: 10,
+                fontSize: '0.9rem',
               }}
             >
-              <Send size={18} />
-              <span>{reportSent ? 'OBSERVATION SENT TO SYSTEM' : t.submitBtn}</span>
+              <CheckCircle2 size={18} />
+              <span>{t.ackButton}</span>
             </button>
+          )}
 
-            {reportSent && (
-              <div className="alert alert-success" style={{ fontSize: '0.8rem', marginTop: 12, borderRadius: 12 }}>
-                {t.submittedAlert}
-                <div style={{ fontSize: '0.72rem', marginTop: 4, fontWeight: 600 }}>
-                  {t.unverifiedNotice}
+          {/* GROUND CONDITION REPORTING PANEL */}
+          {showReport && (
+            <div className="card" style={{ marginTop: 10 }}>
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase' }}>
+                  <AlertTriangle size={14} style={{ color: '#ea580c' }} />
+                  <span>{t.reportTitle}</span>
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                  {t.autoTelemetry}
                 </div>
               </div>
-            )}
-          </div>
-        )}
 
+              {/* Auto Telemetry Attachment Metadata Banner */}
+              <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-medium)', padding: '6px 10px', fontSize: '0.68rem', marginBottom: 10 }}>
+                <div style={{ fontWeight: 800, color: 'var(--primary-navy)' }}>📍 AUTO-ATTACHED TELEMETRY</div>
+                <div>GPS: 25.82°N, 91.95°E (NH-6 KM 42) · Vehicle: TRUCK-07</div>
+              </div>
+
+              {/* 4 Touch Condition Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+                {CONDITIONS.map((cond) => {
+                  const isSelected = selectedCondition === cond.key;
+                  return (
+                    <button
+                      key={cond.key}
+                      type="button"
+                      onClick={() => setSelectedCondition(cond.key)}
+                      style={{
+                        border: isSelected ? `2px solid ${cond.color}` : '1px solid var(--border-medium)',
+                        backgroundColor: isSelected ? cond.bg : '#ffffff',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: 10,
+                        minHeight: 64,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: cond.color }}>
+                        [{cond.label}]
+                      </div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>
+                        {cond.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <input
+                className="form-input"
+                type="text"
+                placeholder="Optional field notes..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                style={{ marginBottom: 10 }}
+              />
+
+              <button
+                type="button"
+                className="btn btn-primary btn-lg"
+                onClick={handleReport}
+                disabled={!selectedCondition || reportSent}
+                style={{ width: '100%' }}
+              >
+                <Send size={16} />
+                <span>{reportSent ? 'OBSERVATION TRANSMITTED' : t.submitBtn}</span>
+              </button>
+
+              {reportSent && (
+                <div style={{ fontSize: '0.75rem', marginTop: 8, padding: 8, backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#14532d', fontWeight: 700 }}>
+                  {t.submittedAlert}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );

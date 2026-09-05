@@ -9,19 +9,19 @@ export function StatusBadge({ status }: { status: ShipmentStatus | string }) {
     DRIVER_ACKNOWLEDGED: 'badge-info',
     IN_TRANSIT: 'badge-info',
     DISRUPTED: 'badge-critical',
-    REPLANNED: 'badge-warning',
+    REPLANNED: 'badge-amber',
     DELIVERED: 'badge-success',
-    PENDING: 'badge-warning',
+    PENDING: 'badge-amber',
     REJECTED: 'badge-critical',
     MODIFIED: 'badge-info',
     CLEAR: 'badge-success',
-    SLOW: 'badge-warning',
-    PARTIAL: 'badge-warning',
+    SLOW: 'badge-amber',
+    PARTIAL: 'badge-amber',
     BLOCKED: 'badge-critical',
-    PROACTIVE: 'badge-warning',
+    PROACTIVE: 'badge-amber',
     REACTIVE: 'badge-info',
     HIGH: 'badge-critical',
-    MEDIUM: 'badge-warning',
+    MEDIUM: 'badge-amber',
     LOW: 'badge-success',
   };
 
@@ -29,7 +29,7 @@ export function StatusBadge({ status }: { status: ShipmentStatus | string }) {
   return (
     <span className={`badge ${cls}`}>
       <span className="badge-dot" />
-      <span>{status}</span>
+      <span>[{status}]</span>
     </span>
   );
 }
@@ -37,8 +37,8 @@ export function StatusBadge({ status }: { status: ShipmentStatus | string }) {
 export function SegmentStatusDot({ status }: { status: SegmentStatus }) {
   const colors: Record<SegmentStatus, string> = {
     CLEAR: '#16a34a',
-    SLOW: '#d97706',
-    PARTIAL: '#d97706',
+    SLOW: '#ca8a04',
+    PARTIAL: '#ca8a04',
     BLOCKED: '#dc2626',
   };
   return (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useArohanStore } from '../stores/arohanStore';
 import { ActionCard } from '../components/ActionCard';
-import { Shield, CheckCircle2, XCircle, Sliders, AlertTriangle, UserCheck, Lock } from 'lucide-react';
+import { Shield, UserCheck, Sliders, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function ActionCenter() {
@@ -26,61 +26,59 @@ export function ActionCenter() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">ACTION CENTER — DISPATCHER APPROVAL HUB</h1>
+          <h1 className="page-title">ACTION CENTER — DISPATCH APPROVAL CONSOLE</h1>
           <div className="page-description">
-            Human-in-the-Loop Operations Control · Proactive Decision Approval & Dispatch Execution
+            Human-in-the-Loop Operations Control · Proactive Decision Approval & Verification
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div className="badge badge-info" style={{ padding: '6px 12px' }}>
-            <UserCheck size={14} />
-            <span>DISPATCHER: Arjun Sharma (ID: DISP-104)</span>
-          </div>
+        <div className="badge badge-info" style={{ padding: '4px 8px' }}>
+          <UserCheck size={12} />
+          <span>DISPATCHER: Arjun Sharma (ID: DISP-104)</span>
         </div>
       </div>
 
       {/* Decision Engine Rule Disclosure Banner */}
-      <div className="card" style={{ backgroundColor: 'var(--status-info-bg)', borderColor: 'var(--status-info-border)' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-          <Shield size={20} style={{ color: 'var(--status-info-accent)', marginTop: 2, flexShrink: 0 }} />
+      <div className="card" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <Shield size={16} style={{ color: '#1e40af', marginTop: 2, flexShrink: 0 }} />
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--status-info-text)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase' }}>
               CONFIGURED PROACTIVE DECISION RULE
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginTop: 4, fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '0.75rem', color: '#0f172a', marginTop: 2, fontFamily: 'monospace' }}>
               IF (disruption_probability &ge; 60%) AND (horizon &le; 24h) AND (loss_current &gt; loss_alternative) THEN generate_action_card()
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
-              Proactive Thresholds: Risk Limit = 60% · Planning Horizon = 24 Hours · Mode = Human Approval Required
+            <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: 2 }}>
+              Threshold: Risk Limit = 60% · Planning Horizon = 24 Hours · Mode = Human Approval Required
             </div>
           </div>
         </div>
       </div>
 
       {step < 4 ? (
-        <div className="card" style={{ textAlign: 'center', padding: 48, backgroundColor: 'var(--bg-panel)' }}>
-          <Shield size={48} style={{ color: 'var(--text-muted)', margin: '0 auto 12px auto' }} />
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>
+        <div className="card" style={{ textAlign: 'center', padding: 36, backgroundColor: 'var(--bg-panel)' }}>
+          <Shield size={36} style={{ color: 'var(--text-muted)', margin: '0 auto 8px auto' }} />
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', textTransform: 'uppercase' }}>
             NO PENDING PROACTIVE DECISION
           </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: 500, margin: '8px auto 20px auto' }}>
-            The system is actively monitoring environmental telemetry. A decision action card will be generated automatically when environmental disruption risk crosses the 60% threshold.
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: 480, margin: '6px auto 16px auto' }}>
+            System actively monitoring environmental telemetry. Action cards are generated automatically when risk crosses the 60% threshold.
           </div>
-          <button className="btn btn-primary" onClick={() => navigate('/demo')}>
-            <Sliders size={16} />
-            <span>OPEN SCENARIO CONTROLLER TO ADVANCE TO STEP 4</span>
+          <button className="btn btn-primary btn-sm" onClick={() => navigate('/demo')}>
+            <Sliders size={13} />
+            <span>ADVANCE TO SCENARIO STEP 4</span>
           </button>
         </div>
       ) : !current_decision ? (
-        <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+        <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
           Loading decision parameters...
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Main Action Card */}
           <ActionCard
             decision={current_decision}
@@ -90,30 +88,30 @@ export function ActionCenter() {
             onModify={() => setShowRejectForm(true)}
           />
 
-          {/* Rejection / Modification Panel */}
+          {/* Rejection / Modification Form */}
           {showRejectForm && current_decision.status === 'PENDING' && (
             <div className="card" style={{ borderColor: 'var(--status-critical-border)', backgroundColor: 'var(--status-critical-bg)' }}>
               <div className="card-header" style={{ borderBottomColor: 'var(--status-critical-border)' }}>
                 <div className="card-title" style={{ color: 'var(--status-critical-text)' }}>
-                  <AlertTriangle size={18} />
-                  <span>MODIFY OR REJECT DECISION — ENTER DISPATCHER NOTES</span>
+                  <AlertTriangle size={14} />
+                  <span>MODIFY OR REJECT DECISION — DISPATCHER JUSTIFICATION</span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
                 <textarea
-                  className="form-input"
+                  className="form-textarea"
                   rows={3}
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="Enter explicit operational justification for rejecting or modifying this recommendation..."
+                  placeholder="Enter operational justification for rejecting or modifying this recommendation..."
                 />
 
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                  <button className="btn btn-secondary" onClick={() => setShowRejectForm(false)}>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setShowRejectForm(false)}>
                     CANCEL
                   </button>
-                  <button className="btn btn-danger" onClick={handleReject} disabled={!rejectReason.trim()}>
+                  <button className="btn btn-danger btn-sm" onClick={handleReject} disabled={!rejectReason.trim()}>
                     SUBMIT REJECTION RECORD
                   </button>
                 </div>
@@ -121,32 +119,37 @@ export function ActionCenter() {
             </div>
           )}
 
-          {/* Decision Audit Record Card */}
+          {/* Decision Audit Trail Table */}
           <div className="card">
             <div className="card-header">
               <div className="card-title">
-                <Lock size={16} />
-                <span>DECISION AUDIT & COMPLIANCE RECORD</span>
+                <span>DECISION AUDIT & COMPLIANCE TRAIL</span>
               </div>
               <span className="data-tag data-tag-real">AUDIT TRAIL</span>
             </div>
-            <div className="grid-3">
-              <div>
-                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>DECISION TIMESTAMP</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: 2 }}>{new Date(current_decision.created_at).toLocaleString()}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>APPROVAL STATUS</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: 2, color: current_decision.status === 'APPROVED' ? 'var(--status-success-text)' : 'var(--status-warning-text)' }}>
-                  {current_decision.status}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>EXPECTED MISSION LOSS BENEFIT</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--status-success-text)', marginTop: 2 }}>
-                  Score: {current_decision.mission_score_current.toFixed(0)} → {current_decision.mission_score_recommended.toFixed(0)} (-{(current_decision.mission_score_current - current_decision.mission_score_recommended).toFixed(0)} pts)
-                </div>
-              </div>
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>DECISION TIMESTAMP</th>
+                    <th>DISPATCHER ID</th>
+                    <th>APPROVAL STATUS</th>
+                    <th>EXPECTED LOSS SCORE REDUCTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ fontWeight: 700 }}>{new Date(current_decision.created_at).toLocaleString()} IST</td>
+                    <td>DISP-104 (Arjun Sharma)</td>
+                    <td style={{ fontWeight: 800, color: current_decision.status === 'APPROVED' ? '#16a34a' : '#ea580c' }}>
+                      [{current_decision.status}]
+                    </td>
+                    <td style={{ fontWeight: 800, color: '#16a34a' }}>
+                      {current_decision.mission_score_current.toFixed(0)} → {current_decision.mission_score_recommended.toFixed(0)} (-{(current_decision.mission_score_current - current_decision.mission_score_recommended).toFixed(0)} pts)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

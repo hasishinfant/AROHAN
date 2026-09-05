@@ -1,17 +1,17 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { Sliders, Play, Pause, RotateCcw, SkipForward, CheckCircle2, AlertTriangle, Shield, Clock } from 'lucide-react';
+import { Sliders, Play, Pause, RotateCcw, SkipForward, CheckCircle2 } from 'lucide-react';
 
 const STEP_NARRATIONS = [
-  'Shipment SHP-001 initialized. Guwahati → Shillong via Route A (NH-6). Nominal baseline status. Driver Rahul Kumar assigned.',
+  'Shipment SHP-001 initialized. Guwahati → Shillong via Route A (NH-6). Nominal baseline status.',
   'Environmental telemetry received: Rainfall intensity 38 mm/h, cumulative 95 mm/24h in Umiam sector.',
-  'Risk Engine activated. Route A predicted disruption probability: 78% (HIGH confidence, 18h horizon). Proactive threshold 60% exceeded.',
-  'Logistics Impact Engine computed scores. Route A loss score: 82 (expected delay +9.4h). Route B loss score: 34 (expected delay +1.5h). Delta: 48 pts.',
+  'Risk Engine activated. Route A predicted disruption probability: 78% (HIGH confidence, 18h horizon).',
+  'Logistics Impact Engine computed scores. Route A loss score: 82 (expected delay +9.4h). Route B loss score: 34 (expected delay +1.5h).',
   'Optimization Engine selected Route B (Ridge Road via Sonapur). Action Card issued for human approval.',
-  'Dispatcher Arjun Sharma approved proactive reroute to Route B. Decision logged in audit trail. Mobile alert sent to driver.',
+  'Dispatcher Arjun Sharma approved proactive reroute to Route B. Decision logged in audit trail.',
   'Driver Rahul Kumar acknowledged updated route plan. Shipment status set to IN_TRANSIT on Route B.',
   'FIELD VERIFICATION: Driver reports Route A (NH-6 km 42) is completely BLOCKED due to landslide debris.',
-  'Network State Engine updated segment state to INFEASIBLE. Replanning engine executed. Route B locked as mandatory. Mission saved.',
+  'Network State Engine updated segment state to INFEASIBLE. Route B locked as mandatory.',
 ];
 
 const ACCEPTANCE_CHECKLIST = [
@@ -39,14 +39,12 @@ const ACCEPTANCE_CHECKLIST = [
 
 export function DemoController() {
   const {
-    scenario_step, scenario_status, all_steps,
-    step_label, step_description,
+    scenario_step, scenario_status,
     scenarioStart, scenarioNext, scenarioPause, scenarioResume, scenarioReset,
   } = useArohanStore();
 
   const step = scenario_step ?? -1;
   const status = scenario_status ?? 'IDLE';
-  const steps = all_steps ?? [];
 
   const isRunning = status === 'RUNNING';
   const isPaused = status === 'PAUSED';
@@ -56,18 +54,17 @@ export function DemoController() {
   const narration = step >= 0 && step < STEP_NARRATIONS.length ? STEP_NARRATIONS[step] : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Page Header */}
       <div className="page-header">
         <div>
           <h1 className="page-title">DEMO SCENARIO CONTROLLER</h1>
           <div className="page-description">
-            Deterministic 9-Step Event Sequencer · Evaluator Demonstration Panel
+            Deterministic 9-Step Event Sequencer · Evaluator Demonstration Console
           </div>
         </div>
-        <span className={`badge ${isComplete ? 'badge-success' : isRunning ? 'badge-warning' : isPaused ? 'badge-info' : 'badge-neutral'}`} style={{ padding: '6px 12px' }}>
-          <span className="badge-dot" />
-          <span>STATUS: {status}</span>
+        <span className={`badge ${isComplete ? 'badge-success' : isRunning ? 'badge-amber' : isPaused ? 'badge-info' : 'badge-neutral'}`}>
+          [STATUS: {status}]
         </span>
       </div>
 
@@ -75,97 +72,76 @@ export function DemoController() {
       <div className="card">
         <div className="card-header">
           <div className="card-title">
-            <Sliders size={18} style={{ color: 'var(--primary-navy)' }} />
+            <Sliders size={14} />
             <span>SCENARIO EXECUTION CONTROLS</span>
           </div>
-          <span className="data-tag data-tag-simulated">DETERMINISTIC SIMULATION</span>
+          <span className="data-tag data-tag-simulated">SIMULATION CONTROL</span>
         </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', margin: '8px 0' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', margin: '4px 0' }}>
           {isIdle && (
-            <button className="btn btn-primary btn-lg" onClick={scenarioStart}>
-              <Play size={18} />
+            <button className="btn btn-primary" onClick={scenarioStart}>
+              <Play size={14} />
               <span>START SCENARIO (STEP 1)</span>
             </button>
           )}
 
           {(isRunning || isPaused) && (
-            <button className="btn btn-primary btn-lg" onClick={scenarioNext} disabled={isComplete}>
-              <SkipForward size={18} />
+            <button className="btn btn-primary" onClick={scenarioNext} disabled={isComplete}>
+              <SkipForward size={14} />
               <span>NEXT EVENT (STEP {step + 2})</span>
             </button>
           )}
 
           {isRunning && (
-            <button className="btn btn-secondary btn-lg" onClick={scenarioPause}>
-              <Pause size={18} />
+            <button className="btn btn-secondary" onClick={scenarioPause}>
+              <Pause size={14} />
               <span>PAUSE</span>
             </button>
           )}
 
           {isPaused && (
-            <button className="btn btn-secondary btn-lg" onClick={scenarioResume}>
-              <Play size={18} />
+            <button className="btn btn-secondary" onClick={scenarioResume}>
+              <Play size={14} />
               <span>RESUME</span>
             </button>
           )}
 
-          <button className="btn btn-danger btn-lg" onClick={scenarioReset}>
-            <RotateCcw size={18} />
+          <button className="btn btn-danger" onClick={scenarioReset}>
+            <RotateCcw size={14} />
             <span>RESET SCENARIO</span>
           </button>
         </div>
 
         {/* Current Step Narration Box */}
         {narration ? (
-          <div style={{ marginTop: 12, backgroundColor: 'var(--status-info-bg)', border: '1px solid var(--status-info-border)', borderRadius: 'var(--radius-md)', padding: 16 }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--status-info-text)', textTransform: 'uppercase' }}>
-              STEP {step + 1} OF 9 — NARRATIVE SUMMARY
+          <div style={{ marginTop: 10, backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '10px 12px' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase' }}>
+              STEP {step + 1} OF 9 — EVENT NARRATIVE
             </div>
-            <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginTop: 4, fontWeight: 600 }}>
+            <div style={{ fontSize: '0.85rem', color: '#0f172a', marginTop: 2, fontWeight: 700 }}>
               {narration}
             </div>
           </div>
         ) : (
-          <div style={{ marginTop: 12, backgroundColor: 'var(--bg-panel)', padding: 12, borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Press <strong>START SCENARIO</strong> to initiate the deterministic demonstration.
-          </div>
-        )}
-
-        {/* Progress Bar */}
-        {step >= 0 && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 4 }}>
-              <span>DEMO PROGRESS</span>
-              <span>{step + 1} / 9 STEPS</span>
-            </div>
-            <div style={{ backgroundColor: 'var(--bg-subtle)', height: 8, borderRadius: 4, overflow: 'hidden' }}>
-              <div
-                style={{
-                  width: `${((step + 1) / 9) * 100}%`,
-                  backgroundColor: isComplete ? 'var(--status-success-accent)' : 'var(--primary-navy)',
-                  height: '100%',
-                  transition: 'width 0.3s ease',
-                }}
-              />
-            </div>
+          <div style={{ marginTop: 10, backgroundColor: 'var(--bg-panel)', padding: 10, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Press <strong>START SCENARIO</strong> to initiate the demonstration.
           </div>
         )}
       </div>
 
-      {/* 20-Step Acceptance Test Checklist Matrix */}
+      {/* 20-Step Acceptance Test Matrix */}
       <div className="card">
         <div className="card-header">
           <div className="card-title">
-            <CheckCircle2 size={18} style={{ color: 'var(--status-success-accent)' }} />
+            <CheckCircle2 size={14} />
             <span>ACCEPTANCE TEST VERIFICATION MATRIX (20 REQUIREMENTS)</span>
           </div>
           <span className="data-tag data-tag-real">SYSTEM AUDIT</span>
         </div>
 
-        <div className="grid-2" style={{ gap: 8 }}>
+        <div className="grid-2" style={{ gap: 6 }}>
           {ACCEPTANCE_CHECKLIST.map((item, idx) => {
-            // Determine if check item is fulfilled based on step
             let fulfilled = false;
             if (idx <= 1 && step >= 0) fulfilled = true;
             else if (idx <= 3 && step >= 2) fulfilled = true;
@@ -174,7 +150,6 @@ export function DemoController() {
             else if (idx <= 7 && step >= 5) fulfilled = true;
             else if (idx <= 9 && step >= 6) fulfilled = true;
             else if (idx <= 10 && step >= 7) fulfilled = true;
-            else if (idx <= 17 && step >= 8) fulfilled = true;
             else if (idx <= 19 && step >= 8) fulfilled = true;
 
             return (
@@ -183,17 +158,16 @@ export function DemoController() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  fontSize: '0.8rem',
-                  padding: '6px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: fulfilled ? 'var(--status-success-bg)' : 'var(--bg-panel)',
-                  color: fulfilled ? 'var(--status-success-text)' : 'var(--text-muted)',
-                  border: `1px solid ${fulfilled ? 'var(--status-success-border)' : 'var(--border-subtle)'}`,
+                  gap: 6,
+                  fontSize: '0.75rem',
+                  padding: '4px 8px',
+                  backgroundColor: fulfilled ? '#f0fdf4' : 'var(--bg-panel)',
+                  color: fulfilled ? '#14532d' : 'var(--text-muted)',
+                  border: `1px solid ${fulfilled ? '#bbf7d0' : 'var(--border-medium)'}`,
                 }}
               >
-                <CheckCircle2 size={14} style={{ color: fulfilled ? 'var(--status-success-accent)' : 'var(--text-disabled)' }} />
-                <span style={{ fontWeight: fulfilled ? 600 : 400 }}>{item}</span>
+                <CheckCircle2 size={12} style={{ color: fulfilled ? '#16a34a' : 'var(--text-muted)' }} />
+                <span style={{ fontWeight: fulfilled ? 700 : 500 }}>{item}</span>
               </div>
             );
           })}
