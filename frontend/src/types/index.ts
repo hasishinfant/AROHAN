@@ -3,7 +3,7 @@
 export type RouteLabel = 'A' | 'B';
 export type SegmentStatus = 'CLEAR' | 'SLOW' | 'PARTIAL' | 'BLOCKED';
 export type Confidence = 'LOW' | 'MEDIUM' | 'HIGH';
-export type DecisionStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'MODIFIED';
+export type DecisionStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'MODIFIED' | 'DEFERRED';
 export type ShipmentStatus =
   | 'PLANNED'
   | 'APPROVED'
@@ -58,7 +58,7 @@ export interface Recommendation {
   recommended_route_label: RouteLabel;
   current_route_id: number;
   reason: string;
-  decision_type: 'PROACTIVE' | 'REACTIVE';
+  decision_type: 'PROACTIVE' | 'REACTIVE' | 'HUMAN_REVIEW_REQUIRED';
   delay_saved_h: number;
   risk_reduced_pct: number;
 }
@@ -78,7 +78,7 @@ export interface DecisionData {
   expected_delay_h: number;
   confidence: Confidence;
   horizon_h: number;
-  decision_type: 'PROACTIVE' | 'REACTIVE';
+  decision_type: 'PROACTIVE' | 'REACTIVE' | 'HUMAN_REVIEW_REQUIRED';
   modifier_notes: string | null;
   created_at: string;
   approved_at: string | null;

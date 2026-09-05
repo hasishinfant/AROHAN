@@ -1,6 +1,6 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { Sliders, Play, Pause, RotateCcw, SkipForward, CheckCircle2 } from 'lucide-react';
+import { Sliders, Play, Pause, RotateCcw, SkipForward, CheckCircle2, Shield } from 'lucide-react';
 
 const STEP_NARRATIONS = [
   'Shipment SHP-001 initialized. Guwahati → Shillong via Route A (NH-6). Nominal baseline status.',
@@ -39,8 +39,9 @@ const ACCEPTANCE_CHECKLIST = [
 
 export function DemoController() {
   const {
-    scenario_step, scenario_status,
-    scenarioStart, scenarioNext, scenarioPause, scenarioResume, scenarioReset,
+    scenario_step, scenario_status, all_steps,
+    step_label, step_description,
+    scenarioStart, scenarioNext, scenarioPause, scenarioResume, scenarioReset, scenarioLowConfidence,
   } = useArohanStore();
 
   const step = scenario_step ?? -1;
@@ -60,7 +61,7 @@ export function DemoController() {
         <div>
           <h1 className="page-title">DEMO SCENARIO CONTROLLER</h1>
           <div className="page-description">
-            Deterministic 9-Step Event Sequencer · Evaluator Demonstration Console
+            Deterministic Event Sequencer · Evaluator Demonstration & Confidence Gating Test Panel
           </div>
         </div>
         <span className={`badge ${isComplete ? 'badge-success' : isRunning ? 'badge-amber' : isPaused ? 'badge-info' : 'badge-neutral'}`}>
@@ -106,6 +107,11 @@ export function DemoController() {
               <span>RESUME</span>
             </button>
           )}
+
+          <button className="btn btn-warning" onClick={scenarioLowConfidence} style={{ backgroundColor: '#eab308', color: '#000', fontWeight: 700 }}>
+            <Shield size={14} />
+            <span>TEST LOW-CONFIDENCE GATING SCENARIO</span>
+          </button>
 
           <button className="btn btn-danger" onClick={scenarioReset}>
             <RotateCcw size={14} />

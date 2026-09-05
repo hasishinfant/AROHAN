@@ -132,7 +132,7 @@ export function DecisionHistory() {
             <Activity size={14} />
             <span>FULL CHRONOLOGICAL EVENT LOG</span>
           </div>
-          <span className="data-tag data-tag-real">REAL-TIME EVENTS</span>
+          <span className="data-tag data-tag-simulated">SIMULATED EVENT TIMELINE</span>
         </div>
 
         <EventTimeline events={events ?? []} />

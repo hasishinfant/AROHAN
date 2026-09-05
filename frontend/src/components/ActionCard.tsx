@@ -1,6 +1,6 @@
 import React from 'react';
 import { DecisionData, RouteData } from '../types';
-import { Shield, ArrowRight, CheckCircle2, XCircle, Edit3 } from 'lucide-react';
+import { Shield, ArrowRight, CheckCircle2, XCircle, Edit3, AlertTriangle } from 'lucide-react';
 
 interface ActionCardProps {
   decision: DecisionData;
@@ -78,8 +78,16 @@ export function ActionCard({ decision, routes, onApprove, onReject, onModify }: 
       </div>
 
       {/* Decision Actions */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        {isPending ? (
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        {decision.status === 'DEFERRED' || decision.decision_type === 'HUMAN_REVIEW_REQUIRED' ? (
+          <div className="alert alert-warning" style={{ width: '100%', alignItems: 'center' }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+            <div>
+              <strong>HUMAN REVIEW REQUIRED (CONFIDENCE GATED)</strong><br />
+              System gating rule enforced: Prediction confidence is <strong>LOW</strong> (below <strong>MEDIUM</strong> threshold). Auto-reroute recommendation gated. Deferred to dispatcher manual review.
+            </div>
+          </div>
+        ) : isPending ? (
           <>
             <button className="btn btn-success" onClick={onApprove} style={{ flex: 1 }}>
               <CheckCircle2 size={15} />

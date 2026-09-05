@@ -44,8 +44,8 @@ export function BaselineComparison() {
       distance: '128 km (Pre-diverted)',
       expectedDelay: '+1.5 hrs',
       riskExposure: '21% (Low)',
-      leadTime: '18 hrs (Pre-disruption)',
-      missionSuccess: '100% (Guaranteed delivery)',
+      leadTime: '18 hours (Pre-disruption)',
+      missionSuccess: '0 missed deliveries in scenario',
       lossScore: '34 pts',
       bgClass: '#f0fdf4',
       borderClass: '#bbf7d0',
@@ -81,15 +81,25 @@ export function BaselineComparison() {
         </div>
 
         <div className="kpi-tile">
-          <div className="kpi-label">DECISION LEAD TIME</div>
-          <div className="kpi-value" style={{ color: 'var(--primary-navy)' }}>18 Hours</div>
-          <div className="kpi-subtext">Pre-disruption window</div>
+          <div className="kpi-label">
+            <span>DECISION LEAD TIME</span>
+            <span className="data-tag data-tag-simulated">SIMULATED SCENARIO</span>
+          </div>
+          <div className="kpi-value" style={{ color: 'var(--primary-navy)' }}>
+            18 Hours
+          </div>
+          <div className="kpi-subtext">Before physical failure</div>
         </div>
 
         <div className="kpi-tile">
-          <div className="kpi-label">MISSION SUCCESS RATE</div>
-          <div className="kpi-value" style={{ color: '#16a34a' }}>100%</div>
-          <div className="kpi-subtext">Delivery assurance</div>
+          <div className="kpi-label">
+            <span>MISSED DELIVERIES</span>
+            <span className="data-tag data-tag-derived">DERIVED</span>
+          </div>
+          <div className="kpi-value" style={{ color: 'var(--status-success-text)' }}>
+            0 Missed
+          </div>
+          <div className="kpi-subtext">0 missed deliveries in simulated scenario</div>
         </div>
       </div>
 

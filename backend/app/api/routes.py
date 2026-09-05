@@ -372,6 +372,13 @@ async def scenario_reset(db: AsyncSession = Depends(get_db)) -> dict:
     return state
 
 
+@router.post("/scenario/low-confidence")
+async def scenario_low_confidence(db: AsyncSession = Depends(get_db)) -> dict:
+    from app.scenario.demo_scenario import run_low_confidence_scenario
+    state = await run_low_confidence_scenario(db)
+    return state
+
+
 @router.get("/scenario/status")
 async def scenario_status() -> dict:
     step_def = STEPS[memory.current_step] if 0 <= memory.current_step < len(STEPS) else None

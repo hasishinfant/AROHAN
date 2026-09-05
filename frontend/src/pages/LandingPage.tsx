@@ -1040,6 +1040,7 @@ export function LandingPage() {
               <Link to="/reports" style={{ color: '#94a3b8', textDecoration: 'none' }}>Risk Reports</Link>
             </div>
           </div>
+          </div>
 
           <div>
             <strong style={{ fontSize: '0.78rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 12 }}>OPERATIONAL PORTALS</strong>
