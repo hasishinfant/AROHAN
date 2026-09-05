@@ -16,8 +16,11 @@ html {
   color: #0F172A;
 }
 
-body {
+body, button, input, select, textarea {
   font-family: Arial, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
   background-color: #F5F7FB;
   color: #0F172A;
   min-height: 100vh;

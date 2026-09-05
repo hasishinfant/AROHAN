@@ -257,7 +257,7 @@ export function CommandCenter() {
               </span>
             </div>
             <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 0', fontWeight: 500 }}>
-              Predictive Logistics & Accessibility Intelligence — North Eastern Region of India
+              Disaster Logistics & Relief Transport — North Eastern Region of India
             </p>
           </div>
         </div>
@@ -419,7 +419,7 @@ export function CommandCenter() {
             onClick: () => navigate('/resources'),
           },
           {
-            title: 'AI RECOMMENDATIONS',
+            title: 'RECOMMENDED ACTIONS',
             value: kpis.ai_recommendations,
             desc: 'Pending decision options',
             icon: Zap,
@@ -897,10 +897,10 @@ export function CommandCenter() {
                 </span>
                 <div>
                   <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#064E3B', margin: 0 }}>
-                    AI RECOMMENDATIONS
+                    RECOMMENDED ACTIONS
                   </h3>
                   <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 600 }}>
-                    Predictive Disaster-Response Action Intelligence
+                    Operational Disaster-Response Decisions
                   </span>
                 </div>
               </div>
@@ -967,7 +967,7 @@ export function CommandCenter() {
                   REVIEW
                 </button>
                 <button
-                  onClick={() => navigate('/replan')}
+                  onClick={() => navigate('/action')}
                   style={{
                     flex: 1,
                     padding: '5px 8px',
@@ -980,7 +980,7 @@ export function CommandCenter() {
                     cursor: 'pointer',
                   }}
                 >
-                  VIEW ROUTE
+                  VIEW ACTION
                 </button>
               </div>
             </div>

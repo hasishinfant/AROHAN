@@ -170,7 +170,7 @@ export function CommunicationCenter() {
             Multi-Level Coordination & Multilingual WhatsApp Dispatch
           </h1>
           <p style={{ fontSize: '0.86rem', color: '#64748B', margin: '4px 0 0 0', maxWidth: 960, lineHeight: 1.5 }}>
-            Automated communication pipeline translating AROHAN AI predictions into verified regional emergency directives (Assamese, Mizo, Khasi, Meitei, Bodo, Bengali, English) for frontline relief drivers and institutional authorities across all 5 operational tiers.
+            Direct communication pipeline sending verified regional emergency instructions (Assamese, Mizo, Khasi, Meitei, Bodo, Bengali, English) to frontline relief drivers and disaster response authorities across all 5 operational tiers.
           </p>
         </div>
 

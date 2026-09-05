@@ -33,8 +33,8 @@ function AppShell() {
   if (isLoading) {
     return (
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f4f2', color: '#0f172a' }}>
-        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-teal)' }}>AROHAN LOGISTICS ORCHESTRATION</div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 6 }}>Initializing system state & telemetry...</div>
+        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-teal)' }}>AROHAN DISASTER RELIEF OPERATIONS</div>
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 6 }}>Loading road status & relief movement data...</div>
       </div>
     );
   }

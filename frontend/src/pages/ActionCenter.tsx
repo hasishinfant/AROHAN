@@ -97,7 +97,7 @@ export function ActionCenter() {
       <div className="page-header">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <h1 className="page-title">AI RECOMMENDATION CENTER & COORDINATION CONSOLE</h1>
+            <h1 className="page-title">EMERGENCY ACTION CENTER & RELIEF ADVISORIES</h1>
             <span
               style={{
                 fontSize: '0.65rem',
@@ -110,7 +110,7 @@ export function ActionCenter() {
                 letterSpacing: '0.04em',
               }}
             >
-              HUMAN-IN-THE-LOOP CONTROL
+              DISASTER LOGISTICS CONTROL
             </span>
           </div>
           <div className="page-description">
@@ -163,13 +163,13 @@ export function ActionCenter() {
 
         <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #059669' }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
-            AI RECOMMENDATIONS
+            RECOMMENDED ACTIONS
           </div>
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#059669', marginTop: 2 }}>
             18
           </div>
           <div style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 600, marginTop: 2 }}>
-            Actionable Response Directives
+            Actionable Relief Directives
           </div>
         </div>
 

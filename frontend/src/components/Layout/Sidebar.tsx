@@ -35,7 +35,7 @@ export function Sidebar() {
       items: [
         { path: '/command', label: 'Command Center', icon: LayoutDashboard },
         { path: '/map', label: 'Map Overview (GIS)', icon: Compass },
-        { path: '/action', label: 'AI Recommendation Center', icon: Zap, alert: hasPending },
+        { path: '/action', label: 'Emergency Action Center', icon: Zap, alert: hasPending },
         { path: '/mission', label: 'Relief Movement Details', icon: Package },
       ]
     },
@@ -99,7 +99,7 @@ export function Sidebar() {
               </span>
             </div>
             <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600 }}>
-              NER Disaster Logistics Intelligence
+              NER Disaster Relief Logistics
             </span>
           </div>
         </div>
