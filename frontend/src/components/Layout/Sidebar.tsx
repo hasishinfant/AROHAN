@@ -47,7 +47,7 @@ export function Sidebar() {
     <aside className="sidebar">
       {/* Sidebar Header with Official Logo Emblem */}
       <div className="sidebar-header" onClick={() => navigate('/')} style={{ cursor: 'pointer', padding: '16px 14px' }}>
-        <Logo size={34} variant="light" />
+        <Logo size={34} variant="dark" />
       </div>
 
       {/* Navigation Groups */}
@@ -83,26 +83,26 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Sidebar Footer — Translucent Blue Glass Card */}
+      {/* Sidebar Footer — Pure White & Royal Blue Glass Card */}
       <div style={{
         margin: '12px 10px',
         padding: '10px 12px',
         borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(96, 165, 250, 0.25)',
-        backdropFilter: 'blur(10px)',
+        backgroundColor: '#ffffff',
+        border: '1px solid #cbd5e1',
+        boxShadow: '0 2px 8px rgba(30, 58, 138, 0.05)',
         display: 'flex',
         flexDirection: 'column',
         gap: 3
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#3b82f6', boxShadow: '0 0 8px #3b82f6' }} />
-          <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.72rem', letterSpacing: '0.02em' }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#16a34a', boxShadow: '0 0 8px #16a34a' }} />
+          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.72rem', letterSpacing: '0.02em' }}>
             System Online
           </span>
         </div>
-        <div style={{ fontSize: '0.65rem', color: '#bfdbfe', opacity: 0.85, fontWeight: 600 }}>v1.0.0</div>
-        <div style={{ fontSize: '0.62rem', color: '#93c5fd', opacity: 0.7, fontWeight: 500 }}>Arohan NER Logistics Control</div>
+        <div style={{ fontSize: '0.65rem', color: '#1d4ed8', fontWeight: 700 }}>v1.0.0</div>
+        <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 500 }}>Arohan NER Logistics Control</div>
       </div>
     </aside>
   );

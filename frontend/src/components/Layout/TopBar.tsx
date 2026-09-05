@@ -45,14 +45,14 @@ export function TopBar() {
             width: 36,
             height: 36,
             borderRadius: 10,
-            backgroundColor: '#04221e',
+            backgroundColor: '#1d4ed8',
             color: '#ffffff',
             border: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(4, 34, 30, 0.25)'
+            boxShadow: '0 2px 8px rgba(29, 78, 216, 0.25)'
           }}
         >
           <Truck size={18} />
