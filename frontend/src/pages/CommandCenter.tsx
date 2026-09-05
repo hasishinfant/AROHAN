@@ -24,8 +24,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  MapPin,
-  Layers
+  MapPin
 } from 'lucide-react';
 
 export function CommandCenter() {
@@ -174,6 +173,32 @@ export function CommandCenter() {
             </button>
           </div>
         </div>
+
+        {/* Quick Multimodal Transport Mode Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, paddingTop: 10, borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+              OPERATIONAL TRANSPORT MODE:
+            </span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={() => navigate('/command')} className="btn btn-blue btn-xs" style={{ fontWeight: 900, padding: '3px 8px', fontSize: '0.7rem' }}>
+                [ LAND ]
+              </button>
+              <button onClick={() => navigate('/multimodal')} className="btn btn-secondary btn-xs" style={{ fontWeight: 700, padding: '3px 8px', fontSize: '0.7rem' }}>
+                [ RAIL ]
+              </button>
+              <button onClick={() => navigate('/multimodal')} className="btn btn-secondary btn-xs" style={{ fontWeight: 700, padding: '3px 8px', fontSize: '0.7rem' }}>
+                [ WATER ]
+              </button>
+              <button onClick={() => navigate('/multimodal')} className="btn btn-secondary btn-xs" style={{ fontWeight: 700, padding: '3px 8px', fontSize: '0.7rem' }}>
+                [ AIR ]
+              </button>
+            </div>
+          </div>
+          <button onClick={() => navigate('/multimodal')} className="btn btn-outline btn-xs" style={{ fontSize: '0.7rem', fontWeight: 800, color: '#1d4ed8', borderColor: '#bfdbfe' }}>
+            OPEN MULTIMODAL OPERATIONS CENTER →
+          </button>
+        </div>
       </div>
 
       {/* COLLAPSIBLE DEMO CONTROLS PANEL */}
@@ -245,10 +270,6 @@ export function CommandCenter() {
             <span>Origin: <strong>{currentShipment?.origin.split(' ')[0]}</strong></span>
             <span>→</span>
             <span>Destination: <strong>{currentShipment?.destination.split(' ')[0]}</strong></span>
-            <button onClick={() => navigate('/multimodal')} className="btn btn-sm btn-blue" style={{ fontSize: '0.72rem', padding: '4px 10px', gap: 6, fontWeight: 800, marginLeft: 8 }}>
-              <Layers size={13} />
-              <span>MULTIMODAL OPS</span>
-            </button>
           </div>
         </div>
         <div style={{ flex: 1, width: '100%', borderRadius: 6, overflow: 'hidden' }}>

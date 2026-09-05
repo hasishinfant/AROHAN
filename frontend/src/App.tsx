@@ -47,10 +47,10 @@ function AppShell() {
         <main className="app-content">
           <Routes>
             <Route path="/command" element={<CommandCenter />} />
+            <Route path="/multimodal" element={<MultimodalOperations />} />
             <Route path="/mission" element={<MissionDetail />} />
             <Route path="/action" element={<ActionCenter />} />
             <Route path="/replan" element={<ReplanningView />} />
-            <Route path="/multimodal" element={<MultimodalOperations />} />
             <Route path="/reports" element={<ReportPage />} />
             <Route path="/history" element={<DecisionHistory />} />
             <Route path="/baseline" element={<BaselineComparison />} />

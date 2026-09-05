@@ -392,3 +392,29 @@ async def scenario_status() -> dict:
             for s in STEPS
         ],
     }
+
+
+# ── Multimodal Transport Extensions ───────────────────────────────────────────
+
+@router.get("/multimodal/corridors")
+async def get_multimodal_corridors() -> dict:
+    return {
+        "modes": ["LAND", "RAIL", "WATER", "AIR"],
+        "networks": {
+          "LAND": {"mode": "LAND", "status": "CONNECTED", "primary_corridor": "NH-6 Guwahati → Shillong → Silchar Highway"},
+          "RAIL": {"mode": "RAIL", "status": "STATIC_DATA", "primary_corridor": "Lumding → Badarpur Hill Freight Section"},
+          "WATER": {"mode": "WATER", "status": "SIMULATION", "primary_corridor": "IWAI NW-2 Brahmaputra Pandu ↔ Jogighopa MMLP"},
+          "AIR": {"mode": "AIR", "status": "NOT_CONFIGURED", "primary_corridor": "Guwahati LGBI ↔ Shillong Umroi Air Cargo"}
+        }
+    }
+
+
+@router.get("/multimodal/status")
+async def get_multimodal_status() -> dict:
+    return {
+        "active_modes": ["LAND", "RAIL", "WATER", "AIR"],
+        "candidate_demo": "Jogighopa Multimodal Logistics Park (MMLP) Transfer",
+        "system_layer": "AROHAN Multimodal Transport Intelligence Extension",
+        "compliance": "PM GatiShakti & ULIP Framework Aligned"
+    }
+

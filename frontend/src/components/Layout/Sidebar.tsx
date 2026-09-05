@@ -13,16 +13,16 @@ import {
   Activity,
   Compass,
   FileText,
-  Layers
+  Boxes
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Public Portal', icon: Compass, section: 'OVERVIEW' },
   { path: '/command', label: 'Command Center', icon: LayoutDashboard, section: 'OPERATIONS' },
+  { path: '/multimodal', label: 'Multimodal Operations', icon: Boxes, section: 'OPERATIONS' },
   { path: '/mission', label: 'Mission Detail', icon: Package, section: 'OPERATIONS' },
   { path: '/action', label: 'Action Center', icon: Zap, section: 'OPERATIONS', alertKey: 'pending' },
   { path: '/replan', label: 'Replanning View', icon: GitCompare, section: 'OPERATIONS' },
-  { path: '/multimodal', label: 'Multimodal Operations', icon: Layers, section: 'OPERATIONS' },
   { path: '/reports', label: 'Risk Intelligence', icon: FileText, section: 'ANALYTICS' },
   { path: '/history', label: 'Decision History', icon: History, section: 'ANALYTICS' },
   { path: '/baseline', label: 'Baseline Comparison', icon: BarChart3, section: 'ANALYTICS' },

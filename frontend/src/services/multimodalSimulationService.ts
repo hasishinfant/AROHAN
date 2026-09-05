@@ -1,397 +1,340 @@
-import { TransportMode, DataStatus } from '../types';
+import { TransportMode, DataSourceStatus } from '../types/multimodalTypes';
+import { MULTIMODAL_NETWORKS } from '../config/multimodalRoutes';
 
-export interface VehicleTelemetry {
-  shipmentId: number;
-  legId: string | number;
+export interface MultimodalGPSUpdate {
   mode: TransportMode;
+  shipmentCode: string;
   vehicleId: string;
   vehicleName: string;
+  timestamp: string;
   latitude: number;
   longitude: number;
-  heading: number;
-  speedKmh: number;
-  progressPct: number;
-  distanceCoveredKm: number;
-  distanceTotalKm: number;
-  eta: string;
-  status: 'SCHEDULED' | 'IN_TRANSIT' | 'DISRUPTED' | 'ARRIVED';
-  dataStatus: DataStatus;
-  timestamp: string;
+  speed_kmh: number;
+  heading_deg: number;
+  heading_cardinal: string;
+  progress_pct: number;
+  distance_covered_km: number;
+  distance_remaining_km: number;
+  total_distance_km: number;
+  eta_formatted: string;
+  current_location_name: string;
+  current_risk_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  upcoming_risk: string | null;
+  distance_to_hazard_km: number;
+  hazard_name: string;
+  hazard_approach_state: 'NORMAL' | 'UPCOMING' | 'WARNING' | 'CRITICAL_DECISION';
+  simulated_status: 'SCHEDULED' | 'DEPARTED' | 'IN_TRANSIT' | 'APPROACHING_DESTINATION' | 'DELIVERED';
+  dataSourceStatus: DataSourceStatus;
 }
 
-export type MultimodalSimulationSubscriber = (telemetry: Record<TransportMode, VehicleTelemetry>) => void;
+type MultimodalGPSCallback = (update: MultimodalGPSUpdate) => void;
 
-interface SimulationState {
-  mode: TransportMode;
-  routeCoords: [number, number][]; // [lat, lng]
-  vehicleId: string;
-  vehicleName: string;
-  baseSpeedKmh: number;
-  totalDistanceKm: number;
-  currentIndex: number;
-  segmentProgress: number; // 0 to 1 within current segment
-  speedMultiplier: number;
-  isRunning: boolean;
-  status: 'SCHEDULED' | 'IN_TRANSIT' | 'DISRUPTED' | 'ARRIVED';
-  dataStatus: DataStatus;
-}
-
-// Distance calculation between two [lat, lng] points (Haversine formula in KM)
-function getDistanceKm(coord1: [number, number], coord2: [number, number]): number {
-  const R = 6371; // Earth radius in km
-  const dLat = ((coord2[0] - coord1[0]) * Math.PI) / 180;
-  const dLng = ((coord2[1] - coord1[1]) * Math.PI) / 180;
+function getHaversineDistanceKm(coord1: [number, number], coord2: [number, number]): number {
+  const R = 6371;
+  const dLat = (coord2[1] - coord1[1]) * (Math.PI / 180);
+  const dLng = (coord2[0] - coord1[0]) * (Math.PI / 180);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((coord1[0] * Math.PI) / 180) *
-      Math.cos((coord2[0] * Math.PI) / 180) *
+    Math.cos(coord1[1] * (Math.PI / 180)) *
+      Math.cos(coord2[1] * (Math.PI / 180)) *
       Math.sin(dLng / 2) *
       Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
-// Calculate bearing/heading between two points
-function getHeading(coord1: [number, number], coord2: [number, number]): number {
-  const dLng = ((coord2[1] - coord1[1]) * Math.PI) / 180;
-  const y = Math.sin(dLng) * Math.cos((coord2[0] * Math.PI) / 180);
-  const x =
-    Math.cos((coord1[0] * Math.PI) / 180) * Math.sin((coord2[0] * Math.PI) / 180) -
-    Math.sin((coord1[0] * Math.PI) / 180) *
-      Math.cos((coord2[0] * Math.PI) / 180) *
-      Math.cos(dLng);
+function getBearingDeg(coord1: [number, number], coord2: [number, number]): number {
+  const lat1 = coord1[1] * (Math.PI / 180);
+  const lat2 = coord2[1] * (Math.PI / 180);
+  const dLng = (coord2[0] - coord1[0]) * (Math.PI / 180);
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
   const brng = (Math.atan2(y, x) * 180) / Math.PI;
   return (brng + 360) % 360;
 }
 
-export class MultimodalSimulationEngine {
-  private subscribers: Set<MultimodalSimulationSubscriber> = new Set();
-  private timer: number | null = null;
+function getCardinalDirection(deg: number): string {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const idx = Math.round(deg / 45) % 8;
+  return directions[idx];
+}
 
-  // Preset route geometries for each mode in NER
-  private routes: Record<TransportMode, [number, number][]> = {
-    LAND: [
-      [26.1445, 91.7362], // Guwahati Depot
-      [25.8900, 91.9650], // Nongpoh
-      [25.7000, 91.8900], // Umiam Lake Corridor
-      [25.5788, 91.8933], // Shillong Hub
-    ],
-    RAIL: [
-      [26.1750, 91.7750], // Guwahati NFR Rail Freight Yard
-      [26.1800, 92.4000], // Jagiroad Station Yard
-      [25.7500, 92.8000], // Lumding Junction
-      [24.8300, 92.7800], // Silchar Railway Goods Yard
-    ],
-    WATER: [
-      [26.1900, 90.5800], // Jogighopa Inland Waterway Terminal (NW-2)
-      [26.1700, 90.9500], // Goalpara River Corridor
-      [26.1850, 91.7200], // Pandu Port Freight Terminal (Guwahati)
-      [26.0200, 89.9800], // Dhubri Port Terminal
-    ],
-    AIR: [
-      [26.1061, 91.5859], // Guwahati LGBI Airport Cargo Terminal
-      [25.7042, 91.9786], // Shillong Umroi Airport Runway
-      [24.9125, 92.9789], // Silchar Kumbhirgram Airport Base
-    ],
+class MultimodalSimulationService {
+  private activeMode: TransportMode = 'LAND';
+  private currentDistanceKm: Record<TransportMode, number> = {
+    LAND: 0,
+    RAIL: 0,
+    WATER: 0,
+    AIR: 0,
   };
+  private isRunning: boolean = false;
+  private isPaused: boolean = false;
+  private simSpeedMultiplier: number = 20; // Valid: 1, 5, 10, 20, 50, 100
 
-  private states: Record<TransportMode, SimulationState> = {
-    LAND: {
-      mode: 'LAND',
-      routeCoords: [],
-      vehicleId: 'TRK-007',
-      vehicleName: 'Heavy Logistics Volvo FH16 (12-Wheeler)',
-      baseSpeedKmh: 45,
-      totalDistanceKm: 102,
-      currentIndex: 0,
-      segmentProgress: 0,
-      speedMultiplier: 1,
-      isRunning: false,
-      status: 'IN_TRANSIT',
-      dataStatus: 'CONNECTED',
-    },
-    RAIL: {
-      mode: 'RAIL',
-      routeCoords: [],
-      vehicleId: 'NFR-708',
-      vehicleName: 'Northeast Frontier WAG-9 Freight Rake (42 Containers)',
-      baseSpeedKmh: 65,
-      totalDistanceKm: 198,
-      currentIndex: 0,
-      segmentProgress: 0,
-      speedMultiplier: 1,
-      isRunning: false,
-      status: 'IN_TRANSIT',
-      dataStatus: 'STATIC_DATA',
-    },
-    WATER: {
-      mode: 'WATER',
-      routeCoords: [],
-      vehicleId: 'MB-BRAHMAPUTRA-04',
-      vehicleName: 'IWAI Self-Propelled Cargo Vessel (Catamaran Barge)',
-      baseSpeedKmh: 18,
-      totalDistanceKm: 145,
-      currentIndex: 0,
-      segmentProgress: 0,
-      speedMultiplier: 1,
-      isRunning: false,
-      status: 'IN_TRANSIT',
-      dataStatus: 'SIMULATION',
-    },
-    AIR: {
-      mode: 'AIR',
-      routeCoords: [],
-      vehicleId: 'AI-CARGO-302',
-      vehicleName: 'IAF C-130J Super Hercules / BlueDart Boeing 737F',
-      baseSpeedKmh: 480,
-      totalDistanceKm: 210,
-      currentIndex: 0,
-      segmentProgress: 0,
-      speedMultiplier: 1,
-      isRunning: false,
-      status: 'IN_TRANSIT',
-      dataStatus: 'SIMULATION',
-    },
+  private animFrameId: number | null = null;
+  private lastTimestamp: number | null = null;
+
+  private subscribers: Set<MultimodalGPSCallback> = new Set();
+  private lastUpdates: Record<TransportMode, MultimodalGPSUpdate | null> = {
+    LAND: null,
+    RAIL: null,
+    WATER: null,
+    AIR: null,
   };
 
   constructor() {
-    // Initialize default routes
-    (Object.keys(this.routes) as TransportMode[]).forEach((mode) => {
-      this.states[mode].routeCoords = this.routes[mode];
-      this.states[mode].totalDistanceKm = this.computeTotalDistance(this.routes[mode]);
-    });
+    this.reset('LAND');
   }
 
-  private computeTotalDistance(coords: [number, number][]): number {
-    let total = 0;
-    for (let i = 0; i < coords.length - 1; i++) {
-      total += getDistanceKm(coords[i], coords[i + 1]);
+  public setMode(mode: TransportMode) {
+    if (this.activeMode !== mode) {
+      this.activeMode = mode;
+      if (!this.lastUpdates[mode]) {
+        this.emitUpdate(mode);
+      } else {
+        this.emitUpdate(mode);
+      }
     }
-    return Math.round(total * 10) / 10;
   }
 
-  public subscribe(subscriber: MultimodalSimulationSubscriber): () => void {
-    this.subscribers.add(subscriber);
-    subscriber(this.getAllTelemetry());
-    if (this.subscribers.size === 1 && !this.timer) {
-      this.startLoop();
+  public getActiveMode(): TransportMode {
+    return this.activeMode;
+  }
+
+  public setSpeedMultiplier(multiplier: number) {
+    const validSpeeds = [1, 5, 10, 20, 50, 100];
+    if (validSpeeds.includes(multiplier)) {
+      this.simSpeedMultiplier = multiplier;
+    } else {
+      this.simSpeedMultiplier = 20;
+    }
+    this.emitUpdate(this.activeMode);
+  }
+
+  public getSpeedMultiplier(): number {
+    return this.simSpeedMultiplier;
+  }
+
+  public subscribe(callback: MultimodalGPSCallback): () => void {
+    this.subscribers.add(callback);
+    const update = this.lastUpdates[this.activeMode];
+    if (update) {
+      callback(update);
     }
     return () => {
-      this.subscribers.delete(subscriber);
-      if (this.subscribers.size === 0 && this.timer) {
-        this.stopLoop();
-      }
+      this.subscribers.delete(callback);
     };
   }
 
-  public setSpeedMultiplier(mode: TransportMode, multiplier: number) {
-    if (this.states[mode]) {
-      this.states[mode].speedMultiplier = multiplier;
-      this.notifySubscribers();
+  public start() {
+    if (this.isRunning && !this.isPaused) return;
+
+    this.isRunning = true;
+    this.isPaused = false;
+    this.lastTimestamp = performance.now();
+
+    if (this.animFrameId !== null) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = null;
+    }
+
+    this.animFrameId = requestAnimationFrame((ts) => this.loop(ts));
+    this.emitUpdate(this.activeMode);
+  }
+
+  public pause() {
+    this.isPaused = true;
+    if (this.animFrameId !== null) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = null;
+    }
+    this.lastTimestamp = null;
+    this.emitUpdate(this.activeMode);
+  }
+
+  public resume() {
+    if (this.isRunning && this.isPaused) {
+      this.start();
     }
   }
 
-  public startModeSimulation(mode: TransportMode) {
-    if (this.states[mode]) {
-      this.states[mode].isRunning = true;
-      if (this.states[mode].status === 'ARRIVED') {
-        this.resetModeSimulation(mode);
-        this.states[mode].isRunning = true;
-      }
-      this.notifySubscribers();
+  public reset(mode?: TransportMode) {
+    const targetMode = mode || this.activeMode;
+
+    if (this.animFrameId !== null) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = null;
     }
+
+    this.isRunning = false;
+    this.isPaused = false;
+    this.currentDistanceKm[targetMode] = 0;
+    this.lastTimestamp = null;
+
+    this.emitUpdate(targetMode);
   }
 
-  public pauseModeSimulation(mode: TransportMode) {
-    if (this.states[mode]) {
-      this.states[mode].isRunning = false;
-      this.notifySubscribers();
-    }
+  public getLastUpdate(mode?: TransportMode): MultimodalGPSUpdate | null {
+    return this.lastUpdates[mode || this.activeMode];
   }
 
-  public resetModeSimulation(mode: TransportMode) {
-    if (this.states[mode]) {
-      this.states[mode].currentIndex = 0;
-      this.states[mode].segmentProgress = 0;
-      this.states[mode].isRunning = false;
-      this.states[mode].status = 'IN_TRANSIT';
-      this.notifySubscribers();
-    }
+  public isSimulating(): boolean {
+    return this.isRunning && !this.isPaused;
   }
 
-  public setCustomRoute(mode: TransportMode, routeCoords: [number, number][]) {
-    if (routeCoords.length >= 2 && this.states[mode]) {
-      this.states[mode].routeCoords = routeCoords;
-      this.states[mode].totalDistanceKm = this.computeTotalDistance(routeCoords);
-      this.states[mode].currentIndex = 0;
-      this.states[mode].segmentProgress = 0;
-      this.notifySubscribers();
+  private loop(timestamp: number) {
+    if (!this.isRunning || this.isPaused) {
+      this.animFrameId = null;
+      return;
     }
+
+    if (!this.lastTimestamp) {
+      this.lastTimestamp = timestamp;
+    }
+
+    const deltaSeconds = Math.min((timestamp - this.lastTimestamp) / 1000, 0.1);
+    this.lastTimestamp = timestamp;
+
+    const mode = this.activeMode;
+    const config = MULTIMODAL_NETWORKS[mode] || MULTIMODAL_NETWORKS.LAND;
+    const coords = config.routeCoords;
+    const totalDistKm = this.calculateTotalDistance(coords);
+
+    // Mode-specific base speeds in km/h
+    let baseSpeedKmh = 60;
+    if (mode === 'RAIL') baseSpeedKmh = 50;
+    else if (mode === 'WATER') baseSpeedKmh = 24;
+    else if (mode === 'AIR') baseSpeedKmh = 450;
+
+    const kmPerSecond = (baseSpeedKmh / 3600) * this.simSpeedMultiplier;
+    const stepDistance = kmPerSecond * deltaSeconds;
+
+    this.currentDistanceKm[mode] += stepDistance;
+
+    if (this.currentDistanceKm[mode] >= totalDistKm) {
+      this.currentDistanceKm[mode] = totalDistKm;
+      this.isRunning = false;
+      this.isPaused = false;
+      this.animFrameId = null;
+      this.emitUpdate(mode);
+      return; // Finite completion - stop cleanly!
+    }
+
+    this.emitUpdate(mode);
+    this.animFrameId = requestAnimationFrame((ts) => this.loop(ts));
   }
 
-  private startLoop() {
-    this.timer = window.setInterval(() => {
-      this.step();
-    }, 1000);
+  private calculateTotalDistance(coords: [number, number][]): number {
+    let dist = 0;
+    for (let i = 0; i < coords.length - 1; i++) {
+      dist += getHaversineDistanceKm(coords[i], coords[i + 1]);
+    }
+    return Math.max(dist, 0.001);
   }
 
-  private stopLoop() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
-  }
+  private emitUpdate(mode: TransportMode) {
+    const config = MULTIMODAL_NETWORKS[mode] || MULTIMODAL_NETWORKS.LAND;
+    const coords = config.routeCoords;
 
-  private step() {
-    let changed = false;
-
-    (Object.keys(this.states) as TransportMode[]).forEach((mode) => {
-      const state = this.states[mode];
-      if (!state.isRunning || state.status === 'ARRIVED') return;
-
-      const coords = state.routeCoords;
-      if (coords.length < 2) return;
-
-      // Distance to advance per tick (1 second) based on speed and multiplier
-      const effSpeed = state.baseSpeedKmh * state.speedMultiplier;
-      const stepKm = (effSpeed / 3600) * 1.5; // Adjusted scaling factor for responsive simulation UI
-
-      let p1 = coords[state.currentIndex];
-      let p2 = coords[state.currentIndex + 1];
-      if (!p1 || !p2) return;
-
-      const segLenKm = Math.max(getDistanceKm(p1, p2), 0.01);
-      const stepFraction = stepKm / segLenKm;
-
-      state.segmentProgress += stepFraction;
-
-      if (state.segmentProgress >= 1) {
-        state.segmentProgress = 0;
-        state.currentIndex += 1;
-
-        if (state.currentIndex >= coords.length - 1) {
-          state.currentIndex = coords.length - 1;
-          state.segmentProgress = 0;
-          state.status = 'ARRIVED';
-          state.isRunning = false;
-        }
-      }
-      changed = true;
-    });
-
-    if (changed || this.subscribers.size > 0) {
-      this.notifySubscribers();
-    }
-  }
-
-  private notifySubscribers() {
-    const telemetry = this.getAllTelemetry();
-    this.subscribers.forEach((sub) => sub(telemetry));
-  }
-
-  public getModeTelemetry(mode: TransportMode): VehicleTelemetry {
-    const state = this.states[mode];
-    const coords = state.routeCoords;
-
-    if (!coords || coords.length === 0) {
-      return {
-        shipmentId: 1,
-        legId: `leg-${mode.toLowerCase()}-01`,
-        mode,
-        vehicleId: state.vehicleId,
-        vehicleName: state.vehicleName,
-        latitude: 26.1445,
-        longitude: 91.7362,
-        heading: 0,
-        speedKmh: state.baseSpeedKmh,
-        progressPct: 0,
-        distanceCoveredKm: 0,
-        distanceTotalKm: state.totalDistanceKm,
-        eta: '12:00 IST',
-        status: state.status,
-        dataStatus: state.dataStatus,
-        timestamp: new Date().toISOString(),
-      };
+    const cumulativeDistances: number[] = [0];
+    for (let i = 0; i < coords.length - 1; i++) {
+      const segDist = getHaversineDistanceKm(coords[i], coords[i + 1]);
+      cumulativeDistances.push(cumulativeDistances[i] + segDist);
     }
 
-    if (state.status === 'ARRIVED' || state.currentIndex >= coords.length - 1) {
-      const last = coords[coords.length - 1];
-      return {
-        shipmentId: 1,
-        legId: `leg-${mode.toLowerCase()}-01`,
-        mode,
-        vehicleId: state.vehicleId,
-        vehicleName: state.vehicleName,
-        latitude: last[0],
-        longitude: last[1],
-        heading: 0,
-        speedKmh: 0,
-        progressPct: 100,
-        distanceCoveredKm: state.totalDistanceKm,
-        distanceTotalKm: state.totalDistanceKm,
-        eta: 'ARRIVED AT TERMINAL',
-        status: 'ARRIVED',
-        dataStatus: state.dataStatus,
-        timestamp: new Date().toISOString(),
-      };
+    const totalDistanceKm = cumulativeDistances[cumulativeDistances.length - 1] || 1;
+    const coveredKm = Math.min(Math.max(this.currentDistanceKm[mode] || 0, 0), totalDistanceKm);
+    const remainingKm = Math.max(0, totalDistanceKm - coveredKm);
+    const progressPct = Math.min(100, Math.round((coveredKm / totalDistanceKm) * 100));
+
+    let segIdx = 0;
+    while (segIdx < cumulativeDistances.length - 2 && cumulativeDistances[segIdx + 1] <= coveredKm) {
+      segIdx++;
     }
 
-    const p1 = coords[state.currentIndex];
-    const p2 = coords[state.currentIndex + 1] || p1;
+    const segStartDist = cumulativeDistances[segIdx];
+    const segEndDist = cumulativeDistances[segIdx + 1] || segStartDist + 0.0001;
+    const segLen = Math.max(segEndDist - segStartDist, 0.0001);
+    const fraction = Math.min(1, Math.max(0, (coveredKm - segStartDist) / segLen));
 
-    const lat = p1[0] + (p2[0] - p1[0]) * state.segmentProgress;
-    const lng = p1[1] + (p2[1] - p1[1]) * state.segmentProgress;
-    const heading = getHeading(p1, p2);
+    const p1 = coords[segIdx];
+    const p2 = coords[Math.min(segIdx + 1, coords.length - 1)];
 
-    // Compute distance covered so far
-    let coveredKm = 0;
-    for (let i = 0; i < state.currentIndex; i++) {
-      coveredKm += getDistanceKm(coords[i], coords[i + 1]);
+    const lng = p1[0] + fraction * (p2[0] - p1[0]);
+    const lat = p1[1] + fraction * (p2[1] - p1[1]);
+
+    const headingDeg = Math.round(getBearingDeg(p1, p2));
+    const cardinalDir = getCardinalDirection(headingDeg);
+
+    const distToHazardKm = Number(getHaversineDistanceKm([lng, lat], config.hazardCoords).toFixed(1));
+
+    let baseSpeedKmh = 60;
+    if (mode === 'RAIL') baseSpeedKmh = 50;
+    else if (mode === 'WATER') baseSpeedKmh = 24;
+    else if (mode === 'AIR') baseSpeedKmh = 450;
+
+    let hazardApproachState: MultimodalGPSUpdate['hazard_approach_state'] = 'NORMAL';
+    if (distToHazardKm <= 30) {
+      if (distToHazardKm <= 5) hazardApproachState = 'CRITICAL_DECISION';
+      else if (distToHazardKm <= 10) hazardApproachState = 'WARNING';
+      else if (distToHazardKm <= 25) hazardApproachState = 'UPCOMING';
     }
-    coveredKm += getDistanceKm(p1, p2) * state.segmentProgress;
 
-    const totalKm = state.totalDistanceKm || 1;
-    const progressPct = Math.min(Math.round((coveredKm / totalKm) * 100), 100);
+    let riskLevel: MultimodalGPSUpdate['current_risk_level'] = 'LOW';
+    let upcomingRisk: string | null = null;
 
-    const remainingKm = Math.max(totalKm - coveredKm, 0);
-    const effSpeed = state.baseSpeedKmh * Math.max(state.speedMultiplier, 1);
-    const remainingHours = remainingKm / effSpeed;
+    if (distToHazardKm <= 15) {
+      riskLevel = distToHazardKm <= 5 ? 'HIGH' : 'MEDIUM';
+      upcomingRisk = `⚠ ${config.hazardName} (${distToHazardKm} km) — ${config.hazardType}`;
+    }
 
-    const etaTime = new Date(Date.now() + remainingHours * 3600 * 1000);
-    const etaStr = etaTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' IST';
+    let status: MultimodalGPSUpdate['simulated_status'] = 'IN_TRANSIT';
+    if (progressPct === 0) status = 'SCHEDULED';
+    else if (progressPct < 5) status = 'DEPARTED';
+    else if (progressPct >= 100) status = 'DELIVERED';
+    else if (progressPct >= 85) status = 'APPROACHING_DESTINATION';
 
-    return {
-      shipmentId: 1,
-      legId: `leg-${mode.toLowerCase()}-01`,
+    const remainingHours = baseSpeedKmh > 0 ? remainingKm / baseSpeedKmh : 0;
+    const now = new Date();
+    const etaDate = new Date(now.getTime() + remainingHours * 3600 * 1000);
+    const etaFormatted = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')} IST`;
+
+    let locationName = `${config.primaryCorridor}`;
+    if (progressPct < 10) locationName = `${config.originHub} Departure`;
+    else if (distToHazardKm <= 5) locationName = `${config.hazardName} Hazard Zone`;
+    else if (progressPct >= 90) locationName = `${config.destHub} Arrival Sector`;
+
+    const update: MultimodalGPSUpdate = {
       mode,
-      vehicleId: state.vehicleId,
-      vehicleName: state.vehicleName,
-      latitude: lat,
-      longitude: lng,
-      heading,
-      speedKmh: Math.round(state.baseSpeedKmh * (state.isRunning ? state.speedMultiplier : 0)),
-      progressPct,
-      distanceCoveredKm: Math.round(coveredKm * 10) / 10,
-      distanceTotalKm: state.totalDistanceKm,
-      eta: etaStr,
-      status: state.status,
-      dataStatus: state.dataStatus,
-      timestamp: new Date().toISOString(),
+      shipmentCode: `SHP-${mode}-001`,
+      vehicleId: config.vehicleId,
+      vehicleName: config.vehicleName,
+      timestamp: new Date().toLocaleTimeString(),
+      latitude: Number(lat.toFixed(5)),
+      longitude: Number(lng.toFixed(5)),
+      speed_kmh: baseSpeedKmh,
+      heading_deg: headingDeg,
+      heading_cardinal: cardinalDir,
+      progress_pct: progressPct,
+      distance_covered_km: Number(coveredKm.toFixed(1)),
+      distance_remaining_km: Number(remainingKm.toFixed(1)),
+      total_distance_km: Number(totalDistanceKm.toFixed(1)),
+      eta_formatted: etaFormatted,
+      current_location_name: locationName,
+      current_risk_level: riskLevel,
+      upcoming_risk: upcomingRisk,
+      distance_to_hazard_km: distToHazardKm,
+      hazard_name: config.hazardName,
+      hazard_approach_state: hazardApproachState,
+      simulated_status: status,
+      dataSourceStatus: config.dataSourceStatus,
     };
-  }
 
-  public getAllTelemetry(): Record<TransportMode, VehicleTelemetry> {
-    return {
-      LAND: this.getModeTelemetry('LAND'),
-      RAIL: this.getModeTelemetry('RAIL'),
-      WATER: this.getModeTelemetry('WATER'),
-      AIR: this.getModeTelemetry('AIR'),
-    };
-  }
-
-  public getState(mode: TransportMode): SimulationState {
-    return this.states[mode];
+    this.lastUpdates[mode] = update;
+    if (mode === this.activeMode) {
+      this.subscribers.forEach((cb) => cb(update));
+    }
   }
 }
 
-export const multimodalSimulationService = new MultimodalSimulationEngine();
+export const multimodalSimulationService = new MultimodalSimulationService();

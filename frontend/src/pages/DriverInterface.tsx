@@ -206,9 +206,12 @@ export function DriverInterface() {
                   <Smartphone size={14} />
                   <span>MY JOURNEY — {shipment.shipment_code}</span>
                 </div>
-                <span className={`badge ${gpsUpdate?.simulated_status === 'DELIVERED' ? 'badge-success' : 'badge-info'}`}>
-                  [{gpsUpdate?.simulated_status || driver_status}]
-                </span>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <span className="data-tag data-tag-real" style={{ fontSize: '0.62rem' }}>MODE: LAND</span>
+                  <span className={`badge ${gpsUpdate?.simulated_status === 'DELIVERED' ? 'badge-success' : 'badge-info'}`}>
+                    [{gpsUpdate?.simulated_status || driver_status}]
+                  </span>
+                </div>
               </div>
 
               {/* Progress Bar */}

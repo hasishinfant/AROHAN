@@ -169,24 +169,27 @@ export function ReportPage() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Multimodal Transport Mode Selector Bar */}
-      <div className="card" style={{ padding: '8px 16px', backgroundColor: '#ffffff', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
-          REPORT TRANSPORT MODE FILTER:
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {['LAND', 'RAIL', 'WATER', 'AIR'].map((m) => (
-            <button
-              key={m}
-              onClick={() => setSelectedRiskFilter(m)}
-              className={`btn btn-sm ${selectedRiskFilter === m ? 'btn-blue' : 'btn-secondary'}`}
-              style={{ fontSize: '0.72rem', fontWeight: 800, padding: '4px 12px' }}
-            >
-              [{m}] MODE
-            </button>
-          ))}
+        {/* Transport Mode Filter Bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, paddingTop: 10, borderTop: '1px solid #f1f5f9' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+            REPORT TRANSPORT MODE:
+          </span>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {['LAND', 'RAIL', 'WATER', 'AIR'].map((m) => (
+              <button
+                key={m}
+                onClick={() => setSelectedRiskFilter(m)}
+                className={`btn ${selectedRiskFilter === m ? 'btn-blue' : 'btn-secondary'} btn-xs`}
+                style={{ fontWeight: selectedRiskFilter === m ? 900 : 700, padding: '3px 8px', fontSize: '0.7rem' }}
+              >
+                [{m}]
+              </button>
+            ))}
+          </div>
+          <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: 'auto' }}>
+            Filter: <strong>{selectedRiskFilter === 'ALL' ? 'ALL MODES' : `${selectedRiskFilter} CORRIDORS`}</strong>
+          </span>
         </div>
       </div>
 

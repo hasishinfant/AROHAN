@@ -1,6 +1,6 @@
 import React from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { Sliders, Play, Pause, RotateCcw, SkipForward, CheckCircle2, Shield } from 'lucide-react';
+import { Sliders, Play, Pause, RotateCcw, SkipForward, CheckCircle2, Shield, Boxes } from 'lucide-react';
 
 const STEP_NARRATIONS = [
   'Shipment SHP-001 initialized. Guwahati → Shillong via Route A (NH-6). Nominal baseline status.',
@@ -136,32 +136,31 @@ export function DemoController() {
         )}
       </div>
 
-      {/* Multimodal Transport Mode Simulation Controls */}
-      <div className="card" style={{ borderLeft: '4px solid #1d4ed8' }}>
+      {/* Multimodal Transport Mode Simulation Control Card */}
+      <div className="card">
         <div className="card-header">
           <div className="card-title">
-            <Sliders size={14} style={{ color: '#1d4ed8' }} />
+            <Boxes size={14} style={{ color: '#1d4ed8' }} />
             <span>MULTIMODAL TRANSPORT MODE TEST PANEL</span>
           </div>
-          <span className="data-tag data-tag-real">MULTIMODAL CONTROLLER</span>
+          <span className="data-tag data-tag-simulated">MULTIMODAL EXTENSION</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.8rem' }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {['LAND', 'RAIL', 'WATER', 'AIR'].map((mode) => (
-              <a
-                key={mode}
-                href="/multimodal"
-                className="btn btn-sm btn-secondary"
-                style={{ fontSize: '0.75rem', fontWeight: 800 }}
-              >
-                TEST [{mode}] SIMULATION MAP
-              </a>
-            ))}
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            Supports <strong>1x, 5x, 10x, 20x, 50x, 100x</strong> speed multipliers for Land (Truck), Rail (Freight Train), Water (IWAI Barge), and Air (Cargo Aircraft).
-          </div>
+        <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: 10 }}>
+          Test operational mode switching, speed acceleration (1x–100x), and simulation isolation across LAND, RAIL, WATER, and AIR corridors.
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {['LAND', 'RAIL', 'WATER', 'AIR'].map((m) => (
+            <a
+              key={m}
+              href="/multimodal"
+              className="btn btn-secondary btn-sm"
+              style={{ fontWeight: 800, fontSize: '0.75rem' }}
+            >
+              TEST {m} MODE SIMULATION →
+            </a>
+          ))}
         </div>
       </div>
 
