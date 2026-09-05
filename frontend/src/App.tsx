@@ -56,7 +56,7 @@ function AppShell() {
             <Route path="/action" element={<ActionCenter />} />
             <Route path="/mission" element={<MissionDetail />} />
             <Route path="/history" element={<DecisionHistory />} />
-            <Route path="/baseline" element={<BaselineComparison />} />
+            <Route path="/baseline" element={<Navigate to="/command" replace />} />
             <Route path="/health" element={<SystemHealth />} />
             <Route path="/risk" element={<Navigate to="/map" replace />} />
             <Route path="/replan" element={<Navigate to="/action" replace />} />

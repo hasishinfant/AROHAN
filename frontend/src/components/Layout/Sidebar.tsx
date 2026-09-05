@@ -57,7 +57,6 @@ export function Sidebar() {
       title: 'GOVERNANCE & AUDIT',
       items: [
         { path: '/history', label: 'Decision Audit Trail', icon: History },
-        { path: '/baseline', label: 'Delivery Reliability Baseline', icon: BarChart3 },
         { path: '/health', label: 'System Health & Ingestion', icon: Globe },
       ]
     }
