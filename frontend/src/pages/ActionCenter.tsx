@@ -97,7 +97,7 @@ export function ActionCenter() {
       <div className="page-header">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <h1 className="page-title">AUTOMATED COORDINATION & ACTION CENTER</h1>
+            <h1 className="page-title">AI RECOMMENDATION CENTER & COORDINATION CONSOLE</h1>
             <span
               style={{
                 fontSize: '0.65rem',
@@ -114,12 +114,87 @@ export function ActionCenter() {
             </span>
           </div>
           <div className="page-description">
-            Operational Coordination Alerts · Inter-Departmental Logistics Directives · Proactive Reroute Approvals
+            Multi-Hazard Corridor Directives · Inter-District Resource Rebalancing · Proactive Convoy Diversions
           </div>
         </div>
         <div className="badge badge-info" style={{ padding: '4px 8px' }}>
           <UserCheck size={12} />
-          <span>DISPATCHER: Arjun Sharma (ID: DISP-104)</span>
+          <span>INCIDENT COMMAND OFFICER: Arjun Sharma (ID: DISP-104)</span>
+        </div>
+      </div>
+
+      {/* TOP METRICS BANNER (6 CORE METRICS) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
+        <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #DC2626' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+            ACTIVE RISK EVENTS
+          </div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#DC2626', marginTop: 2 }}>
+            12
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#DC2626', fontWeight: 700, marginTop: 2 }}>
+            Critical Landslide & Flood Nodes
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #F59E0B' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+            AFFECTED CORRIDORS
+          </div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#D97706', marginTop: 2 }}>
+            7
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600, marginTop: 2 }}>
+            NH-6, NH-27, NH-102, NH-29 & Rails
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #EA580C' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+            RESOURCE SHORTAGE ALERTS
+          </div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#EA580C', marginTop: 2 }}>
+            4
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#EA580C', fontWeight: 700, marginTop: 2 }}>
+            Shillong, Silchar, Agartala, Aizawl
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #059669' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+            AI RECOMMENDATIONS
+          </div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#059669', marginTop: 2 }}>
+            18
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 600, marginTop: 2 }}>
+            Actionable Response Directives
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #2563EB' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+            HIGH PRIORITY ACTIONS
+          </div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#2563EB', marginTop: 2 }}>
+            6
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#2563EB', fontWeight: 700, marginTop: 2 }}>
+            Immediate Directive Approval Req.
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '12px 14px', borderLeft: '4px solid #475569' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+            FORECAST WINDOW
+          </div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A', marginTop: 2 }}>
+            48h
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600, marginTop: 2 }}>
+            NESAC / IMD Meteorological Lookahead
+          </div>
         </div>
       </div>
 

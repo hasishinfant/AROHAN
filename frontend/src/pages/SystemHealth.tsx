@@ -8,14 +8,12 @@ import {
   Server,
   CloudRain,
   CheckCircle2,
-  Layers,
   RefreshCw,
   Clock,
   AlertTriangle,
   ExternalLink,
   Globe,
   FileText,
-  MapPin,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -27,8 +25,7 @@ import {
   Search,
   Check,
   Copy,
-  FileSpreadsheet,
-  Download
+  FileSpreadsheet
 } from 'lucide-react';
 
 interface ProviderStatus {
@@ -437,12 +434,6 @@ export function SystemHealth() {
     { name: 'Arohan Core Database (PostGIS)', status: 'HEALTHY', desc: 'Async SQLite / PostGIS relational persistence & audit store', icon: Database, tag: 'SYSTEM' },
     { name: 'Proactive Decision Engine', status: 'HEALTHY', desc: 'Loss objective optimizer & risk threshold trigger engine', icon: ShieldCheck, tag: 'DERIVED' },
     { name: 'WebSocket Stream Dispatcher', status: isConnected ? 'HEALTHY' : 'CONNECTING', desc: 'Real-time state broadcast & driver mobile PWA push queue', icon: Server, tag: 'SYSTEM' },
-  ];
-
-  const positioningLayers = [
-    { title: 'Information Systems of Record (ASDMA, NESAC, ULIP, e-DAR)', role: 'Data & Telemetry Providers', desc: 'Raw environmental history, weather radar, and cargo records.' },
-    { title: 'AROHAN Proactive Decision Layer (MDoNER Layer)', role: 'Decision Intelligence & Coordination', desc: 'Converts forecast risk into proactive logistics decisions, coordinates dispatchers, and replans dynamically.' },
-    { title: 'Field Execution Layer (Driver Mobile PWA & Field Verifiers)', role: 'Execution & Reality Feedback', desc: 'Receives updated route instructions, acknowledges plans, and reports live road blockages.' },
   ];
 
   return (
@@ -1227,99 +1218,6 @@ export function SystemHealth() {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Positioning Matrix */}
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title">
-            <Layers size={14} />
-            <span>OPERATIONAL SYSTEM POSITIONING MATRIX</span>
-          </div>
-          <span className="data-tag data-tag-real">ARCHITECTURE</span>
-        </div>
-
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>SYSTEM LAYER</th>
-                <th>PRIMARY ROLE</th>
-                <th>AROHAN RELATIONSHIP</th>
-              </tr>
-            </thead>
-            <tbody>
-              {positioningLayers.map((layer) => (
-                <tr key={layer.title}>
-                  <td><strong>{layer.title}</strong></td>
-                  <td><span className="badge badge-info">[{layer.role}]</span></td>
-                  <td>{layer.desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Data Provenance Matrix */}
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title">
-            <Activity size={18} />
-            <span>DATA PROVENANCE & CLASSIFICATION DISCLOSURE</span>
-          </div>
-          <span className="data-tag data-tag-real">TRANSPARENCY</span>
-        </div>
-
-        <div className="grid-3">
-          <div className="card" style={{ backgroundColor: 'var(--bg-panel)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase' }}>REAL DATA</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginTop: 4 }}>
-              • OpenStreetMap GIS road geometry & distance<br />
-              • IMD rainfall intensity & 24h cumulative grid<br />
-              • Terrain elevation slope factor & historical risk index<br />
-              • NESAC NER-DRR Monograph & Hydrological Telemetry
-            </div>
-          </div>
-
-          <div className="card" style={{ backgroundColor: 'var(--bg-panel)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase' }}>SIMULATED DATA</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginTop: 4 }}>
-              • Vehicle GPS real-time location (AS-01-A-1234)<br />
-              • Shipment cargo manifest & priority level (SHP-001)<br />
-              • Dispatcher operational response latency
-            </div>
-          </div>
-
-          <div className="card" style={{ backgroundColor: 'var(--bg-panel)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase' }}>DERIVED DATA</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginTop: 4 }}>
-              • ML Disruption Risk Probability (78% Route A)<br />
-              • Expected Mission Loss Score & Delay Impact<br />
-              • Proactive Reroute Recommendation & Delay Avoided KPI
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Security, Privacy & Scalability Directives */}
-      <div className="card" style={{ borderLeft: '4px solid var(--primary-navy)' }}>
-        <div className="card-header" style={{ marginBottom: 8, paddingBottom: 8 }}>
-          <div className="card-title">
-            <ShieldCheck size={18} style={{ color: 'var(--primary-navy)' }} />
-            <span>SECURITY, PRIVACY & FUTURE SCALING DIRECTIVES</span>
-          </div>
-          <span className="badge badge-info">JUDGING CRITERIA</span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.85rem' }}>
-          <div style={{ backgroundColor: 'var(--bg-panel)', padding: 10, borderRadius: 'var(--radius-md)' }}>
-            <strong>Security & Privacy:</strong> Enforces Role-Based Access Control (RBAC), tamper-evident decision audit logging, and zero PII storage beyond anonymous driver IDs.
-          </div>
-          <div style={{ backgroundColor: 'var(--bg-panel)', padding: 10, borderRadius: 'var(--radius-md)' }}>
-            <strong>Future Scope:</strong> Designed for multi-corridor scaling across all 8 North Eastern Region states via PostGIS route graph partitioning.
-          </div>
         </div>
       </div>
     </div>

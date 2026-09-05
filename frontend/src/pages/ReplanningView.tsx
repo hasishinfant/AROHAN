@@ -14,7 +14,12 @@ import {
   Train,
   Ship,
   PhoneCall,
-  Sliders
+  Sliders,
+  Compass,
+  MapPin,
+  Search,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,9 +28,25 @@ export function ReplanningView() {
   const navigate = useNavigate();
 
   const [simulateTotalBlockage, setSimulateTotalBlockage] = useState(false);
+  const [sourceDistrict, setSourceDistrict] = useState('Kamrup Metro (Guwahati Inland Port)');
+  const [destDistrict, setDestDistrict] = useState('East Khasi Hills (Shillong Core Hub)');
+  const [selectedResource, setSelectedResource] = useState('Emergency Medical Kits');
+  const [quantity, setQuantity] = useState('4,200 kg');
+  const [weatherCondition, setWeatherCondition] = useState('Heavy Rainfall (38.0 mm/h)');
+  const [forecastWindow, setForecastWindow] = useState('18 Hours');
+  const [isSearchingRoute, setIsSearchingRoute] = useState(false);
+  const [discoverySuccess, setDiscoverySuccess] = useState<string | null>(null);
 
   const step = scenario_step ?? -1;
   const replanComplete = step >= 8;
+
+  const handleDiscoverRoute = () => {
+    setIsSearchingRoute(true);
+    setTimeout(() => {
+      setIsSearchingRoute(false);
+      setDiscoverySuccess(`Disaster-Safe Route Computed: Route B (Sonapur Ridge Corridor) verified safe for ${selectedResource} (${quantity}) from ${sourceDistrict.split(' ')[0]} to ${destDistrict.split(' ')[0]}. Avoids 42° slope risk zone.`);
+    }, 700);
+  };
 
   const loopNodes = [
     { label: 'SENSE', done: step >= 1, desc: 'IMD rainfall stream' },
@@ -138,6 +159,178 @@ export function ReplanningView() {
           </div>
         </div>
       )}
+
+      {/* FEATURE 1: DISASTER ROUTE DISCOVERY & MULTI-CORRIDOR INQUIRY FORM */}
+      <div className="card" style={{ padding: 18, border: '1px solid #059669', backgroundColor: '#FFFFFF' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Compass size={18} style={{ color: '#059669' }} />
+            <div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase' }}>
+                DISASTER ROUTE DISCOVERY & MULTI-CORRIDOR INQUIRY
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
+                Multi-Hazard Predictive Pathfinding · Evaluates Safety, Slope Risk, Flood Inundation & Road Accessibility
+              </div>
+            </div>
+          </div>
+          <span
+            style={{
+              fontSize: '0.65rem',
+              fontWeight: 800,
+              backgroundColor: '#ECFDF5',
+              color: '#065F46',
+              border: '1px solid #A7F3D0',
+              padding: '3px 8px',
+              borderRadius: 9999,
+            }}
+          >
+            DISASTER PATH ENGINE
+          </span>
+        </div>
+
+        {/* Input Parameters Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12 }}>
+          <div>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: 4 }}>
+              SOURCE RELIEF DEPOT / DISTRICT
+            </label>
+            <select
+              className="form-input"
+              value={sourceDistrict}
+              onChange={(e) => setSourceDistrict(e.target.value)}
+              style={{ fontSize: '0.75rem', width: '100%', padding: '6px 8px' }}
+            >
+              <option value="Kamrup Metro (Guwahati Inland Port)">Kamrup Metro (Guwahati Inland Port)</option>
+              <option value="East Khasi Hills (Shillong Regional Reserve)">East Khasi Hills (Shillong Reserve)</option>
+              <option value="Cachar (Silchar Central Base)">Cachar (Silchar Central Base)</option>
+              <option value="Sonitpur (Tezpur Logistics Outpost)">Sonitpur (Tezpur Outpost)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: 4 }}>
+              DESTINATION AFFECTED DISTRICT
+            </label>
+            <select
+              className="form-input"
+              value={destDistrict}
+              onChange={(e) => setDestDistrict(e.target.value)}
+              style={{ fontSize: '0.75rem', width: '100%', padding: '6px 8px' }}
+            >
+              <option value="East Khasi Hills (Shillong Core Hub)">East Khasi Hills (Shillong Core Hub)</option>
+              <option value="Cachar (Silchar Civil Hospital)">Cachar (Silchar Civil Hospital)</option>
+              <option value="West Tripura (Agartala Disaster Store)">West Tripura (Agartala Disaster Store)</option>
+              <option value="Aizawl (Zuangtui Emergency Hub)">Aizawl (Zuangtui Emergency Hub)</option>
+              <option value="Papum Pare (Itanagar Outpost)">Papum Pare (Itanagar Outpost)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: 4 }}>
+              ESSENTIAL RELIEF COMMODITY
+            </label>
+            <select
+              className="form-input"
+              value={selectedResource}
+              onChange={(e) => setSelectedResource(e.target.value)}
+              style={{ fontSize: '0.75rem', width: '100%', padding: '6px 8px' }}
+            >
+              <option value="Emergency Medical Kits">Emergency Medical Kits</option>
+              <option value="Rice & Staple Food Grains">Rice & Staple Food Grains</option>
+              <option value="High-Altitude Oxygen Cylinders">High-Altitude Oxygen Cylinders</option>
+              <option value="Disaster Recovery Fuel (POL)">Disaster Recovery Fuel (POL)</option>
+              <option value="Potable Drinking Water & Purifiers">Potable Drinking Water & Purifiers</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: 4 }}>
+              REQUIRED PAYLOAD QUANTITY
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              style={{ fontSize: '0.75rem', width: '100%', padding: '6px 8px' }}
+              placeholder="e.g. 4,200 kg or 1,200 MT"
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: 4 }}>
+              FIELD WEATHER / HAZARD CONDITION
+            </label>
+            <select
+              className="form-input"
+              value={weatherCondition}
+              onChange={(e) => setWeatherCondition(e.target.value)}
+              style={{ fontSize: '0.75rem', width: '100%', padding: '6px 8px' }}
+            >
+              <option value="Heavy Rainfall (38.0 mm/h)">Heavy Rainfall (38.0 mm/h) — Saturated</option>
+              <option value="Active Landslide Debris Warning">Active Landslide Debris Warning</option>
+              <option value="River Flash Flood Inundation">River Flash Flood Inundation</option>
+              <option value="Moderate Mist / Highland Visibility">Moderate Mist / Highland Visibility</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: 4 }}>
+              PREDICTIVE FORECAST HORIZON
+            </label>
+            <select
+              className="form-input"
+              value={forecastWindow}
+              onChange={(e) => setForecastWindow(e.target.value)}
+              style={{ fontSize: '0.75rem', width: '100%', padding: '6px 8px' }}
+            >
+              <option value="6 Hours">6 Hours (Immediate Convoy)</option>
+              <option value="12 Hours">12 Hours (Tactical Relief)</option>
+              <option value="18 Hours">18 Hours (Proactive Diversion Window)</option>
+              <option value="24 Hours">24 Hours (Strategic Buffer)</option>
+              <option value="48 Hours">48 Hours (Multi-State Staging)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Action Button & Confirmation Banner */}
+        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+          <button
+            className="btn btn-primary"
+            onClick={handleDiscoverRoute}
+            disabled={isSearchingRoute}
+            style={{ backgroundColor: '#059669', borderColor: '#047857', fontWeight: 800, fontSize: '0.8rem' }}
+          >
+            <Search size={14} />
+            <span>{isSearchingRoute ? 'CALCULATING TERRAIN FEASIBILITY...' : 'FIND DISASTER-SAFE ROUTE'}</span>
+          </button>
+
+          <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
+            Multi-factor evaluation: Safety Risk Delta &gt; Travel Time &gt; Slope Stability &gt; Inundation Buffer
+          </div>
+        </div>
+
+        {discoverySuccess && (
+          <div
+            style={{
+              marginTop: 12,
+              padding: '10px 14px',
+              backgroundColor: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              borderRadius: 8,
+              fontSize: '0.78rem',
+              color: '#065F46',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Sparkles size={16} style={{ color: '#059669', flexShrink: 0 }} />
+            <span>{discoverySuccess}</span>
+          </div>
+        )}
+      </div>
 
       {/* FEATURE 2: ROUTE FEASIBILITY EVALUATION MATRIX */}
       <div className="card" style={{ padding: 18 }}>

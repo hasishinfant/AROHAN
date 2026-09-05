@@ -28,13 +28,15 @@ export function TopBar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const systemStatus = () => {
     const step = scenario_step ?? -1;
-    if (step >= 7) return { bg: '#FFE4E6', text: '#BE123C', border: '#FECDD3', label: 'SLA Breached', dot: '#DC2626' };
-    if (step >= 4) return { bg: '#FEF3C7', text: '#B45309', border: '#FDE68A', label: 'Reroute Active', dot: '#F59E0B' };
-    if (step >= 2) return { bg: '#FEF3C7', text: '#B45309', border: '#FDE68A', label: 'At Risk (Elevated)', dot: '#F59E0B' };
-    if (step >= 0) return { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE', label: 'Mission Active', dot: '#3B82F6' };
-    return { bg: '#ECFDF5', text: '#047857', border: '#A7F3D0', label: 'Normal SLA', dot: '#10B981' };
+    if (step >= 7) return { bg: '#FFE4E6', text: '#BE123C', border: '#FECDD3', label: 'Primary Route Blocked (Debris)', dot: '#DC2626' };
+    if (step >= 4) return { bg: '#FEF3C7', text: '#B45309', border: '#FDE68A', label: 'Disaster Reroute Active', dot: '#F59E0B' };
+    if (step >= 2) return { bg: '#FEF3C7', text: '#B45309', border: '#FDE68A', label: 'Elevated Corridor Risk', dot: '#F59E0B' };
+    if (step >= 0) return { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE', label: 'Relief Convoy En Route', dot: '#3B82F6' };
+    return { bg: '#ECFDF5', text: '#047857', border: '#A7F3D0', label: 'Corridors Passable', dot: '#10B981' };
   };
 
   const sys = systemStatus();
@@ -42,6 +44,23 @@ export function TopBar() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      if (q.includes('risk') || q.includes('landslide') || q.includes('flood') || q.includes('nh-') || q.includes('corridor')) {
+        navigate('/risk');
+      } else if (q.includes('resource') || q.includes('food') || q.includes('oxygen') || q.includes('shortage')) {
+        navigate('/resources');
+      } else if (q.includes('action') || q.includes('alert') || q.includes('recommend')) {
+        navigate('/action');
+      } else if (q.includes('route') || q.includes('replan')) {
+        navigate('/replan');
+      } else {
+        navigate('/command');
+      }
+    }
   };
 
   return (
@@ -59,7 +78,7 @@ export function TopBar() {
         zIndex: 20
       }}
     >
-      {/* 1. LEFT: ACTIVE MISSION DROPDOWN */}
+      {/* 1. LEFT: ACTIVE RELIEF CONVOY DROPDOWN */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div
           style={{
@@ -81,8 +100,8 @@ export function TopBar() {
             }}
           />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Active Shipment
+            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Active Relief Movement
             </span>
             <select
               value={selectedShipmentId || 1}
@@ -108,8 +127,8 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* 2. CENTER: SANCHAR AI SEARCH BAR */}
-      <div style={{ flex: 1, maxWidth: 500 }}>
+      {/* 2. CENTER: GLOBAL DISASTER LOGISTICS SEARCH BAR */}
+      <div style={{ flex: 1, maxWidth: 520 }}>
         <div
           style={{
             display: 'flex',
@@ -124,12 +143,15 @@ export function TopBar() {
           <Search size={15} style={{ color: '#94A3B8', flexShrink: 0 }} />
           <input
             type="text"
-            placeholder="Search corridors, lanes, carriers, SLA status..."
+            placeholder="Search District (Aizawl), Corridor (NH-6), Resource (Oxygen/Food), Incident..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             style={{
               border: 'none',
               outline: 'none',
               width: '100%',
-              fontSize: '0.85rem',
+              fontSize: '0.82rem',
               color: '#0F172A',
               backgroundColor: 'transparent'
             }}

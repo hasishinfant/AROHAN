@@ -15,7 +15,8 @@ import {
   Sliders,
   Sparkles,
   Layers,
-  Activity
+  Activity,
+  Globe
 } from 'lucide-react';
 import { Logo } from '../Logo';
 
@@ -26,18 +27,34 @@ export function Sidebar() {
 
   const hasPending = current_decision?.status === 'PENDING';
 
-  const navItems = [
-    { path: '/command', label: 'Command Center', icon: LayoutDashboard },
-    { path: '/resources', label: 'Resource Allocation', icon: Boxes },
-    { path: '/risk', label: 'Risk Intelligence', icon: ShieldAlert },
-    { path: '/action', label: 'Action & Coordination', icon: Zap, alert: hasPending },
-    { path: '/replan', label: 'Intelligent Rerouting', icon: Layers },
-    { path: '/multimodal', label: 'Multimodal Hub', icon: Activity },
-    { path: '/mission', label: 'Mission Operations', icon: Package },
-    { path: '/reports', label: 'Corridor Analytics', icon: FileText },
-    { path: '/history', label: 'Decision Audit', icon: History },
-    { path: '/baseline', label: 'SLA Baseline', icon: BarChart3 },
-    { path: '/demo', label: 'Scenario Simulator', icon: Sliders },
+  const navSections = [
+    {
+      title: 'OPERATIONS',
+      items: [
+        { path: '/command', label: 'Command Center', icon: LayoutDashboard },
+        { path: '/risk', label: 'Corridor Risk Intelligence', icon: ShieldAlert },
+        { path: '/action', label: 'AI Recommendation Center', icon: Zap, alert: hasPending },
+        { path: '/replan', label: 'Disaster Route Discovery', icon: Layers },
+        { path: '/multimodal', label: 'Multimodal Hub (Rail/River)', icon: Activity },
+        { path: '/mission', label: 'Relief Movement Details', icon: Package },
+      ]
+    },
+    {
+      title: 'RESOURCES & REDISTRIBUTION',
+      items: [
+        { path: '/resources', label: 'Resource Redistribution', icon: Boxes },
+      ]
+    },
+    {
+      title: 'SIMULATION & ANALYTICS',
+      items: [
+        { path: '/demo', label: 'Disaster Scenario Simulator', icon: Sliders },
+        { path: '/reports', label: 'Corridor Analytics & Reports', icon: FileText },
+        { path: '/history', label: 'Decision Audit Trail', icon: History },
+        { path: '/baseline', label: 'Delivery Reliability Baseline', icon: BarChart3 },
+        { path: '/health', label: 'System Health & Ingestion', icon: Globe },
+      ]
+    }
   ];
 
   return (
@@ -73,59 +90,73 @@ export function Sidebar() {
                 borderRadius: 9999,
                 padding: '1px 6px'
               }}>
-                MDoNER
+                SIH26002
               </span>
             </div>
             <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600 }}>
-              NER Logistics Risk Intelligence
+              NER Disaster Logistics Intelligence
             </span>
           </div>
         </div>
 
         {/* 2. NAVIGATION LINKS */}
-        <nav className="sidebar-nav" style={{ marginTop: 14 }}>
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.path}
-                type="button"
-                className={`sidebar-link ${isActive ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
-                title={item.label}
-              >
-                <Icon
-                  size={18}
-                  style={{
-                    color: isActive ? '#059669' : '#64748B',
-                    flexShrink: 0,
-                    transition: 'color 0.15s ease'
-                  }}
-                />
-                <span style={{
-                  flex: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontSize: '0.85rem'
-                }}>
-                  {item.label}
-                </span>
-                {item.alert && (
-                  <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: '#DC2626',
-                      boxShadow: '0 0 8px #DC2626'
-                    }}
-                  />
-                )}
-              </button>
-            );
-          })}
+        <nav className="sidebar-nav" style={{ marginTop: 10 }}>
+          {navSections.map((section) => (
+            <div key={section.title} style={{ marginBottom: 10 }}>
+              <div style={{
+                fontSize: '0.62rem',
+                fontWeight: 800,
+                color: '#94A3B8',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                padding: '4px 12px 2px 12px'
+              }}>
+                {section.title}
+              </div>
+              {section.items.map((item) => {
+                const isActive = location.pathname === item.path;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    className={`sidebar-link ${isActive ? 'active' : ''}`}
+                    onClick={() => navigate(item.path)}
+                    title={item.label}
+                  >
+                    <Icon
+                      size={17}
+                      style={{
+                        color: isActive ? '#059669' : '#64748B',
+                        flexShrink: 0,
+                        transition: 'color 0.15s ease'
+                      }}
+                    />
+                    <span style={{
+                      flex: 1,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      fontSize: '0.82rem'
+                    }}>
+                      {item.label}
+                    </span>
+                    {item.alert && (
+                      <span
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: '#DC2626',
+                          boxShadow: '0 0 8px #DC2626'
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
       </div>
 

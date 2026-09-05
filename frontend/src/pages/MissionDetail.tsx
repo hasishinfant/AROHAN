@@ -96,26 +96,26 @@ export function MissionDetail() {
         </div>
       </div>
 
-      {/* Shipment Specification Sheet for Particular Selected Shipment */}
+      {/* Relief Movement Specification Sheet for Particular Selected Relief Convoy */}
       {shipment && (
-        <div className="card" style={{ border: '2px solid #1d4ed8' }}>
+        <div className="card" style={{ border: '2px solid #059669' }}>
           <div className="card-header">
             <div className="card-title">
-              <Package size={14} style={{ color: '#1d4ed8' }} />
-              <span>SHIPMENT DOSSIER — PARTICULAR FOCUS: {shipment.shipment_code}</span>
+              <Truck size={14} style={{ color: '#059669' }} />
+              <span>ESSENTIAL RELIEF MOVEMENT DOSSIER — CONVOY: {shipment.shipment_code}</span>
             </div>
-            <span className="data-tag data-tag-real">PARTICULAR SHIPMENT</span>
+            <span className="data-tag data-tag-real">RELIEF MANIFEST</span>
           </div>
           <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
-                  <th>CARGO TYPE</th>
-                  <th>TOTAL WEIGHT</th>
+                  <th>ESSENTIAL RELIEF COMMODITY</th>
+                  <th>CONVOY PAYLOAD</th>
                   <th>PRIORITY / URGENCY</th>
-                  <th>ORIGIN DEPOT</th>
-                  <th>DESTINATION HUB</th>
-                  <th>ASSIGNED CORRIDOR ROUTE</th>
+                  <th>SOURCE RELIEF DEPOT</th>
+                  <th>AFFECTED DESTINATION HUB</th>
+                  <th>DESIGNATED CORRIDOR ROUTE</th>
                 </tr>
               </thead>
               <tbody>
@@ -123,13 +123,13 @@ export function MissionDetail() {
                   <td style={{ fontWeight: 800 }}>{shipment.cargo_type}</td>
                   <td style={{ fontWeight: 700 }}>{shipment.weight_kg} kg</td>
                   <td style={{ fontWeight: 800, color: shipment.urgency >= 4 ? '#dc2626' : '#b45309' }}>
-                    Level {shipment.urgency}/5 ({shipment.urgency >= 4 ? 'High Priority' : 'Standard Priority'})
+                    Level {shipment.urgency}/5 ({shipment.urgency >= 4 ? 'Critical Priority' : 'Standard Emergency'})
                   </td>
                   <td style={{ fontWeight: 700 }}>{shipment.origin}</td>
                   <td style={{ fontWeight: 700 }}>{shipment.destination}</td>
                   <td style={{ fontWeight: 800, color: 'var(--primary-navy)' }}>
                     Route {routes?.find((r) => r.id === shipment.assigned_route_id)?.label ?? 'A'}
-                    {step >= 5 && winner && (selectedShipmentId === 1) && ` → Route ${winner} (Updated)`}
+                    {step >= 5 && winner && (selectedShipmentId === 1) && ` → Route ${winner} (Proactive Diversion)`}
                   </td>
                 </tr>
               </tbody>

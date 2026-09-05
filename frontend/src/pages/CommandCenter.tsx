@@ -124,7 +124,7 @@ export function CommandCenter() {
             </span>
           </div>
           <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748B', fontWeight: 400 }}>
-            Real-time corridor telemetry, predictive risk indices, and autonomous multimodal dispatch orchestration.
+            Real-time corridor accessibility, predictive hazard indices, and essential relief dispatch orchestration.
           </p>
         </div>
 
@@ -186,7 +186,7 @@ export function CommandCenter() {
             }}
           >
             <Sliders size={14} />
-            <span>Demo Controls</span>
+            <span>Disaster Controls</span>
             {showDemoControls ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>
@@ -212,10 +212,10 @@ export function CommandCenter() {
             <Zap size={18} style={{ color: '#34D399' }} />
             <div>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF' }}>
-                DEMO SCENARIO SIMULATION ENGINE
+                DISASTER SCENARIO SIMULATION ENGINE
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                Trigger hazards, test AI reroute recommendations, and adjust telemetry playback speeds.
+                Trigger hazards, test AI reroute recommendations, and evaluate essential supply delivery disruptions.
               </div>
             </div>
           </div>
@@ -239,7 +239,24 @@ export function CommandCenter() {
               }}
             >
               <CloudRain size={14} />
-              <span>Simulate Disruption (Step {step < 0 ? 1 : step + 1})</span>
+              <span>Advance Hazard (Step {step + 2})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/demo')}
+              style={{
+                backgroundColor: '#334155',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '6px 12px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                borderRadius: 8,
+                cursor: 'pointer'
+              }}
+            >
+              Full Simulator Panel
             </button>
 
             <button
@@ -261,23 +278,6 @@ export function CommandCenter() {
             >
               <Zap size={14} />
               <span>Apply AI Bypass (Route B)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => gpsSimulationService.setSpeedMultiplier(50)}
-              style={{
-                backgroundColor: '#334155',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '6px 12px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                borderRadius: 8,
-                cursor: 'pointer'
-              }}
-            >
-              Speed 50×
             </button>
 
             <button
@@ -323,7 +323,7 @@ export function CommandCenter() {
               <Sparkles size={16} />
             </div>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1E3A8A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              AROHAN LOGISTICS COPILOT — PROACTIVE ROUTE RECOMMENDATION
+              AROHAN LOGISTICS COPILOT — PROACTIVE DISASTER REROUTE DIRECTIVE
             </span>
             <span style={{
               display: 'inline-flex',
@@ -335,7 +335,7 @@ export function CommandCenter() {
               backgroundColor: '#DBEAFE',
               color: '#1E40AF'
             }}>
-              CONFIDENCE 96%
+              CONFIDENCE 88%
             </span>
           </div>
 
@@ -353,7 +353,7 @@ export function CommandCenter() {
                 fontWeight: 600
               }}
             >
-              Apply Recommendation
+              Apply Reroute Directive
             </button>
             <button
               type="button"
@@ -372,40 +372,40 @@ export function CommandCenter() {
         </div>
 
         <p style={{ margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.5 }}>
-          Rerouting <strong>{currentShipment?.shipment_code || 'SHP-001'}</strong> via Western Sonapur Ridge Corridor bypasses landslide-prone NH-06 kilometer 42, reducing SLA breach exposure by <strong>21%</strong> and cutting transit delay by <strong>5.9 hours</strong>.
+          Rerouting Relief Movement <strong>{currentShipment?.shipment_code || 'REL-001'}</strong> via Western Sonapur Ridge Corridor (Route B) bypasses landslide-prone NH-06 kilometer 42–54, preventing supply delivery disruption and cutting delay by <strong>5.9 hours</strong>.
         </p>
       </div>
 
-      {/* 3. CORE METRIC PANELS (Section 6.A Blueprint - 4 Columns) */}
+      {/* 3. CORE METRIC PANELS (4 Operational Disaster Decision Metrics) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18 }}>
         
-        {/* Metric 1: On-Time SLA */}
+        {/* Metric 1: Active Risk Events */}
         <div className="card" style={{ padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              ON-TIME DELIVERY SLA
+              ACTIVE RISK EVENTS
             </span>
-            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#059669', border: '1px solid #E2E8F0' }}>
-              <TrendingUp size={16} />
+            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#DC2626', border: '1px solid #E2E8F0' }}>
+              <ShieldAlert size={16} />
             </div>
           </div>
           
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>98.4%</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
-              +2.4%
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>12</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#FEF2F2', color: '#DC2626' }}>
+              3 Critical
             </span>
           </div>
           <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Compared to last week average
+            Active landslide & hydro alerts
           </p>
         </div>
 
-        {/* Metric 2: Freight Volume Dispatched */}
+        {/* Metric 2: Affected Corridors */}
         <div className="card" style={{ padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              TOTAL TON-KM DISPATCHED
+              AFFECTED CORRIDORS
             </span>
             <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#3B82F6', border: '1px solid #E2E8F0' }}>
               <Truck size={16} />
@@ -413,21 +413,21 @@ export function CommandCenter() {
           </div>
           
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>13,984</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
-              +18.4%
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>7</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#EFF6FF', color: '#1D4ED8' }}>
+              NH-6, NH-27, NH-102
             </span>
           </div>
           <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Active multimodal movement
+            Strategic lifeline corridors monitored
           </p>
         </div>
 
-        {/* Metric 3: Delay Mitigated */}
+        {/* Metric 3: Delay Avoided */}
         <div className="card" style={{ padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              EXPECTED DELAY AVOIDED
+              SUPPLY DELAY AVOIDED
             </span>
             <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#F59E0B', border: '1px solid #E2E8F0' }}>
               <Clock size={16} />
@@ -438,34 +438,34 @@ export function CommandCenter() {
             <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>
               {kpis?.delay_avoided_h != null ? `${kpis.delay_avoided_h} hrs` : '5.9 hrs'}
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#EFF6FF', color: '#1D4ED8' }}>
-              Route B
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
+              Route B Bypass
             </span>
           </div>
           <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Landslide bypass mitigation
+            Pre-emptive diversion lead time: 18h
           </p>
         </div>
 
-        {/* Metric 4: Direct Savings */}
+        {/* Metric 4: Shortage Alerts */}
         <div className="card" style={{ padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              LOGISTICS COST SAVED
+              RESOURCE SHORTAGE ALERTS
             </span>
             <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#059669', border: '1px solid #E2E8F0' }}>
-              <DollarSign size={16} />
+              <Boxes size={16} />
             </div>
           </div>
           
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#059669' }}>₹48.2 L</span>
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>4</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
-              Optimal
+              6 Actions
             </span>
           </div>
           <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Idle fuel & disruption penalty reduction
+            Forecast horizon: 48 hours
           </p>
         </div>
       </div>
@@ -788,16 +788,16 @@ export function CommandCenter() {
             </div>
             <div>
               <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A' }}>
-                Primary GIS Corridor Monitoring Display — {currentShipment?.shipment_code || 'SHP-001'}
+                Primary GIS Corridor Monitoring Display — {currentShipment?.shipment_code || 'REL-001'}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                Geospatial vehicle tracking with animated route vectors & terrain elevation mapping
+                Geospatial relief convoy tracking with real-time route vectors & hazard overlay
               </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.78rem', color: '#475569' }}>
-            <span>Origin: <strong style={{ color: '#0F172A' }}>{currentShipment?.origin.split(' ')[0]}</strong></span>
+            <span>Source: <strong style={{ color: '#0F172A' }}>{currentShipment?.origin.split(' ')[0]}</strong></span>
             <ArrowRight size={14} style={{ color: '#94A3B8' }} />
             <span>Destination: <strong style={{ color: '#0F172A' }}>{currentShipment?.destination.split(' ')[0]}</strong></span>
             <span style={{ color: '#E2E8F0' }}>|</span>
@@ -811,25 +811,25 @@ export function CommandCenter() {
         </div>
       </div>
 
-      {/* 6. FLEET OPERATIONS MANIFEST TABLE (Section 6.E Blueprint) */}
+      {/* 6. ESSENTIAL RELIEF MOVEMENT MANIFEST TABLE */}
       <div className="card" style={{ padding: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, paddingBottom: 12, borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', gap: 12 }}>
           <div>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-              Fleet Operations Manifest
+              Essential Relief Movement Manifest
             </h3>
             <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: 2 }}>
-              Active shipments, designated transit corridors, and real-time SLA metrics
+              Active relief convoys, designated transit corridors, and real-time accessibility status
             </div>
           </div>
 
           {/* Search Box & Status Filter Pills */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', width: 220 }}>
+            <div style={{ position: 'relative', width: 240 }}>
               <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input
                 type="text"
-                placeholder="Search shipment, route..."
+                placeholder="Search movement, corridor, resource..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -879,12 +879,12 @@ export function CommandCenter() {
                 <th style={{ width: '4%' }}>
                   <input type="checkbox" style={{ accentColor: '#059669', cursor: 'pointer' }} />
                 </th>
-                <th style={{ width: '13%' }}>Shipment</th>
-                <th style={{ width: '25%' }}>Corridor / Lane</th>
-                <th style={{ width: '22%' }}>Cargo Manifest</th>
-                <th style={{ width: '11%' }}>Vehicle ID</th>
-                <th style={{ width: '13%' }}>SLA Status</th>
-                <th style={{ width: '12%' }}>ETA</th>
+                <th style={{ width: '13%' }}>Relief Movement</th>
+                <th style={{ width: '25%' }}>Corridor / Transit Route</th>
+                <th style={{ width: '22%' }}>Essential Commodity</th>
+                <th style={{ width: '11%' }}>Transport Unit</th>
+                <th style={{ width: '13%' }}>Movement Status</th>
+                <th style={{ width: '12%' }}>Target ETA</th>
               </tr>
             </thead>
             <tbody>
