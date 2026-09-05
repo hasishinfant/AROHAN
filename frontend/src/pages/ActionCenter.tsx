@@ -15,7 +15,9 @@ import {
   MapPin,
   Clock,
   ArrowRight,
-  Boxes
+  Boxes,
+  Compass,
+  MessageSquare
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,7 +32,8 @@ export function ActionCenter() {
     fetchAlerts,
     reviewAlert,
     approveAlert,
-    dismissAlert
+    dismissAlert,
+    openWhatsAppModal
   } = useArohanStore();
 
   const [activeTab, setActiveTab] = useState<'ALERTS' | 'DISPATCH'>('ALERTS');
@@ -371,14 +374,53 @@ export function ActionCenter() {
 
                   {/* Operational Action Buttons */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, flexWrap: 'wrap', gap: 10 }}>
-                    <button
-                      className="btn btn-outline btn-sm"
-                      onClick={() => navigate('/resources')}
-                      style={{ fontSize: '0.75rem' }}
-                    >
-                      <Boxes size={13} />
-                      <span>INSPECT DISTRICT INVENTORY</span>
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => navigate('/resources')}
+                        style={{ fontSize: '0.75rem' }}
+                      >
+                        <Boxes size={13} />
+                        <span>INSPECT DISTRICT INVENTORY</span>
+                      </button>
+
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => {
+                          const c = alert.affected_corridor.toLowerCase();
+                          if (c.includes('nh-6') || c.includes('umi') || c.includes('shillong')) {
+                            navigate('/map?focus=nh6');
+                          } else if (c.includes('silchar') || c.includes('nh-27')) {
+                            navigate('/map?focus=silchar');
+                          } else if (c.includes('nh-306') || c.includes('aizawl')) {
+                            navigate('/map?focus=aizawl');
+                          } else {
+                            navigate('/map');
+                          }
+                        }}
+                        style={{ fontSize: '0.75rem', color: '#047857', borderColor: '#A7F3D0', backgroundColor: '#ECFDF5' }}
+                      >
+                        <Compass size={13} />
+                        <span>VIEW ON GIS MAP</span>
+                      </button>
+
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() =>
+                          openWhatsAppModal({
+                            movement_code: alert.alert_code || 'REL-001',
+                            reason: alert.title,
+                            old_route: alert.affected_corridor,
+                            new_route: alert.recommended_route,
+                            destination: alert.location_district,
+                          })
+                        }
+                        style={{ fontSize: '0.75rem', color: '#059669', borderColor: '#A7F3D0', backgroundColor: '#F0FDF4' }}
+                      >
+                        <MessageSquare size={13} />
+                        <span>SEND DRIVER WHATSAPP</span>
+                      </button>
+                    </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       {alert.status === 'ACTIVE' && (

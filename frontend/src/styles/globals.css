@@ -231,6 +231,88 @@ body {
   justify-content: space-between;
   height: 100vh;
   overflow-y: auto;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+.topbar-mobile-menu-btn {
+  display: none;
+}
+
+/* ── Responsive Mobile & Tablet Media Queries ────────────── */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebar.sidebar-mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 45;
+  }
+
+  .topbar-mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .app-main {
+    width: 100%;
+  }
+
+  .app-content {
+    padding: 16px;
+  }
+
+  /* Force 12-column grids to stack vertically on tablets & mobile */
+  [style*="grid-template-columns: repeat(12"] > [style*="grid-column: span 8"],
+  [style*="grid-template-columns: repeat(12"] > [style*="grid-column: span 4"] {
+    grid-column: span 12 !important;
+  }
+
+  [style*="grid-template-columns: 3fr 2fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-content {
+    padding: 10px;
+  }
+
+  .topbar {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+
+  /* Keep tables scrollable horizontally without breaking page width */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
 }
 
 .sidebar-header {

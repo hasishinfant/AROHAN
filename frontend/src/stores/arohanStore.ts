@@ -915,6 +915,9 @@ interface ArohanStore extends Partial<AppState> {
   openWhatsAppModal: (context?: any) => void;
   closeWhatsAppModal: () => void;
   communicationLogs: any[];
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
 
   // Actions
   setGpsUpdate: (update: GPSUpdate | null) => void;
@@ -992,6 +995,9 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
   openWhatsAppModal: (context = null) => set({ isWhatsAppModalOpen: true, whatsAppModalContext: context }),
   closeWhatsAppModal: () => set({ isWhatsAppModalOpen: false, whatsAppModalContext: null }),
   communicationLogs: DEFAULT_COMMUNICATION_LOGS,
+  isSidebarOpen: false,
+  toggleSidebar: () => set((s) => ({ isSidebarOpen: !s.isSidebarOpen })),
+  setSidebarOpen: (open: boolean) => set({ isSidebarOpen: open }),
 
   setGpsUpdate: (update) => set({ gpsUpdate: update }),
 

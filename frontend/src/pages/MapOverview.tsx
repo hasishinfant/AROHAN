@@ -427,7 +427,7 @@ export function MapOverview() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activePreset, setActivePreset] = useState<string>('guwahati-shillong');
-  const [mapStyleKey, setMapStyleKey] = useState<'voyager' | 'osm'>('voyager');
+  const [mapStyleKey, setMapStyleKey] = useState<'osm' | 'topo'>('osm');
   const [isLayerDrawerOpen, setIsLayerDrawerOpen] = useState(true);
 
   // Layer Toggles
@@ -562,30 +562,30 @@ export function MapOverview() {
       style: {
         version: 8,
         sources: {
-          'basemap-voyager': {
-            type: 'raster',
-            tiles: ['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© OpenStreetMap contributors, CartoDB, AROHAN GIS',
-          },
           'basemap-osm': {
             type: 'raster',
             tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
             tileSize: 256,
             attribution: '© OpenStreetMap contributors',
           },
+          'basemap-topo': {
+            type: 'raster',
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
+            tileSize: 256,
+            attribution: '© OpenStreetMap contributors, Esri USGS',
+          },
         },
         layers: [
-          {
-            id: 'layer-basemap-voyager',
-            type: 'raster',
-            source: 'basemap-voyager',
-            layout: { visibility: 'visible' },
-          },
           {
             id: 'layer-basemap-osm',
             type: 'raster',
             source: 'basemap-osm',
+            layout: { visibility: 'visible' },
+          },
+          {
+            id: 'layer-basemap-topo',
+            type: 'raster',
+            source: 'basemap-topo',
             layout: { visibility: 'none' },
           },
         ],
@@ -961,16 +961,16 @@ export function MapOverview() {
   }, [layers]);
 
   // ── Switch Basemap ────────────────────────────────────────────────────────
-  const handleBasemapChange = (styleKey: 'voyager' | 'osm') => {
+  const handleBasemapChange = (styleKey: 'osm' | 'topo') => {
     setMapStyleKey(styleKey);
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
 
-    if (map.getLayer('layer-basemap-voyager')) {
-      map.setLayoutProperty('layer-basemap-voyager', 'visibility', styleKey === 'voyager' ? 'visible' : 'none');
-    }
     if (map.getLayer('layer-basemap-osm')) {
       map.setLayoutProperty('layer-basemap-osm', 'visibility', styleKey === 'osm' ? 'visible' : 'none');
+    }
+    if (map.getLayer('layer-basemap-topo')) {
+      map.setLayoutProperty('layer-basemap-topo', 'visibility', styleKey === 'topo' ? 'visible' : 'none');
     }
   };
 
@@ -1154,22 +1154,6 @@ export function MapOverview() {
           {/* Basemap Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#F1F5F9', padding: 2, borderRadius: 6 }}>
             <button
-              onClick={() => handleBasemapChange('voyager')}
-              style={{
-                padding: '4px 8px',
-                borderRadius: 4,
-                fontSize: '0.72rem',
-                fontWeight: mapStyleKey === 'voyager' ? 700 : 500,
-                backgroundColor: mapStyleKey === 'voyager' ? '#ffffff' : 'transparent',
-                color: mapStyleKey === 'voyager' ? '#0F172A' : '#64748B',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: mapStyleKey === 'voyager' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              Relief
-            </button>
-            <button
               onClick={() => handleBasemapChange('osm')}
               style={{
                 padding: '4px 8px',
@@ -1183,7 +1167,23 @@ export function MapOverview() {
                 boxShadow: mapStyleKey === 'osm' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
               }}
             >
-              Streets
+              Streets (OSM)
+            </button>
+            <button
+              onClick={() => handleBasemapChange('topo')}
+              style={{
+                padding: '4px 8px',
+                borderRadius: 4,
+                fontSize: '0.72rem',
+                fontWeight: mapStyleKey === 'topo' ? 700 : 500,
+                backgroundColor: mapStyleKey === 'topo' ? '#ffffff' : 'transparent',
+                color: mapStyleKey === 'topo' ? '#0F172A' : '#64748B',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: mapStyleKey === 'topo' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              Terrain / Topo
             </button>
           </div>
 

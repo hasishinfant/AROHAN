@@ -4,45 +4,28 @@ import { useArohanStore } from '../../stores/arohanStore';
 import {
   Search,
   Bell,
-  MessageSquare,
   ChevronDown,
   LogOut,
-  Volume2,
-  VolumeX,
   Compass,
-  Radio
+  Menu,
+  ShieldAlert,
+  Boxes
 } from 'lucide-react';
 
 export function TopBar() {
   const navigate = useNavigate();
   const {
-    shipmentsList,
-    selectedShipmentId,
-    selectShipment,
-    scenario_step,
     user,
     logout,
     isConnected,
-    activeRoleLevel,
-    setActiveRoleLevel,
-    openWhatsAppModal,
+    toggleSidebar,
+    operationalAlerts
   } = useArohanStore();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-
   const [searchQuery, setSearchQuery] = useState('');
 
-  const systemStatus = () => {
-    const step = scenario_step ?? -1;
-    if (step >= 7) return { bg: '#FFE4E6', text: '#BE123C', border: '#FECDD3', label: 'Primary Route Blocked (Debris)', dot: '#DC2626' };
-    if (step >= 4) return { bg: '#FEF3C7', text: '#B45309', border: '#FDE68A', label: 'Disaster Reroute Active', dot: '#F59E0B' };
-    if (step >= 2) return { bg: '#FEF3C7', text: '#B45309', border: '#FDE68A', label: 'Elevated Corridor Risk', dot: '#F59E0B' };
-    if (step >= 0) return { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE', label: 'Relief Convoy En Route', dot: '#3B82F6' };
-    return { bg: '#ECFDF5', text: '#047857', border: '#A7F3D0', label: 'Corridors Passable', dot: '#10B981' };
-  };
-
-  const sys = systemStatus();
+  const activeAlertsCount = operationalAlerts?.filter(a => a.status === 'ACTIVE').length || 2;
 
   const handleLogout = () => {
     logout();
@@ -70,8 +53,8 @@ export function TopBar() {
     <header
       className="topbar"
       style={{
-        height: 64,
-        padding: '0 24px',
+        height: 60,
+        padding: '0 20px',
         backgroundColor: '#FFFFFF',
         borderBottom: '1px solid #E2E8F0',
         display: 'flex',
@@ -81,57 +64,48 @@ export function TopBar() {
         zIndex: 20
       }}
     >
-      {/* 1. LEFT: ACTIVE RELIEF CONVOY DROPDOWN */}
+      {/* 1. LEFT: MOBILE TOGGLE & SYSTEM TITLE */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div
+        {/* Mobile Sidebar Hamburger Button */}
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className="topbar-mobile-menu-btn"
           style={{
-            display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            backgroundColor: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            borderRadius: 12,
-            padding: '5px 12px'
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            backgroundColor: '#F1F5F9',
+            border: '1px solid #CBD5E1',
+            cursor: 'pointer',
+            color: '#334155',
+            flexShrink: 0
           }}
+          title="Toggle Navigation Menu"
         >
+          <Menu size={18} />
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span
             style={{
               width: 8,
               height: 8,
               borderRadius: '50%',
-              backgroundColor: isConnected ? '#10B981' : '#3B82F6'
+              backgroundColor: isConnected ? '#10B981' : '#10B981',
+              boxShadow: '0 0 6px rgba(16, 185, 129, 0.4)'
             }}
           />
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Active Relief Movement
-            </span>
-            <select
-              value={selectedShipmentId || 1}
-              onChange={(e) => selectShipment(Number(e.target.value))}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                color: '#0F172A',
-                outline: 'none',
-                cursor: 'pointer',
-                paddingRight: 6
-              }}
-            >
-              {shipmentsList?.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.shipment_code} — {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]} ({s.cargo_type})
-                </option>
-              ))}
-            </select>
-          </div>
+          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F172A', letterSpacing: '0.02em' }}>
+            NER DISASTER RELIEF DECISION SYSTEM
+          </span>
         </div>
       </div>
 
       {/* 2. CENTER: GLOBAL DISASTER LOGISTICS SEARCH BAR */}
-      <div style={{ flex: 1, maxWidth: 520 }}>
+      <div style={{ flex: 1, maxWidth: 540 }}>
         <div
           style={{
             display: 'flex',
@@ -139,14 +113,14 @@ export function TopBar() {
             gap: 10,
             backgroundColor: '#F8FAFC',
             border: '1px solid #E2E8F0',
-            borderRadius: 12,
-            padding: '7px 14px'
+            borderRadius: 8,
+            padding: '6px 12px'
           }}
         >
           <Search size={15} style={{ color: '#94A3B8', flexShrink: 0 }} />
           <input
             type="text"
-            placeholder="Search District (Aizawl), Corridor (NH-6), Resource (Oxygen/Food), Incident..."
+            placeholder="Search District (Aizawl), Corridor (NH-6), Resource (Oxygen/Food), Hazard..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
@@ -162,137 +136,52 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* 3. RIGHT: MULTI-LEVEL ROLE SWITCHER, WHATSAPP DISPATCH & STATUS */}
+      {/* 3. RIGHT: QUICK ACCESS & USER PROFILE */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Multi-Level Role Switcher */}
-        <div
+        {/* Quick Shortcut: Map Overview */}
+        <button
+          type="button"
+          onClick={() => navigate('/map')}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 6,
+            padding: '6px 10px',
+            borderRadius: 6,
             backgroundColor: '#F8FAFC',
             border: '1px solid #CBD5E1',
-            borderRadius: 10,
-            padding: '4px 10px',
-          }}
-        >
-          <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
-            TIER:
-          </span>
-          <select
-            value={activeRoleLevel || 1}
-            onChange={(e) => {
-              const lvl = Number(e.target.value);
-              setActiveRoleLevel(lvl);
-              if (lvl === 5) navigate('/driver');
-            }}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              fontWeight: 700,
-              fontSize: '0.75rem',
-              color: '#0F172A',
-              cursor: 'pointer',
-              outline: 'none',
-            }}
-          >
-            <option value={1}>L1: Regional Command (NER Node)</option>
-            <option value={2}>L2: State Control (SDMA)</option>
-            <option value={3}>L3: District Control (DDMA)</option>
-            <option value={4}>L4: Logistics Coordinator</option>
-            <option value={5}>L5: Driver (Field Mobile)</option>
-          </select>
-        </div>
-
-        {/* WhatsApp Dispatch Button */}
-        <button
-          type="button"
-          onClick={() => openWhatsAppModal()}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '6px 12px',
-            borderRadius: 10,
-            backgroundColor: '#ECFDF5',
-            border: '1px solid #A7F3D0',
-            color: '#047857',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-          title="Compose and Preview WhatsApp Emergency Instructions"
-        >
-          <MessageSquare size={14} style={{ color: '#059669' }} />
-          <span>WhatsApp Dispatch</span>
-        </button>
-
-        {/* Operational Status Pill */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
+            color: '#334155',
             fontSize: '0.75rem',
             fontWeight: 600,
-            padding: '4px 12px',
-            borderRadius: 9999,
-            backgroundColor: sys.bg,
-            color: sys.text,
-            border: `1px solid ${sys.border}`
-          }}
-        >
-          <span
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              backgroundColor: sys.dot
-            }}
-          />
-          <span>{sys.label}</span>
-        </div>
-
-        {/* Audio Alert Toggle */}
-        <button
-          type="button"
-          onClick={() => setAudioEnabled(!audioEnabled)}
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            backgroundColor: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            color: audioEnabled ? '#059669' : '#94A3B8',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             cursor: 'pointer'
           }}
-          title={audioEnabled ? 'Mute Alerts' : 'Enable Audio Alerts'}
+          title="Open GIS Operational Map"
         >
-          {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          <Compass size={14} color="#059669" />
+          <span>GIS Map</span>
         </button>
 
-        {/* Multi-Level Coordination Link */}
+        {/* Quick Shortcut: Buffer Stock */}
         <button
           type="button"
-          onClick={() => navigate('/communications')}
+          onClick={() => navigate('/resources')}
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            backgroundColor: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            color: '#475569',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 6,
+            padding: '6px 10px',
+            borderRadius: 6,
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #CBD5E1',
+            color: '#334155',
+            fontSize: '0.75rem',
+            fontWeight: 600,
             cursor: 'pointer'
           }}
-          title="Multi-Level Government Coordination & WhatsApp Logs"
+          title="Open District Stock Redistribution"
         >
-          <MessageSquare size={16} />
+          <Boxes size={14} color="#059669" />
+          <span>Buffers</span>
         </button>
 
         {/* Notification Bell with indicator */}
@@ -303,7 +192,7 @@ export function TopBar() {
             style={{
               width: 36,
               height: 36,
-              borderRadius: 10,
+              borderRadius: 8,
               backgroundColor: '#F8FAFC',
               border: '1px solid #E2E8F0',
               color: '#475569',
@@ -312,22 +201,33 @@ export function TopBar() {
               justifyContent: 'center',
               cursor: 'pointer'
             }}
-            title="Corridor Alerts"
+            title="Active Operational Advisories"
           >
             <Bell size={16} />
           </button>
-          <span
-            style={{
-              position: 'absolute',
-              top: 6,
-              right: 6,
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              backgroundColor: '#DC2626',
-              border: '1.5px solid #FFFFFF'
-            }}
-          />
+          {activeAlertsCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: -3,
+                right: -3,
+                minWidth: 16,
+                height: 16,
+                padding: '0 4px',
+                borderRadius: 9999,
+                backgroundColor: '#DC2626',
+                color: '#FFFFFF',
+                fontSize: '0.62rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1.5px solid #FFFFFF'
+              }}
+            >
+              {activeAlertsCount}
+            </span>
+          )}
         </div>
 
         {/* User Profile Pill */}
@@ -362,25 +262,13 @@ export function TopBar() {
               }}
             >
               {user?.avatarText || 'AS'}
-              <span
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  right: 0,
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#10B981',
-                  border: '1.5px solid #FFFFFF'
-                }}
-              />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0F172A', lineHeight: 1.1 }}>
-                {user?.name || 'Arjun Sharma'}
+                {user?.name || 'Officer'}
               </span>
               <span style={{ fontSize: '0.65rem', color: '#64748B' }}>
-                Director
+                Relief Command
               </span>
             </div>
             <ChevronDown size={14} style={{ color: '#94A3B8' }} />
@@ -395,7 +283,7 @@ export function TopBar() {
                 right: 0,
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E2E8F0',
-                borderRadius: 12,
+                borderRadius: 8,
                 padding: '8px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
                 minWidth: 180,
@@ -403,8 +291,8 @@ export function TopBar() {
               }}
             >
               <div style={{ padding: '6px 10px', borderBottom: '1px solid #F1F5F9' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0F172A' }}>{user?.name || 'Arjun Sharma'}</div>
-                <div style={{ fontSize: '0.68rem', color: '#64748B' }}>{user?.email || 'arjun@arohan.gov.in'}</div>
+                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0F172A' }}>{user?.name || 'Relief Officer'}</div>
+                <div style={{ fontSize: '0.68rem', color: '#64748B' }}>{user?.email || 'admin@arohan.gov.in'}</div>
               </div>
               <button
                 type="button"
@@ -418,7 +306,7 @@ export function TopBar() {
                   marginTop: 4,
                   backgroundColor: '#FFE4E6',
                   border: 'none',
-                  borderRadius: 8,
+                  borderRadius: 6,
                   color: '#BE123C',
                   fontSize: '0.75rem',
                   fontWeight: 600,

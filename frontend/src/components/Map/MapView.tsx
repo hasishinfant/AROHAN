@@ -28,13 +28,13 @@ const MAP_STYLES = {
     label: 'Street Standard',
     tile: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   },
-  dark: {
-    label: 'Dark GIS Mode',
-    tile: 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+  topo: {
+    label: 'Topographic',
+    tile: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
   },
-  voyager: {
-    label: 'Satellite Voyager',
-    tile: 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+  satellite: {
+    label: 'Satellite',
+    tile: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   },
 };
 
@@ -48,7 +48,7 @@ export function MapView() {
 
   const [followTruck, setFollowTruck] = React.useState<boolean>(true);
   const [speedMultiplier, setSpeedMultiplier] = React.useState<number>(20);
-  const [mapStyleKey, setMapStyleKey] = React.useState<'osm' | 'dark' | 'voyager'>('osm');
+  const [mapStyleKey, setMapStyleKey] = React.useState<'osm' | 'topo' | 'satellite'>('osm');
   const [showHazardLayer, setShowHazardLayer] = React.useState<boolean>(true);
   const [showFirmsLayer, setShowFirmsLayer] = React.useState<boolean>(true);
 
@@ -114,7 +114,7 @@ export function MapView() {
   };
 
   // Change Map Basemap Tile Source
-  const handleStyleChange = (key: 'osm' | 'dark' | 'voyager') => {
+  const handleStyleChange = (key: 'osm' | 'topo' | 'satellite') => {
     setMapStyleKey(key);
     const map = mapRef.current;
     if (!map) return;
@@ -508,7 +508,7 @@ export function MapView() {
         {/* Map Basemap Style Switcher */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 3, borderLeft: '1px solid var(--border-medium)', paddingLeft: 8 }}>
           <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)' }}>THEME:</span>
-          {(['osm', 'dark', 'voyager'] as const).map((key) => (
+          {(['osm', 'topo', 'satellite'] as const).map((key) => (
             <button
               key={key}
               type="button"
