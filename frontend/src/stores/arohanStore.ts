@@ -24,6 +24,47 @@ export interface AuthUser {
   avatarText: string;
 }
 
+export interface CommandKpis {
+  active_risk_events: number;
+  predicted_disruptions: number;
+  affected_corridors: number;
+  resource_shortages: number;
+  ai_recommendations: number;
+  high_priority_actions: number;
+  resource_transfers: number;
+  forecast_horizon: string;
+  data_notice: string;
+  last_updated: string;
+}
+
+export interface FieldReportData {
+  id: number;
+  driver_id?: number;
+  incident_type: 'LANDSLIDE' | 'FLOOD' | 'ROAD_BLOCKAGE' | 'BRIDGE_DAMAGE' | 'ACCESSIBILITY_LOSS' | 'OTHER';
+  condition: 'CLEAR' | 'SLOW' | 'PARTIAL' | 'BLOCKED';
+  verification_status: 'VERIFIED' | 'CORROBORATED' | 'UNVERIFIED';
+  notes: string;
+  lat: number;
+  lon: number;
+  location_name: string;
+  created_at: string;
+}
+
+export interface DistrictFloodVulnerability {
+  district_name: string;
+  state_name: string;
+  is_ner_region: boolean;
+  risk_tier: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW';
+  dfsi: number;
+  percent_flooded_area: number;
+  permanent_water: number;
+  corrected_percent_flooded_area: number;
+  human_fatality: number;
+  human_injured: number;
+  population: number;
+  mean_flood_duration_days: number;
+}
+
 const STORAGE_KEY = 'arohan_auth_user';
 
 const getInitialUser = (): AuthUser | null => {
@@ -543,6 +584,70 @@ export const DEFAULT_TERRAIN_RISKS = {
   data_notice: 'Real GIS terrain layers integrated with live IMD telemetry & predictive machine learning.',
 };
 
+export const DEFAULT_COMMAND_KPIS: CommandKpis = {
+  active_risk_events: 12,
+  predicted_disruptions: 8,
+  affected_corridors: 6,
+  resource_shortages: 4,
+  ai_recommendations: 18,
+  high_priority_actions: 5,
+  resource_transfers: 9,
+  forecast_horizon: '48h',
+  data_notice: 'SIMULATION / PROTOTYPE DATA',
+  last_updated: new Date().toISOString(),
+};
+
+export const DEFAULT_FIELD_REPORTS: FieldReportData[] = [
+  {
+    id: 101,
+    driver_id: 1,
+    incident_type: 'LANDSLIDE',
+    condition: 'BLOCKED',
+    verification_status: 'VERIFIED',
+    notes: 'Mud & boulder slide blocking northbound carriageway at km 48. Clearance crews deployed with 2 excavators.',
+    lat: 25.682,
+    lon: 91.905,
+    location_name: 'NH-6 km 48 Umiam Lake Escarpment (Meghalaya)',
+    created_at: new Date(Date.now() - 1800000).toISOString(),
+  },
+  {
+    id: 102,
+    driver_id: 2,
+    incident_type: 'FLOOD',
+    condition: 'PARTIAL',
+    verification_status: 'CORROBORATED',
+    notes: 'Water surging 0.4m over low-lying culvert. High-clearance relief trucks passing slowly; light vehicles turned back.',
+    lat: 24.816,
+    lon: 92.798,
+    location_name: 'Silchar Chanderpur Approach (Cachar, Assam)',
+    created_at: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: 103,
+    driver_id: 3,
+    incident_type: 'ROAD_BLOCKAGE',
+    condition: 'SLOW',
+    verification_status: 'UNVERIFIED',
+    notes: 'Heavy multi-axle freight stuck on hairpin incline. Single-lane alternating convoy in effect.',
+    lat: 25.178,
+    lon: 93.025,
+    location_name: 'NH-27 Haflong Pass km 114 (Dima Hasao)',
+    created_at: new Date(Date.now() - 5400000).toISOString(),
+  },
+  {
+    id: 104,
+    driver_id: 4,
+    incident_type: 'BRIDGE_DAMAGE',
+    condition: 'PARTIAL',
+    verification_status: 'VERIFIED',
+    notes: 'Scour observed at pier 2 after flash stream surge. Load limit capped at 12 MT payload.',
+    lat: 24.045,
+    lon: 92.715,
+    location_name: 'Kolasib Mountain Bridge (NH-306, Mizoram)',
+    created_at: new Date(Date.now() - 7200000).toISOString(),
+  },
+];
+
 export const DEFAULT_EVENTS: NetworkEvent[] = [
   {
     id: 1,
@@ -708,6 +813,11 @@ interface ArohanStore extends Partial<AppState> {
     total_forecast_windows: number;
     data_notice?: string;
   } | null;
+  commandKpis: CommandKpis;
+  fieldReports: FieldReportData[];
+  corridorRiskForecasts: CorridorRiskForecastData[];
+  floodVulnerabilities: DistrictFloodVulnerability[];
+  floodSummary: any;
 
   // Actions
   setGpsUpdate: (update: GPSUpdate | null) => void;
@@ -721,6 +831,10 @@ interface ArohanStore extends Partial<AppState> {
   approveAlert: (id: number) => Promise<void>;
   dismissAlert: (id: number, reason: string) => Promise<void>;
   fetchTerrainRisks: () => Promise<void>;
+  fetchCommandKpis: () => Promise<void>;
+  fetchFieldReports: () => Promise<void>;
+  fetchCorridorRiskForecasts: () => Promise<void>;
+  fetchFloodVulnerabilities: (nerOnly?: boolean) => Promise<void>;
   scenarioStart: () => Promise<void>;
   scenarioNext: () => Promise<void>;
   scenarioPause: () => Promise<void>;
@@ -764,6 +878,11 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
   resourceTransfers: DEFAULT_RESOURCE_TRANSFERS,
   operationalAlerts: DEFAULT_OPERATIONAL_ALERTS,
   terrainRisks: DEFAULT_TERRAIN_RISKS,
+  commandKpis: DEFAULT_COMMAND_KPIS,
+  fieldReports: DEFAULT_FIELD_REPORTS,
+  corridorRiskForecasts: DEFAULT_TERRAIN_RISKS.current_risks,
+  floodVulnerabilities: [],
+  floodSummary: null,
 
   setGpsUpdate: (update) => set({ gpsUpdate: update }),
 
@@ -851,6 +970,10 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
       get().fetchResources();
       get().fetchAlerts();
       get().fetchTerrainRisks();
+      get().fetchCommandKpis();
+      get().fetchFieldReports();
+      get().fetchCorridorRiskForecasts();
+      get().fetchFloodVulnerabilities();
     } catch (e) {
       set({ isLoading: false, error: String(e) });
     }
@@ -984,6 +1107,54 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
       set({ terrainRisks: data });
     } catch (e) {
       console.warn('Failed to fetch terrain risks:', e);
+    }
+  },
+
+  fetchCommandKpis: async () => {
+    try {
+      const data = await patch('/command/kpis', 'GET');
+      if (data) {
+        set({ commandKpis: data });
+      }
+    } catch (e) {
+      console.warn('Failed to fetch command KPIs:', e);
+    }
+  },
+
+  fetchFieldReports: async () => {
+    try {
+      const data = await patch('/field-reports', 'GET');
+      if (Array.isArray(data) && data.length > 0) {
+        set({ fieldReports: data });
+      }
+    } catch (e) {
+      console.warn('Failed to fetch field reports:', e);
+    }
+  },
+
+  fetchCorridorRiskForecasts: async () => {
+    try {
+      const data = await patch('/corridors/risk-forecasts', 'GET');
+      if (Array.isArray(data) && data.length > 0) {
+        set({ corridorRiskForecasts: data });
+      }
+    } catch (e) {
+      console.warn('Failed to fetch corridor forecasts:', e);
+    }
+  },
+
+  fetchFloodVulnerabilities: async (nerOnly = true) => {
+    try {
+      const [listRes, sumRes] = await Promise.all([
+        patch(`/data/flood-vulnerability?ner_only=${nerOnly}&limit=200`, 'GET'),
+        patch('/data/flood-vulnerability/summary', 'GET'),
+      ]);
+      set({
+        floodVulnerabilities: listRes?.data || [],
+        floodSummary: sumRes || null,
+      });
+    } catch (e) {
+      console.warn('Failed to fetch flood vulnerability data:', e);
     }
   },
 }));

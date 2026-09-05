@@ -4,6 +4,7 @@ import { Sidebar } from './components/Layout/Sidebar';
 import { TopBar } from './components/Layout/TopBar';
 import { LandingPage } from './pages/LandingPage';
 import { CommandCenter } from './pages/CommandCenter';
+import { MapOverview } from './pages/MapOverview';
 import { MissionDetail } from './pages/MissionDetail';
 import { ActionCenter } from './pages/ActionCenter';
 import { DriverInterface } from './pages/DriverInterface';
@@ -49,6 +50,7 @@ function AppShell() {
         <main className="app-content">
           <Routes>
             <Route path="/command" element={<CommandCenter />} />
+            <Route path="/map" element={<MapOverview />} />
             <Route path="/resources" element={<ResourceDashboard />} />
             <Route path="/alerts" element={<ActionCenter />} />
             <Route path="/multimodal" element={<MultimodalOperations />} />

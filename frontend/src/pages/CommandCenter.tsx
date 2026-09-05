@@ -1,1080 +1,1362 @@
-import React, { useState, useEffect } from 'react';
-import { MapView } from '../components/Map/MapView';
-import { StatusBadge } from '../components/StatusBadge';
-import { useArohanStore } from '../stores/arohanStore';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gpsSimulationService } from '../services/gpsSimulationService';
+import { useArohanStore } from '../stores/arohanStore';
+import { OperationalAlertData } from '../types';
 import { DecisionFlowStepper } from '../components/DecisionFlowStepper';
 import {
-  Clock,
-  Radio,
+  ShieldAlert,
+  AlertTriangle,
+  Zap,
+  TrendingUp,
+  MapPin,
+  Compass,
+  Boxes,
+  Truck,
+  Layers,
   ArrowRight,
   ArrowUpRight,
-  Activity,
-  Sliders,
-  Truck,
-  Zap,
-  CloudRain,
-  Shield,
-  ShieldAlert,
-  Search,
   RotateCcw,
-  X,
-  Calendar,
-  Layers,
-  TrendingUp,
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
+  Search,
+  Filter,
   CheckCircle2,
+  Clock,
+  Radio,
+  Sliders,
+  Calendar,
+  CloudRain,
+  Flame,
+  Info,
+  ExternalLink,
+  ChevronRight,
+  Activity,
   Sparkles,
-  DollarSign,
-  Compass,
-  Boxes
+  RefreshCw,
+  Bell,
+  Check,
+  X,
+  Navigation
 } from 'lucide-react';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend
+} from 'recharts';
 
 export function CommandCenter() {
-  const {
-    shipment,
-    shipmentsList,
-    selectedShipmentId,
-    selectShipment,
-    scenario_step,
-    kpis,
-    isConnected,
-    gpsUpdate,
-    scenarioNext,
-    scenarioReset
-  } = useArohanStore();
   const navigate = useNavigate();
+  const {
+    commandKpis,
+    operationalAlerts,
+    resourceStocks,
+    resourceTransfers,
+    fieldReports,
+    fetchCommandKpis,
+    fetchAlerts,
+    fetchResources,
+    fetchFieldReports,
+    fetchFloodVulnerabilities,
+    approveAlert,
+    reviewAlert,
+    dismissAlert,
+    approveTransfer,
+    isConnected,
+    events
+  } = useArohanStore();
 
-  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-US', { hour12: false }));
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [showRiskModal, setShowRiskModal] = useState<boolean>(false);
-  const [showDemoControls, setShowDemoControls] = useState<boolean>(false);
-  const [reportRange, setReportRange] = useState<'Real-time' | 'Daily'>('Real-time');
+  // Component state
+  const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [riskFilter, setRiskFilter] = useState<string>('ALL');
+  const [actionFilter, setActionFilter] = useState<string>('ALL');
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-IN', { hour12: false }));
+  const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
   // Live clock
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
+      setCurrentTime(new Date().toLocaleTimeString('en-IN', { hour12: false }));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const step = scenario_step ?? -1;
+  // Fetch live operational data on mount
+  useEffect(() => {
+    fetchCommandKpis();
+    fetchAlerts();
+    fetchResources();
+    fetchFieldReports();
+    fetchFloodVulnerabilities();
+  }, []);
 
-  // Filtered shipments
-  const filteredShipments = (shipmentsList || []).filter((s) => {
-    const matchesSearch =
-      s.shipment_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.origin.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.cargo_type.toLowerCase().includes(searchQuery.toLowerCase());
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      fetchCommandKpis(),
+      fetchAlerts(),
+      fetchResources(),
+      fetchFieldReports(),
+      fetchFloodVulnerabilities(),
+    ]);
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
-    const matchesStatus = statusFilter === 'ALL' || s.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  const showNotification = (msg: string) => {
+    setActionSuccessMsg(msg);
+    setTimeout(() => setActionSuccessMsg(null), 4000);
+  };
+
+  // KPI calculations with fallback to default operational numbers
+  const kpis = commandKpis || {
+    active_risk_events: operationalAlerts.filter(a => a.status !== 'DISMISSED').length || 12,
+    predicted_disruptions: 8,
+    affected_corridors: 6,
+    resource_shortages: resourceStocks.filter(s => s.status === 'SHORTAGE' || s.status === 'CRITICAL').length || 4,
+    ai_recommendations: 18,
+    high_priority_actions: operationalAlerts.filter(a => a.priority === 'CRITICAL' && a.status === 'ACTIVE').length || 5,
+    resource_transfers: resourceTransfers.length || 9,
+    forecast_horizon: '48h',
+    data_notice: 'SIMULATION / PROTOTYPE DATA — Calibrated with Official IMD & NESAC Parameters',
+    last_updated: new Date().toISOString(),
+  };
+
+  // Section B: 48h Predictive Risk Trend Data
+  const riskTrendData = [
+    { time: 'Current', activeRisks: 12, disruptions: 8, rainfallAvg: 38 },
+    { time: '+6h', activeRisks: 15, disruptions: 11, rainfallAvg: 44 },
+    { time: '+12h', activeRisks: 18, disruptions: 14, rainfallAvg: 52 },
+    { time: '+24h', activeRisks: 14, disruptions: 9, rainfallAvg: 30 },
+    { time: '+48h', activeRisks: 8, disruptions: 5, rainfallAvg: 18 },
+  ];
+
+  // Section C: Risk Type Distribution Data
+  const riskTypeData = [
+    { name: 'Landslide', value: 35, color: '#ef4444' },
+    { name: 'Flood Surge', value: 30, color: '#3b82f6' },
+    { name: 'Heavy Rainfall', value: 20, color: '#06b6d4' },
+    { name: 'Road Degradation', value: 10, color: '#f59e0b' },
+    { name: 'Bridge Scour', value: 5, color: '#8b5cf6' },
+  ];
+
+  // Section G: Resource Availability vs Requirement (Surplus vs Shortage)
+  const resourceBalanceData = [
+    { district: 'Guwahati (Kamrup)', available: 4500, required: 2000, type: 'Food Grains' },
+    { district: 'Shillong (E. Khasi)', available: 850, required: 2400, type: 'Food Grains' },
+    { district: 'Silchar (Cachar)', available: 420, required: 1500, type: 'Medical Kits' },
+    { district: 'Agartala (W. Tripura)', available: 110, required: 450, type: 'Oxygen' },
+    { district: 'Aizawl (Mizoram)', available: 480, required: 950, type: 'Fuel (x100 L)' },
+    { district: 'Itanagar (Papum Pare)', available: 2400, required: 2000, type: 'Water (x10 L)' },
+  ];
+
+  // Regional Risk Overview by State
+  const regionalRiskOverview = [
+    { state: 'Assam', critical: 3, high: 5, moderate: 8, affectedCorridors: 4, primaryHazard: 'Flood Surge & River Embankment', status: 'CRITICAL' },
+    { state: 'Meghalaya', critical: 2, high: 4, moderate: 3, affectedCorridors: 2, primaryHazard: 'NH-6 Slope Shear Failure', status: 'CRITICAL' },
+    { state: 'Mizoram', critical: 1, high: 3, moderate: 4, affectedCorridors: 2, primaryHazard: 'NH-306 Hill Creep & Mudflow', status: 'HIGH' },
+    { state: 'Tripura', critical: 1, high: 2, moderate: 2, affectedCorridors: 1, primaryHazard: 'Isolated Buffer Depletion', status: 'HIGH' },
+    { state: 'Arunachal Pradesh', critical: 1, high: 2, moderate: 5, affectedCorridors: 2, primaryHazard: 'Frontier Escarpment Slide', status: 'HIGH' },
+    { state: 'Manipur', critical: 0, high: 2, moderate: 4, affectedCorridors: 1, primaryHazard: 'Highway Shoulder Erosion', status: 'MODERATE' },
+    { state: 'Nagaland', critical: 0, high: 1, moderate: 3, affectedCorridors: 1, primaryHazard: 'Monsoon Waterlogging', status: 'MODERATE' },
+    { state: 'Sikkim', critical: 0, high: 2, moderate: 2, affectedCorridors: 1, primaryHazard: 'High-Altitude Flash Runoff', status: 'MODERATE' },
+  ];
+
+  // Filtered Regional Risk based on state selector and hazard filter
+  const filteredRegionalRisks = regionalRiskOverview.filter(r => {
+    const matchesRegion = selectedRegion === 'ALL' || r.state.toUpperCase() === selectedRegion;
+    const matchesHazard = riskFilter === 'ALL' ||
+      (riskFilter === 'FLOOD' && r.primaryHazard.toLowerCase().includes('flood')) ||
+      (riskFilter === 'LANDSLIDE' && (r.primaryHazard.toLowerCase().includes('slope') || r.primaryHazard.toLowerCase().includes('slide') || r.primaryHazard.toLowerCase().includes('hill'))) ||
+      (riskFilter === 'HEAVY RAINFALL' && r.primaryHazard.toLowerCase().includes('runoff')) ||
+      (riskFilter === 'ROAD ACCESSIBILITY' && r.primaryHazard.toLowerCase().includes('highway'));
+    return matchesRegion && matchesHazard;
   });
 
-  const handleSimulateDisruption = async () => {
-    if (scenarioNext) {
-      await scenarioNext();
-    }
-  };
-
-  const handleTriggerReroute = () => {
-    gpsSimulationService.acceptReroute();
-  };
-
-  const handleResetSimulation = () => {
-    gpsSimulationService.reset(selectedShipmentId || 1);
-    if (scenarioReset) {
-      scenarioReset();
-    }
-  };
-
-  const currentShipment = shipment || (shipmentsList && shipmentsList[0]);
+  // Action Queue items
+  const actionQueue = operationalAlerts.filter(a => {
+    const matchesPriority = actionFilter === 'ALL' || a.priority === actionFilter;
+    const matchesSearch = !searchQuery ||
+      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.location_district.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.recommended_action.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesPriority && matchesSearch;
+  });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%', paddingBottom: 40 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%', paddingBottom: 50 }}>
       
-      {/* End-to-End Decision Flow Stepper */}
+      {/* ── END-TO-END DECISION FLOW STEPPER ──────────────────────────────────── */}
       <DecisionFlowStepper />
 
-      {/* 1. TOP HEADER: TITLE & CONTROLS (Sanchar AI Style) */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
-              Command Center
-            </h1>
-            <span style={{
-              display: 'inline-flex',
+      {/* ── COMMAND CENTER HEADER ─────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 16,
+        padding: '20px 24px',
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      }}>
+        {/* Left: Brand Identity & Subtitle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: 10,
+            backgroundColor: '#ECFDF5',
+            border: '1px solid #A7F3D0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#059669',
+            flexShrink: 0,
+          }}>
+            <Compass size={24} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
+                AROHAN COMMAND CENTER
+              </h1>
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                backgroundColor: '#ECFDF5',
+                color: '#047857',
+                border: '1px solid #A7F3D0',
+                borderRadius: 9999,
+                padding: '2px 8px',
+              }}>
+                SIH26002
+              </span>
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                backgroundColor: '#FEF3C7',
+                color: '#B45309',
+                border: '1px solid #FDE68A',
+                borderRadius: 9999,
+                padding: '2px 8px',
+              }}>
+                SIMULATION / PROTOTYPE DATA
+              </span>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 0', fontWeight: 500 }}>
+              Predictive Logistics & Accessibility Intelligence — North Eastern Region of India
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Controls (Region, Search, Refresh, User Department) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          
+          {/* Region Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B' }}>REGION:</span>
+            <select
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 6,
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                backgroundColor: '#F8FAFC',
+                border: '1px solid #CBD5E1',
+                color: '#0F172A',
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            >
+              <option value="ALL">All NER (8 States)</option>
+              <option value="ASSAM">Assam</option>
+              <option value="MEGHALAYA">Meghalaya</option>
+              <option value="MIZORAM">Mizoram</option>
+              <option value="TRIPURA">Tripura</option>
+              <option value="ARUNACHAL PRADESH">Arunachal Pradesh</option>
+              <option value="MANIPUR">Manipur</option>
+              <option value="NAGALAND">Nagaland</option>
+              <option value="SIKKIM">Sikkim</option>
+            </select>
+          </div>
+
+          {/* Department Tag */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '5px 10px',
+            borderRadius: 6,
+            backgroundColor: '#F1F5F9',
+            fontSize: '0.75rem',
+            color: '#334155',
+            fontWeight: 600,
+          }}>
+            <Activity size={14} color="#059669" />
+            <span>NER Disaster Response Logistics Unit</span>
+          </div>
+
+          {/* Live Refresh Button */}
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            style={{
+              display: 'flex',
               alignItems: 'center',
-              padding: '2px 8px',
-              borderRadius: 9999,
-              fontSize: '0.72rem',
+              gap: 6,
+              padding: '6px 12px',
+              borderRadius: 6,
+              fontSize: '0.78rem',
               fontWeight: 600,
               backgroundColor: '#ECFDF5',
               color: '#047857',
-              border: '1px solid #A7F3D0'
-            }}>
-              Active Monitoring
-            </span>
-          </div>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748B', fontWeight: 400 }}>
-            Real-time corridor accessibility, predictive hazard indices, and essential relief dispatch orchestration.
-          </p>
-        </div>
-
-        {/* Header Right Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Live IST Time */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: 8,
-              padding: '6px 12px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: '#334155',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+              border: '1px solid #A7F3D0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
             }}
           >
-            <Clock size={14} style={{ color: '#059669' }} />
+            <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
+
+          {/* Clock & Status */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '5px 10px',
+            borderRadius: 6,
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            fontSize: '0.75rem',
+            color: '#475569',
+            fontWeight: 700,
+          }}>
+            <Clock size={13} color="#059669" />
             <span>{currentTime} IST</span>
           </div>
-
-          {/* Date Picker Pill */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: 8,
-              padding: '6px 12px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: '#334155',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-            }}
-          >
-            <Calendar size={14} style={{ color: '#64748B' }} />
-            <span>24.04.2026</span>
-          </div>
-
-          {/* Simulation Controls Button */}
-          <button
-            type="button"
-            onClick={() => setShowDemoControls(!showDemoControls)}
-            className="btn btn-secondary"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              padding: '6px 14px',
-              borderRadius: 8
-            }}
-          >
-            <Sliders size={14} />
-            <span>Disaster Controls</span>
-            {showDemoControls ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
         </div>
       </div>
 
-      {/* DEMO SIMULATION CONTROLS (COLLAPSIBLE) */}
-      {showDemoControls && (
-        <div
-          style={{
-            backgroundColor: '#0F172A',
-            color: '#FFFFFF',
-            borderRadius: 12,
-            padding: '16px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 12,
-            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Zap size={18} style={{ color: '#34D399' }} />
-            <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF' }}>
-                DISASTER SCENARIO SIMULATION ENGINE
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                Trigger hazards, test AI reroute recommendations, and evaluate essential supply delivery disruptions.
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={handleSimulateDisruption}
-              style={{
-                backgroundColor: '#DC2626',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '6px 14px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                borderRadius: 8,
-                cursor: 'pointer'
-              }}
-            >
-              <CloudRain size={14} />
-              <span>Advance Hazard (Step {step + 2})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/demo')}
-              style={{
-                backgroundColor: '#334155',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '6px 12px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                borderRadius: 8,
-                cursor: 'pointer'
-              }}
-            >
-              Full Simulator Panel
-            </button>
-
-            <button
-              type="button"
-              onClick={handleTriggerReroute}
-              style={{
-                backgroundColor: '#059669',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '6px 14px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                borderRadius: 8,
-                cursor: 'pointer'
-              }}
-            >
-              <Zap size={14} />
-              <span>Apply AI Bypass (Route B)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleResetSimulation}
-              style={{
-                backgroundColor: '#475569',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '6px 14px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                borderRadius: 8,
-                cursor: 'pointer'
-              }}
-            >
-              <RotateCcw size={14} />
-              <span>Reset</span>
-            </button>
-          </div>
+      {/* Action Notification Toast */}
+      {actionSuccessMsg && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '10px 16px',
+          backgroundColor: '#ECFDF5',
+          color: '#065F46',
+          border: '1px solid #A7F3D0',
+          borderRadius: 8,
+          fontSize: '0.85rem',
+          fontWeight: 600,
+        }}>
+          <CheckCircle2 size={16} color="#059669" />
+          <span>{actionSuccessMsg}</span>
         </div>
       )}
 
-      {/* 2. SANCHAR AI COPILOT INSIGHT CARD (Section 6.B Blueprint) */}
-      <div
-        className="card-ai-insight"
-        style={{
-          border: '1px solid #BFDBFE',
-          background: 'linear-gradient(90deg, rgba(239, 246, 255, 0.6) 0%, rgba(238, 242, 255, 0.25) 100%)',
-          borderRadius: 16,
-          padding: '18px 22px',
-          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ padding: '6px 8px', borderRadius: 8, backgroundColor: '#EFF6FF', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Sparkles size={16} />
-            </div>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1E3A8A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              AROHAN LOGISTICS COPILOT — PROACTIVE DISASTER REROUTE DIRECTIVE
-            </span>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '2px 8px',
-              borderRadius: 9999,
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              backgroundColor: '#DBEAFE',
-              color: '#1E40AF'
-            }}>
-              CONFIDENCE 88%
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button
-              type="button"
-              onClick={handleTriggerReroute}
-              className="btn btn-primary btn-sm"
+      {/* ── TOP KPI ROW (8 COMPACT OPERATIONAL CARDS) ─────────────────────────── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+        gap: 12,
+      }}>
+        {[
+          {
+            title: 'ACTIVE RISKS',
+            value: kpis.active_risk_events,
+            desc: 'High-priority hazard alerts',
+            icon: ShieldAlert,
+            color: '#ef4444',
+            bg: '#FEE2E2',
+            onClick: () => {
+              const el = document.getElementById('section-regional-risk');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            },
+          },
+          {
+            title: 'PREDICTED DISRUPTIONS',
+            value: kpis.predicted_disruptions,
+            desc: 'Accessibility risk forecasts',
+            icon: AlertTriangle,
+            color: '#f59e0b',
+            bg: '#FEF3C7',
+            onClick: () => navigate('/map?focus=corridors'),
+          },
+          {
+            title: 'AFFECTED CORRIDORS',
+            value: kpis.affected_corridors,
+            desc: 'Routes at elevated risk',
+            icon: Navigation,
+            color: '#d97706',
+            bg: '#FEF3C7',
+            onClick: () => navigate('/map'),
+          },
+          {
+            title: 'RESOURCE SHORTAGES',
+            value: kpis.resource_shortages,
+            desc: 'Districts needing supply',
+            icon: Boxes,
+            color: '#dc2626',
+            bg: '#FEE2E2',
+            onClick: () => navigate('/resources'),
+          },
+          {
+            title: 'AI RECOMMENDATIONS',
+            value: kpis.ai_recommendations,
+            desc: 'Pending decision options',
+            icon: Zap,
+            color: '#059669',
+            bg: '#ECFDF5',
+            onClick: () => {
+              const el = document.getElementById('section-ai-recommendations');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            },
+          },
+          {
+            title: 'HIGH PRIORITY ACTIONS',
+            value: kpis.high_priority_actions,
+            desc: 'Authority review required',
+            icon: Flame,
+            color: '#b91c1c',
+            bg: '#FEE2E2',
+            onClick: () => {
+              const el = document.getElementById('section-action-queue');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            },
+          },
+          {
+            title: 'RESOURCE TRANSFERS',
+            value: kpis.resource_transfers,
+            desc: 'Redistribution movements',
+            icon: Truck,
+            color: '#2563eb',
+            bg: '#DBEAFE',
+            onClick: () => navigate('/resources'),
+          },
+          {
+            title: 'FORECAST HORIZON',
+            value: kpis.forecast_horizon || '48h',
+            desc: 'Predictive planning window',
+            icon: Clock,
+            color: '#475569',
+            bg: '#F1F5F9',
+            onClick: () => {},
+          },
+        ].map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={idx}
+              onClick={card.onClick}
               style={{
-                backgroundColor: '#059669',
-                color: '#FFFFFF',
-                borderRadius: 8,
-                padding: '6px 14px',
-                fontSize: '0.78rem',
-                fontWeight: 600
+                backgroundColor: '#ffffff',
+                padding: '14px 16px',
+                borderRadius: 10,
+                border: '1px solid #E2E8F0',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
               }}
             >
-              Apply Reroute Directive
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowRiskModal(true)}
-              className="btn btn-secondary btn-sm"
-              style={{
-                borderRadius: 8,
-                padding: '6px 12px',
-                fontSize: '0.78rem',
-                fontWeight: 600
-              }}
-            >
-              Inspect Risk ML
-            </button>
-          </div>
-        </div>
-
-        <p style={{ margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.5 }}>
-          Rerouting Relief Movement <strong>{currentShipment?.shipment_code || 'REL-001'}</strong> via Western Sonapur Ridge Corridor (Route B) bypasses landslide-prone NH-06 kilometer 42–54, preventing supply delivery disruption and cutting delay by <strong>5.9 hours</strong>.
-        </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748B', letterSpacing: '0.04em' }}>
+                  {card.title}
+                </span>
+                <span style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 6,
+                  backgroundColor: card.bg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: card.color,
+                }}>
+                  <Icon size={13} />
+                </span>
+              </div>
+              <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }}>
+                {card.value}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#64748B', marginTop: 4 }}>
+                {card.desc}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* 3. CORE METRIC PANELS (4 Operational Disaster Decision Metrics) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18 }}>
-        
-        {/* Metric 1: Active Risk Events */}
-        <div className="card" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              ACTIVE RISK EVENTS
-            </span>
-            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#DC2626', border: '1px solid #E2E8F0' }}>
-              <ShieldAlert size={16} />
-            </div>
-          </div>
-          
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>12</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#FEF2F2', color: '#DC2626' }}>
-              3 Critical
-            </span>
-          </div>
-          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Active landslide & hydro alerts
-          </p>
+      {/* ── QUICK ACTIONS BAR ─────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 10,
+        backgroundColor: '#ffffff',
+        padding: '12px 18px',
+        borderRadius: 8,
+        border: '1px solid #E2E8F0',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 800, color: '#0F172A' }}>
+          <Sparkles size={15} color="#059669" />
+          <span>OPERATIONAL SHORTCUTS:</span>
         </div>
-
-        {/* Metric 2: Affected Corridors */}
-        <div className="card" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              AFFECTED CORRIDORS
-            </span>
-            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#3B82F6', border: '1px solid #E2E8F0' }}>
-              <Truck size={16} />
-            </div>
-          </div>
-          
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>7</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#EFF6FF', color: '#1D4ED8' }}>
-              NH-6, NH-27, NH-102
-            </span>
-          </div>
-          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Strategic lifeline corridors monitored
-          </p>
-        </div>
-
-        {/* Metric 3: Delay Avoided */}
-        <div className="card" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              SUPPLY DELAY AVOIDED
-            </span>
-            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#F59E0B', border: '1px solid #E2E8F0' }}>
-              <Clock size={16} />
-            </div>
-          </div>
-          
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>
-              {kpis?.delay_avoided_h != null ? `${kpis.delay_avoided_h} hrs` : '5.9 hrs'}
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
-              Route B Bypass
-            </span>
-          </div>
-          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Pre-emptive diversion lead time: 18h
-          </p>
-        </div>
-
-        {/* Metric 4: Shortage Alerts */}
-        <div className="card" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              RESOURCE SHORTAGE ALERTS
-            </span>
-            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#059669', border: '1px solid #E2E8F0' }}>
-              <Boxes size={16} />
-            </div>
-          </div>
-          
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>4</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
-              6 Actions
-            </span>
-          </div>
-          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
-            Forecast horizon: 48 hours
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {[
+            { label: 'VIEW MAP OVERVIEW', path: '/map', icon: Compass, primary: true },
+            { label: 'ANALYZE CORRIDOR RISK', path: '/risk', icon: ShieldAlert },
+            { label: 'RUN DISASTER SCENARIO', path: '/demo', icon: Sliders },
+            { label: 'FIND ALTERNATIVE ROUTE', path: '/replan', icon: Layers },
+            { label: 'CHECK RESOURCE STOCKS', path: '/resources', icon: Boxes },
+            { label: 'VIEW ALL ALERTS', path: '/action', icon: Zap },
+          ].map((act, i) => {
+            const Icon = act.icon;
+            return (
+              <button
+                key={i}
+                onClick={() => navigate(act.path)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  backgroundColor: act.primary ? '#059669' : '#F8FAFC',
+                  color: act.primary ? '#ffffff' : '#334155',
+                  border: `1px solid ${act.primary ? '#059669' : '#CBD5E1'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Icon size={13} />
+                <span>{act.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* 4. VISUALIZATION & ANALYTICS ROW (Section 7 Blueprint - Emerald & Multi-Series) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 1fr 1fr', gap: 18, alignItems: 'stretch' }}>
+      {/* ── MAIN DASHBOARD GRID (LEFT: RISK & ACCESSIBILITY | RIGHT: AI RECOMMENDATIONS) ─ */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, 1fr)',
+        gap: 20,
+      }}>
         
-        {/* CHART 1: TELEMETRY & RISK REPORT (Area Chart with #059669 Emerald Gradient) */}
-        <div className="card" style={{ padding: 22, justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        {/* ── LEFT / LARGE AREA (COLS 1-8): RISK, TRENDS, GRAPHS ─────────────── */}
+        <div style={{ gridColumn: 'span 8', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          
+          {/* SECTION A — REGIONAL RISK OVERVIEW */}
+          <div id="section-regional-risk" style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #E2E8F0',
+            padding: 20,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                  Telemetry & Risk Exposure Curve
-                </h3>
-                <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: 2 }}>
-                  Dynamic corridor vulnerability index & sensor stream
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ShieldAlert size={18} color="#ef4444" />
+                  <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                    REGIONAL RISK & ACCESSIBILITY STATUS
+                  </h2>
                 </div>
+                <span style={{ fontSize: '0.74rem', color: '#64748B' }}>
+                  Operational hazard classification across 8 North Eastern Region states
+                </span>
               </div>
 
-              {/* Range Filters */}
-              <div style={{ display: 'flex', gap: 4 }}>
-                {(['Real-time', 'Daily'] as const).map((r) => (
+              {/* Hazard Filter Pills */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                {['ALL', 'FLOOD', 'LANDSLIDE', 'HEAVY RAINFALL', 'ROAD ACCESSIBILITY'].map((f) => (
                   <button
-                    key={r}
-                    type="button"
-                    onClick={() => setReportRange(r)}
+                    key={f}
+                    onClick={() => setRiskFilter(f)}
                     style={{
-                      border: '1px solid',
-                      borderColor: reportRange === r ? '#059669' : '#E2E8F0',
-                      backgroundColor: reportRange === r ? '#ECFDF5' : '#FFFFFF',
-                      color: reportRange === r ? '#047857' : '#475569',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      padding: '4px 10px',
-                      borderRadius: 6,
-                      cursor: 'pointer'
+                      padding: '3px 8px',
+                      borderRadius: 4,
+                      fontSize: '0.7rem',
+                      fontWeight: riskFilter === f ? 700 : 500,
+                      backgroundColor: riskFilter === f ? '#059669' : '#F1F5F9',
+                      color: riskFilter === f ? '#ffffff' : '#475569',
+                      border: 'none',
+                      cursor: 'pointer',
                     }}
                   >
-                    {r}
+                    {f}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* SVG Spline Area Chart with Sanchar AI Emerald Gradient (Section 7 Spec) */}
-            <div style={{ position: 'relative', width: '100%', height: 140 }}>
-              <svg width="100%" height="100%" viewBox="0 0 500 140" preserveAspectRatio="none">
-                <defs>
-                  {/* Sanchar AI Emerald Gradient Pattern */}
-                  <linearGradient id="colorEmerald" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#059669" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
+            {/* State-by-State Operational Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+              {filteredRegionalRisks.map((st, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    backgroundColor: '#F8FAFC',
+                    borderRadius: 8,
+                    border: `1px solid ${st.status === 'CRITICAL' ? '#FECACA' : st.status === 'HIGH' ? '#FDE68A' : '#E2E8F0'}`,
+                    padding: 12,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>{st.state}</span>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: 4,
+                      backgroundColor: st.status === 'CRITICAL' ? '#FEE2E2' : st.status === 'HIGH' ? '#FEF3C7' : '#ECFDF5',
+                      color: st.status === 'CRITICAL' ? '#B91C1C' : st.status === 'HIGH' ? '#B45309' : '#047857',
+                    }}>
+                      {st.status}
+                    </span>
+                  </div>
 
-                {/* Dashed Background Grid Lines */}
-                <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" strokeDasharray="3 3" />
-                <line x1="0" y1="70" x2="500" y2="70" stroke="#E2E8F0" strokeDasharray="3 3" />
-                <line x1="0" y1="110" x2="500" y2="110" stroke="#E2E8F0" strokeDasharray="3 3" />
+                  <div style={{ fontSize: '0.72rem', color: '#475569', marginBottom: 8, fontWeight: 500 }}>
+                    {st.primaryHazard}
+                  </div>
 
-                {/* Gradient Fill Path */}
-                <path
-                  d="M0,110 C80,105 120,40 180,35 C240,30 280,85 340,70 C400,55 440,25 500,20 L500,140 L0,140 Z"
-                  fill="url(#colorEmerald)"
-                />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', borderTop: '1px solid #E2E8F0', paddingTop: 6 }}>
+                    <span style={{ color: '#64748B' }}>Affected Corridors:</span>
+                    <span style={{ fontWeight: 800, color: '#0F172A' }}>{st.affectedCorridors} Corridors</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Primary Emerald Line (#059669) */}
-                <path
-                  d="M0,110 C80,105 120,40 180,35 C240,30 280,85 340,70 C400,55 440,25 500,20"
-                  fill="none"
-                  stroke="#059669"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
+          {/* SECTION B & C: RISK TREND GRAPH + RISK TYPE DISTRIBUTION */}
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+            
+            {/* Section B: Risk Trend Graph (48h Window) */}
+            <div style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #E2E8F0',
+              padding: 18,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>
+                    PREDICTIVE RISK TREND (48H HORIZON)
+                  </div>
+                  <span style={{ fontSize: '0.7rem', color: '#64748B' }}>
+                    Active risk events & forecasted accessibility disruptions
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, backgroundColor: '#FEF3C7', color: '#B45309', fontWeight: 700 }}>
+                  SIMULATION DATA
+                </span>
+              </div>
 
-                {/* Secondary Blue Line (#3B82F6) */}
-                <path
-                  d="M0,120 C80,115 140,85 200,80 C260,75 320,95 380,85 C440,75 480,50 500,45"
-                  fill="none"
-                  stroke="#3B82F6"
-                  strokeWidth="1.8"
-                  strokeDasharray="4 4"
-                />
-
-                {/* Key Risk Peak Marker */}
-                <circle cx="180" cy="35" r="4" fill="#059669" stroke="#FFFFFF" strokeWidth="2" />
-                <circle cx="500" cy="20" r="4" fill="#059669" stroke="#FFFFFF" strokeWidth="2" />
-              </svg>
-
-              {/* Tooltip Pill */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 10,
-                  left: 140,
-                  backgroundColor: '#0F172A',
-                  color: '#FFFFFF',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  padding: '3px 8px',
-                  borderRadius: 6,
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 5
-                }}
-              >
-                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#34D399' }} />
-                <span>Peak Risk 82% @ 12:40</span>
+              <div style={{ height: 180, width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={riskTrendData}>
+                    <defs>
+                      <linearGradient id="riskGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="disruptGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="time" stroke="#64748B" fontSize={11} />
+                    <YAxis stroke="#64748B" fontSize={11} />
+                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', color: '#fff', borderRadius: 6, fontSize: 12 }} />
+                    <Area type="monotone" dataKey="activeRisks" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#riskGrad)" name="Active Risks" />
+                    <Area type="monotone" dataKey="disruptions" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#disruptGrad)" name="Disruptions" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Timestamps */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94A3B8', fontWeight: 500, marginTop: 8 }}>
-              <span>00:00</span>
-              <span>04:00</span>
-              <span>08:00</span>
-              <span>12:00</span>
-              <span>16:00</span>
-              <span>20:00</span>
+            {/* Section C: Risk Type Distribution */}
+            <div style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #E2E8F0',
+              padding: 18,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>
+                  REGIONAL HAZARD DRIVERS
+                </div>
+                <span style={{ fontSize: '0.7rem', color: '#64748B' }}>
+                  Breakdown by dominant hazard classification
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 130 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={riskTypeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={36}
+                      outerRadius={58}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {riskTypeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', color: '#fff', borderRadius: 6, fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+                {riskTypeData.map((d, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.68rem', color: '#334155' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: d.color }} />
+                    <span>{d.name} ({d.value}%)</span>
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #F1F5F9', marginTop: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: '#334155' }}>
-              <Shield size={14} style={{ color: '#059669' }} />
-              <span>Recommended bypass: <strong>Route B (+5.9h saved)</strong></span>
-            </div>
-            <button
-              onClick={handleTriggerReroute}
-              className="btn btn-primary btn-sm"
-              style={{ padding: '4px 10px', fontSize: '0.72rem' }}
-            >
-              Trigger Reroute
-            </button>
-          </div>
-        </div>
-
-        {/* CHART 2: MULTIMODAL MODE SPLIT (Donut Ring Chart) */}
-        <div className="card" style={{ padding: 22, justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                Multimodal Mode Split
-              </h3>
+          {/* SECTION G — SUPPLY / DEMAND GRAPH (SURPLUS VS SHORTAGE) */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #E2E8F0',
+            padding: 20,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Boxes size={17} color="#059669" />
+                  <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                    ESSENTIAL RESOURCE BALANCE — AVAILABILITY VS REQUIREMENT
+                  </h3>
+                </div>
+                <span style={{ fontSize: '0.72rem', color: '#64748B' }}>
+                  Surplus depots vs Deficit relief nodes informing inter-district redistribution
+                </span>
+              </div>
               <button
-                type="button"
-                onClick={() => navigate('/multimodal')}
-                style={{ border: 'none', background: 'transparent', color: '#64748B', cursor: 'pointer', padding: 2 }}
+                onClick={() => navigate('/resources')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#059669',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                <ArrowUpRight size={16} />
+                <span>Redistribution Center</span>
+                <ChevronRight size={14} />
               </button>
             </div>
 
-            {/* Donut Chart */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: 130 }}>
-              <svg width="130" height="130" viewBox="0 0 42 42">
-                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F1F5F9" strokeWidth="4.5" />
-                {/* Emerald 600 - Highway Freight (64%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#059669"
-                  strokeWidth="4.5"
-                  strokeDasharray="64 36"
-                  strokeDashoffset="25"
-                  strokeLinecap="round"
-                />
-                {/* Blue 500 - Rail Express (22%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#3B82F6"
-                  strokeWidth="4.5"
-                  strokeDasharray="22 78"
-                  strokeDashoffset="61"
-                  strokeLinecap="round"
-                />
-                {/* Amber 500 - Inland Waterways (10%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#F59E0B"
-                  strokeWidth="4.5"
-                  strokeDasharray="10 90"
-                  strokeDashoffset="39"
-                  strokeLinecap="round"
-                />
-                {/* Purple - Air Cargo (4%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#8B5CF6"
-                  strokeWidth="4.5"
-                  strokeDasharray="4 96"
-                  strokeDashoffset="29"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.62rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>TOTAL</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0F172A', lineHeight: 1 }}>150</span>
-                <span style={{ fontSize: '0.62rem', color: '#94A3B8' }}>Missions</span>
-              </div>
-            </div>
-
-            {/* Sanchar AI Legend */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 8px', marginTop: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#059669' }} />
-                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Highway (64%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6' }} />
-                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Rail (22%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F59E0B' }} />
-                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Water (10%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#8B5CF6' }} />
-                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Air (4%)</span>
-              </div>
+            <div style={{ height: 190, width: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={resourceBalanceData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="district" stroke="#64748B" fontSize={10} />
+                  <YAxis stroke="#64748B" fontSize={10} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', color: '#fff', borderRadius: 6, fontSize: 11 }} />
+                  <Legend wrapperStyle={{ fontSize: '0.72rem' }} />
+                  <Bar dataKey="available" name="Available Stock" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="required" name="Minimum Required Buffer" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          <div style={{ fontSize: '0.72rem', color: '#94A3B8', textAlign: 'center', marginTop: 8 }}>
-            Auto-balanced multimodal matrix
+          {/* SECTION H — REGIONAL ROAD ACCESSIBILITY STATUS */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #E2E8F0',
+            padding: 18,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0F172A' }}>
+                REGIONAL ROAD CORRIDOR ACCESSIBILITY
+              </div>
+              <span style={{ fontSize: '0.72rem', color: '#64748B' }}>Click category to open Map Overview</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+              {[
+                { label: 'ACCESSIBLE', count: '74%', desc: '18 Corridors Clear', color: '#10b981', bg: '#ECFDF5', border: '#A7F3D0' },
+                { label: 'PARTIALLY ACCESSIBLE', count: '14%', desc: '3 High-Clearance Only', color: '#f59e0b', bg: '#FEF3C7', border: '#FDE68A' },
+                { label: 'HIGH RISK', count: '8%', desc: '2 Slope Instability Alert', color: '#d97706', bg: '#FEF3C7', border: '#FDE68A' },
+                { label: 'BLOCKED / DISRUPTED', count: '4%', desc: '1 NH-6 km 48 Closure', color: '#ef4444', bg: '#FEE2E2', border: '#FECACA' },
+              ].map((acc, i) => (
+                <div
+                  key={i}
+                  onClick={() => navigate('/map')}
+                  style={{
+                    padding: 12,
+                    borderRadius: 8,
+                    backgroundColor: acc.bg,
+                    border: `1px solid ${acc.border}`,
+                    cursor: 'pointer',
+                    transition: 'transform 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
+                >
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: acc.color }}>{acc.label}</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', margin: '4px 0 2px' }}>{acc.count}</div>
+                  <div style={{ fontSize: '0.68rem', color: '#475569' }}>{acc.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
+
         </div>
 
-        {/* CHART 3: ACTIVE FLEET DRIVERS & VEHICLES (Emerald Bar Chart) */}
-        <div className="card" style={{ padding: 22, justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                Active Fleet Status
-              </h3>
+        {/* ── RIGHT AREA (COLS 9-12): AI RECOMMENDATIONS, RESOURCE STATUS, RECENT EVENTS ─ */}
+        <div style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          
+          {/* SECTION D — AI RECOMMENDATIONS PANEL (HERO SECTION) */}
+          <div id="section-ai-recommendations" style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            border: '2px solid #059669',
+            padding: 18,
+            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.12)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  backgroundColor: '#ECFDF5',
+                  color: '#059669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Zap size={16} />
+                </span>
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#064E3B', margin: 0 }}>
+                    AI RECOMMENDATIONS
+                  </h3>
+                  <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 600 }}>
+                    Predictive Disaster-Response Action Intelligence
+                  </span>
+                </div>
+              </div>
               <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                backgroundColor: '#059669',
+                color: '#ffffff',
                 padding: '2px 8px',
                 borderRadius: 9999,
-                fontSize: '0.68rem',
-                fontWeight: 700,
-                backgroundColor: '#ECFDF5',
-                color: '#047857',
-                border: '1px solid #A7F3D0'
               }}>
-                94% Active
+                ACTIVE
               </span>
             </div>
 
-            {/* Bar Chart with Emerald Fill */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: 130, padding: '0 6px' }}>
-              {[
-                { day: 'Mon', active: 85 },
-                { day: 'Tue', active: 92 },
-                { day: 'Wed', active: 78 },
-                { day: 'Thu', active: 95 },
-                { day: 'Fri', active: 88 },
-                { day: 'Sat', active: 94 },
-                { day: 'Sun', active: 70 }
-              ].map((b) => (
-                <div key={b.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                  <div
-                    style={{
-                      width: 14,
-                      height: 100,
-                      backgroundColor: '#F1F5F9',
-                      borderRadius: 6,
-                      position: 'relative',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '100%',
-                        height: `${b.active}%`,
-                        backgroundColor: b.active >= 90 ? '#059669' : '#10B981',
-                        borderRadius: 6,
-                        transition: 'height 0.3s ease'
-                      }}
-                    />
+            {/* Recommendation Card 1: Landslide Disruption */}
+            <div style={{
+              backgroundColor: '#FEF2F2',
+              border: '1px solid #FECACA',
+              borderRadius: 8,
+              padding: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#B91C1C' }}>
+                  HIGH PRIORITY • PREDICTED LANDSLIDE DISRUPTION
+                </span>
+                <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: 4, backgroundColor: '#EF4444', color: '#fff', fontWeight: 700 }}>
+                  NEXT 24H
+                </span>
+              </div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F172A' }}>
+                Aizawl Link & NH-6 Jorabat–Umiam Escarpment
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                <strong>Reason:</strong> Heavy rainfall (38 mm/h) + 42° slope shear failure probability (74%).
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#B91C1C', fontWeight: 600 }}>
+                <strong>Potential Impact:</strong> Blockage of Convoy REL-001 with emergency medical relief.
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#065F46', backgroundColor: '#ECFDF5', padding: '4px 8px', borderRadius: 4, border: '1px solid #A7F3D0', fontWeight: 600 }}>
+                <strong>Action:</strong> Divert via Sonapur Ridge Bypass (Route B) and pre-position earthmovers.
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                <button
+                  onClick={() => {
+                    reviewAlert(1);
+                    showNotification('Disruption alert #ALT-NER-0101 marked as under executive review.');
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '5px 8px',
+                    borderRadius: 4,
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #CBD5E1',
+                    color: '#334155',
+                    cursor: 'pointer',
+                  }}
+                >
+                  REVIEW
+                </button>
+                <button
+                  onClick={() => navigate('/replan')}
+                  style={{
+                    flex: 1,
+                    padding: '5px 8px',
+                    borderRadius: 4,
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    backgroundColor: '#059669',
+                    border: 'none',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  VIEW ROUTE
+                </button>
+              </div>
+            </div>
+
+            {/* Recommendation Card 2: Resource Shortage Forecast */}
+            <div style={{
+              backgroundColor: '#EFF6FF',
+              border: '1px solid #BFDBFE',
+              borderRadius: 8,
+              padding: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1E40AF' }}>
+                  RESOURCE SHORTAGE FORECAST
+                </span>
+                <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: 4, backgroundColor: '#3B82F6', color: '#fff', fontWeight: 700 }}>
+                  18–24H
+                </span>
+              </div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F172A' }}>
+                Destination: East Khasi Hills (Shillong Central Reserve)
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#475569' }}>
+                <strong>Expected Shortage:</strong> 1,200 MT Food Grains below 3-day buffer.
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#047857' }}>
+                <strong>Suggested Source:</strong> Kamrup Metro (4,500 MT surplus buffer).
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                <button
+                  onClick={() => navigate('/resources')}
+                  style={{
+                    flex: 1,
+                    padding: '5px 8px',
+                    borderRadius: 4,
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #CBD5E1',
+                    color: '#334155',
+                    cursor: 'pointer',
+                  }}
+                >
+                  REVIEW TRANSFER
+                </button>
+                <button
+                  onClick={() => {
+                    approveTransfer(101);
+                    showNotification('Transfer TRF-00101 (1,200 MT Food Grains) approved for dispatch.');
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '5px 8px',
+                    borderRadius: 4,
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    backgroundColor: '#2563eb',
+                    border: 'none',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  AUTHORIZE
+                </button>
+              </div>
+            </div>
+
+            {/* Recommendation Card 3: Flood Accessibility Alert */}
+            <div style={{
+              backgroundColor: '#FEF3C7',
+              border: '1px solid #FDE68A',
+              borderRadius: 8,
+              padding: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#92400E' }}>
+                  FLOOD ACCESSIBILITY ALERT
+                </span>
+                <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: 4, backgroundColor: '#F59E0B', color: '#fff', fontWeight: 700 }}>
+                  CURRENT
+                </span>
+              </div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F172A' }}>
+                Cachar (Silchar Approach) — Accessibility: 42%
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#78350F' }}>
+                <strong>Action:</strong> Divert freight to Multimodal Rail-Road Corridor via Lumding Junction.
+              </div>
+              <button
+                onClick={() => navigate('/multimodal')}
+                style={{
+                  marginTop: 4,
+                  padding: '5px 8px',
+                  borderRadius: 4,
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  backgroundColor: '#D97706',
+                  border: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                }}
+              >
+                ACTIVATE MULTIMODAL HUB
+              </button>
+            </div>
+
+          </div>
+
+          {/* SECTION F — RESOURCE AVAILABILITY BY DISTRICT */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #E2E8F0',
+            padding: 18,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>
+                DISTRICT ESSENTIAL RESOURCES
+              </div>
+              <span style={{ fontSize: '0.7rem', color: '#64748B' }}>5 Key Commodities</span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {resourceStocks.slice(0, 5).map((stock, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 10px',
+                    backgroundColor: '#F8FAFC',
+                    borderRadius: 6,
+                    border: '1px solid #E2E8F0',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0F172A' }}>
+                      {stock.district_name}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: '#64748B' }}>
+                      {stock.resource_type}: {stock.available_qty} {stock.unit}
+                    </div>
                   </div>
-                  <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 500 }}>
-                    {b.day}
+                  <span style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    backgroundColor: stock.status === 'SURPLUS' ? '#ECFDF5' : stock.status === 'CRITICAL' ? '#FEE2E2' : '#FEF3C7',
+                    color: stock.status === 'SURPLUS' ? '#047857' : stock.status === 'CRITICAL' ? '#B91C1C' : '#B45309',
+                  }}>
+                    {stock.status}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 10, borderTop: '1px solid #F1F5F9' }}>
-            <span style={{ fontSize: '0.72rem', color: '#64748B' }}>Total Fleet: 148 units</span>
-            <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>8 in standby</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 5. PRIMARY GIS CORRIDOR MONITORING DISPLAY */}
-      <div className="card" style={{ padding: 22 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
-              <Radio size={16} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A' }}>
-                Primary GIS Corridor Monitoring Display — {currentShipment?.shipment_code || 'REL-001'}
+          {/* SECTION I — RECENT OPERATIONAL EVENTS */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #E2E8F0',
+            padding: 18,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>
+                RECENT OPERATIONAL EVENTS
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                Geospatial relief convoy tracking with real-time route vectors & hazard overlay
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.78rem', color: '#475569' }}>
-            <span>Source: <strong style={{ color: '#0F172A' }}>{currentShipment?.origin.split(' ')[0]}</strong></span>
-            <ArrowRight size={14} style={{ color: '#94A3B8' }} />
-            <span>Destination: <strong style={{ color: '#0F172A' }}>{currentShipment?.destination.split(' ')[0]}</strong></span>
-            <span style={{ color: '#E2E8F0' }}>|</span>
-            <span>Speed: <strong style={{ color: '#059669' }}>{gpsUpdate?.speed_kmh || 60} km/h</strong></span>
-          </div>
-        </div>
-
-        {/* Map Container */}
-        <div style={{ height: 480, width: '100%', borderRadius: 12, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-          <MapView />
-        </div>
-      </div>
-
-      {/* 6. ESSENTIAL RELIEF MOVEMENT MANIFEST TABLE */}
-      <div className="card" style={{ padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, paddingBottom: 12, borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-              Essential Relief Movement Manifest
-            </h3>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: 2 }}>
-              Active relief convoys, designated transit corridors, and real-time accessibility status
-            </div>
-          </div>
-
-          {/* Search Box & Status Filter Pills */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', width: 240 }}>
-              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-              <input
-                type="text"
-                placeholder="Search movement, corridor, resource..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '6px 10px 6px 30px',
-                  fontSize: '0.78rem',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: 8,
-                  outline: 'none',
-                  backgroundColor: '#F8FAFC'
-                }}
-              />
+              <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 600 }}>Live Telemetry Feed</span>
             </div>
 
-            {/* Filter Pills */}
-            <div style={{ display: 'flex', gap: 4 }}>
-              {['ALL', 'IN_TRANSIT', 'DISPATCHED', 'DISRUPTED', 'PLANNED'].map((st) => (
-                <button
-                  key={st}
-                  type="button"
-                  onClick={() => setStatusFilter(st)}
-                  style={{
-                    border: '1px solid',
-                    borderColor: statusFilter === st ? '#059669' : '#E2E8F0',
-                    backgroundColor: statusFilter === st ? '#ECFDF5' : '#FFFFFF',
-                    color: statusFilter === st ? '#047857' : '#475569',
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    padding: '4px 10px',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {st.replace('_', ' ')}
-                </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(events || []).slice(-4).reverse().map((ev, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <span style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: '#059669',
+                    marginTop: 5,
+                    flexShrink: 0,
+                  }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0F172A' }}>{ev.title}</span>
+                      <span style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{ev.time_label || 'Just now'}</span>
+                    </div>
+                    <p style={{ fontSize: '0.7rem', color: '#475569', margin: '2px 0 0', lineHeight: 1.35 }}>
+                      {ev.description}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
+
         </div>
 
-        {/* Structured Data Table */}
-        <div className="table-container">
-          <table className="table">
+      </div>
+
+      {/* ── SECTION E — OPERATIONAL ACTION QUEUE (BOTTOM FULL WIDTH) ─────────── */}
+      <div id="section-action-queue" style={{
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        border: '1px solid #E2E8F0',
+        padding: 22,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Flame size={18} color="#dc2626" />
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0F172A', margin: 0 }}>
+                OPERATIONAL ACTION QUEUE
+              </h2>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+              Actionable disaster-response recommendations requiring institutional review & authorization
+            </span>
+          </div>
+
+          {/* Priority Filters */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM'].map((p) => (
+              <button
+                key={p}
+                onClick={() => setActionFilter(p)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  fontSize: '0.75rem',
+                  fontWeight: actionFilter === p ? 700 : 500,
+                  backgroundColor: actionFilter === p ? '#059669' : '#F1F5F9',
+                  color: actionFilter === p ? '#ffffff' : '#475569',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Queue Table */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.78rem' }}>
             <thead>
-              <tr>
-                <th style={{ width: '4%' }}>
-                  <input type="checkbox" style={{ accentColor: '#059669', cursor: 'pointer' }} />
-                </th>
-                <th style={{ width: '13%' }}>Relief Movement</th>
-                <th style={{ width: '25%' }}>Corridor / Transit Route</th>
-                <th style={{ width: '22%' }}>Essential Commodity</th>
-                <th style={{ width: '11%' }}>Transport Unit</th>
-                <th style={{ width: '13%' }}>Movement Status</th>
-                <th style={{ width: '12%' }}>Target ETA</th>
+              <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '2px solid #E2E8F0', color: '#475569', fontWeight: 700 }}>
+                <th style={{ padding: '10px 12px' }}>PRIORITY</th>
+                <th style={{ padding: '10px 12px' }}>ISSUE & ADVISORY</th>
+                <th style={{ padding: '10px 12px' }}>LOCATION / CORRIDOR</th>
+                <th style={{ padding: '10px 12px' }}>POTENTIAL IMPACT</th>
+                <th style={{ padding: '10px 12px' }}>RECOMMENDED ACTION</th>
+                <th style={{ padding: '10px 12px' }}>STATUS</th>
+                <th style={{ padding: '10px 12px', textAlign: 'right' }}>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {filteredShipments.map((s) => {
-                const isSelected = (selectedShipmentId || 1) === s.id;
-                const activeGps = (gpsUpdate && gpsUpdate.shipmentId === s.id) ? gpsUpdate : null;
-                return (
-                  <tr
-                    key={s.id}
-                    onClick={() => selectShipment(s.id)}
-                    style={{
-                      cursor: 'pointer',
-                      backgroundColor: isSelected ? '#F8FAFC' : 'transparent',
-                      borderLeft: isSelected ? '4px solid #059669' : '4px solid transparent'
-                    }}
-                  >
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => selectShipment(s.id)}
-                        style={{ accentColor: '#059669', cursor: 'pointer' }}
-                      />
-                    </td>
-                    <td>
-                      <strong style={{ color: isSelected ? '#059669' : '#0F172A' }}>{s.shipment_code}</strong>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#334155' }}>
-                        <span>{s.origin.split(' ')[0]}</span>
-                        <ArrowRight size={12} style={{ color: '#94A3B8' }} />
-                        <span>{s.destination.split(' ')[0]}</span>
-                      </div>
-                    </td>
-                    <td style={{ color: '#475569' }}>
-                      {s.cargo_type}
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          backgroundColor: '#F1F5F9',
-                          color: '#0F172A',
-                          padding: '2px 6px',
-                          borderRadius: 6,
-                          fontSize: '0.72rem',
-                          fontFamily: 'monospace',
-                          fontWeight: 600
-                        }}
-                      >
-                        TRK-00{s.id}
-                      </span>
-                    </td>
-                    <td>
-                      <StatusBadge status={activeGps?.simulated_status || s.status} />
-                    </td>
-                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0F172A' }}>
-                      {activeGps?.eta_formatted || (s.updated_eta || s.planned_eta)}
-                    </td>
-                  </tr>
-                );
-              })}
+              {actionQueue.map((item, idx) => (
+                <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background-color 0.15s' }}>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: 9999,
+                      backgroundColor: item.priority === 'CRITICAL' ? '#FEE2E2' : item.priority === 'HIGH' ? '#FEF3C7' : '#ECFDF5',
+                      color: item.priority === 'CRITICAL' ? '#B91C1C' : item.priority === 'HIGH' ? '#B45309' : '#047857',
+                    }}>
+                      {item.priority}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', fontWeight: 700, color: '#0F172A', maxWidth: 220 }}>
+                    {item.title}
+                  </td>
+                  <td style={{ padding: '12px', color: '#475569' }}>
+                    <div style={{ fontWeight: 600 }}>{item.location_district}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748B' }}>{item.affected_corridor}</div>
+                  </td>
+                  <td style={{ padding: '12px', color: '#64748B', maxWidth: 200 }}>
+                    {item.affected_resource}
+                  </td>
+                  <td style={{ padding: '12px', color: '#047857', fontWeight: 600, maxWidth: 240 }}>
+                    {item.recommended_action}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      backgroundColor: item.status === 'ACTIVE' ? '#FEF3C7' : item.status === 'APPROVED' ? '#ECFDF5' : '#F1F5F9',
+                      color: item.status === 'ACTIVE' ? '#B45309' : item.status === 'APPROVED' ? '#047857' : '#475569',
+                    }}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                      {item.status === 'ACTIVE' && (
+                        <>
+                          <button
+                            onClick={() => {
+                              reviewAlert(item.id);
+                              showNotification(`Alert ${item.alert_code} marked as reviewed.`);
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: 4,
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              backgroundColor: '#F8FAFC',
+                              border: '1px solid #CBD5E1',
+                              color: '#334155',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            REVIEW
+                          </button>
+                          <button
+                            onClick={() => {
+                              approveAlert(item.id);
+                              showNotification(`Alert action ${item.alert_code} approved.`);
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: 4,
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              backgroundColor: '#059669',
+                              border: 'none',
+                              color: '#ffffff',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            APPROVE
+                          </button>
+                        </>
+                      )}
+                      {item.status !== 'DISMISSED' && (
+                        <button
+                          onClick={() => {
+                            dismissAlert(item.id, 'Dismissed with operational justification by duty officer');
+                            showNotification(`Alert ${item.alert_code} dismissed.`);
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            borderRadius: 4,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            backgroundColor: '#F1F5F9',
+                            border: '1px solid #E2E8F0',
+                            color: '#64748B',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          DISMISS
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 7. RISK BREAKDOWN MODAL */}
-      {showRiskModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 16,
-              width: '100%',
-              maxWidth: 580,
-              padding: 24,
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              border: '1px solid #E2E8F0'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 12, marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <ShieldAlert size={22} style={{ color: '#DC2626' }} />
-                <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                    AI Risk & Disruption Factor Analysis
-                  </h3>
-                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                    Corridor {currentShipment?.shipment_code} ({currentShipment?.origin.split(' ')[0]} → {currentShipment?.destination.split(' ')[0]})
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowRiskModal(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748B' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ backgroundColor: '#ECFDF5', padding: 12, borderRadius: 8, border: '1px solid #A7F3D0', fontSize: '0.8rem', color: '#047857' }}>
-                <strong>ML Confidence Score: 92%</strong> — Ingesting IMD rainfall radar grids, slope incline contours, and ground soil saturation telemetry.
-              </div>
-
-              {/* Factors */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, marginBottom: 4 }}>
-                    <span>Precipitation Rate (IMD Radar)</span>
-                    <span style={{ color: '#DC2626' }}>82 mm/hr (Heavy Storm)</span>
-                  </div>
-                  <div style={{ width: '100%', height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: '82%', height: '100%', backgroundColor: '#DC2626' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, marginBottom: 4 }}>
-                    <span>Mountain Slope Incline</span>
-                    <span style={{ color: '#F59E0B' }}>42° Steep Gradient</span>
-                  </div>
-                  <div style={{ width: '100%', height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: '74%', height: '100%', backgroundColor: '#F59E0B' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, marginBottom: 4 }}>
-                    <span>Soil Saturation Index</span>
-                    <span style={{ color: '#DC2626' }}>94% (Landslide Alert)</span>
-                  </div>
-                  <div style={{ width: '100%', height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: '94%', height: '100%', backgroundColor: '#DC2626' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  handleTriggerReroute();
-                  setShowRiskModal(false);
-                }}
-                className="btn btn-primary"
-                style={{
-                  backgroundColor: '#059669',
-                  color: '#FFFFFF',
-                  borderRadius: 8,
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-              >
-                <Zap size={14} />
-                <span>Execute Route B Bypass</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowRiskModal(false)}
-                className="btn btn-secondary"
-                style={{
-                  borderRadius: 8,
-                  fontSize: '0.8rem',
-                  fontWeight: 600
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

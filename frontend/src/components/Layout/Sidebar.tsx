@@ -16,7 +16,8 @@ import {
   Sparkles,
   Layers,
   Activity,
-  Globe
+  Globe,
+  Compass
 } from 'lucide-react';
 import { Logo } from '../Logo';
 
@@ -32,6 +33,7 @@ export function Sidebar() {
       title: 'OPERATIONS',
       items: [
         { path: '/command', label: 'Command Center', icon: LayoutDashboard },
+        { path: '/map', label: 'Map Overview (GIS)', icon: Compass },
         { path: '/risk', label: 'Corridor Risk Intelligence', icon: ShieldAlert },
         { path: '/action', label: 'AI Recommendation Center', icon: Zap, alert: hasPending },
         { path: '/replan', label: 'Disaster Route Discovery', icon: Layers },

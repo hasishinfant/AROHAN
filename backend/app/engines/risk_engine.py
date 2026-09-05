@@ -17,7 +17,73 @@ Data source classification:
 """
 
 from dataclasses import dataclass
+import json
+import os
+from typing import Optional, List, Dict, Any
 from app.config import settings
+
+# Path to master government flood vulnerability data
+DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "district_flood_vulnerability.json")
+_DISTRICT_CACHE: Optional[List[Dict[str, Any]]] = None
+_DISTRICT_MAP: Optional[Dict[str, Dict[str, Any]]] = None
+
+def get_master_district_data() -> List[Dict[str, Any]]:
+    global _DISTRICT_CACHE, _DISTRICT_MAP
+    if _DISTRICT_CACHE is None:
+        if os.path.exists(DATA_PATH):
+            with open(DATA_PATH, "r", encoding="utf-8") as f:
+                _DISTRICT_CACHE = json.load(f)
+        else:
+            _DISTRICT_CACHE = []
+        _DISTRICT_MAP = {
+            d["district_name"].lower().strip(): d for d in _DISTRICT_CACHE
+        }
+    return _DISTRICT_CACHE
+
+def find_district_vulnerability(query: str) -> Optional[Dict[str, Any]]:
+    get_master_district_data()
+    q = query.lower().strip()
+    if q in _DISTRICT_MAP:
+        return _DISTRICT_MAP[q]
+    # Substring match fallback
+    for name, data in _DISTRICT_MAP.items():
+        if q in name or name in q:
+            return data
+    return None
+
+def calculate_district_vulnerability_indices(district_name: str) -> Dict[str, float]:
+    """
+    Derives real-world vulnerability_score and historical_disruption_index
+    directly from government DFSI and satellite-corrected flood area %.
+    """
+    rec = find_district_vulnerability(district_name)
+    if not rec:
+        return {
+            "vulnerability_score": 0.50,
+            "historical_disruption_index": 0.40,
+            "dfsi": 0.0,
+            "corrected_percent_flooded_area": 0.0,
+            "is_ner": False,
+            "risk_tier": "MODERATE",
+        }
+    
+    # DFSI scale runs from ~0 to ~20 in national records.
+    # We normalize to 0.0 - 1.0 (with 18+ being severe critical risk).
+    raw_dfsi = rec.get("dfsi") or 0.0
+    norm_vuln = min(raw_dfsi / 19.5, 1.0)
+    
+    # Flooded area % runs from 0 to ~25%
+    raw_flood = rec.get("corrected_percent_flooded_area") or 0.0
+    norm_hist = min(raw_flood / 20.0, 1.0)
+    
+    return {
+        "vulnerability_score": round(norm_vuln, 3),
+        "historical_disruption_index": round(norm_hist, 3),
+        "dfsi": raw_dfsi,
+        "corrected_percent_flooded_area": raw_flood,
+        "is_ner": rec.get("is_ner_region", False),
+        "risk_tier": rec.get("risk_tier", "LOW"),
+    }
 
 
 @dataclass
