@@ -35,10 +35,7 @@ export function Sidebar() {
       items: [
         { path: '/command', label: 'Command Center', icon: LayoutDashboard },
         { path: '/map', label: 'Map Overview (GIS)', icon: Compass },
-        { path: '/risk', label: 'Corridor Risk Intelligence', icon: ShieldAlert },
         { path: '/action', label: 'AI Recommendation Center', icon: Zap, alert: hasPending },
-        { path: '/replan', label: 'Disaster Route Discovery', icon: Layers },
-        { path: '/multimodal', label: 'Multimodal Hub (Rail/River)', icon: Activity },
         { path: '/mission', label: 'Relief Movement Details', icon: Package },
       ]
     },
@@ -56,10 +53,8 @@ export function Sidebar() {
       ]
     },
     {
-      title: 'SIMULATION & ANALYTICS',
+      title: 'GOVERNANCE & AUDIT',
       items: [
-        { path: '/demo', label: 'Disaster Scenario Simulator', icon: Sliders },
-        { path: '/reports', label: 'Corridor Analytics & Reports', icon: FileText },
         { path: '/history', label: 'Decision Audit Trail', icon: History },
         { path: '/baseline', label: 'Delivery Reliability Baseline', icon: BarChart3 },
         { path: '/health', label: 'System Health & Ingestion', icon: Globe },
@@ -190,7 +185,7 @@ export function Sidebar() {
               backgroundColor: isConnected ? '#10B981' : '#3B82F6'
             }} />
             <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#334155' }}>
-              {isConnected ? 'Telemetry Live' : 'Simulation Mode'}
+              {isConnected ? 'Telemetry Live' : 'Field Operations Standby'}
             </span>
           </div>
           <button

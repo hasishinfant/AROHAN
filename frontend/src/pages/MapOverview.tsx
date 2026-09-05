@@ -1050,7 +1050,7 @@ export function MapOverview() {
             {/* ── CONNECTED DECISION FLOW BUTTONS ─────────────────────────────── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6, borderTop: '1px solid #F1F5F9', paddingTop: 12 }}>
               <button
-                onClick={() => navigate('/replan')}
+                onClick={() => navigate('/action')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1068,7 +1068,7 @@ export function MapOverview() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                 }}
               >
-                <span>ANALYZE ALTERNATIVE ROUTE</span>
+                <span>REVIEW AI RECOMMENDATIONS</span>
                 <ArrowRight size={15} />
               </button>
 

@@ -536,11 +536,10 @@ export function CommandCenter() {
             { label: 'VIEW MAP OVERVIEW', path: '/map', icon: Compass, primary: true },
             { label: 'WHATSAPP DISPATCH', action: () => openWhatsAppModal(), icon: MessageSquare, special: true },
             { label: '5-TIER COORDINATION', path: '/communications', icon: Sparkles },
-            { label: 'ANALYZE CORRIDOR RISK', path: '/risk', icon: ShieldAlert },
-            { label: 'RUN DISASTER SCENARIO', path: '/demo', icon: Sliders },
-            { label: 'FIND ALTERNATIVE ROUTE', path: '/replan', icon: Layers },
             { label: 'CHECK RESOURCE STOCKS', path: '/resources', icon: Boxes },
-            { label: 'VIEW ALL ALERTS', path: '/action', icon: Zap },
+            { label: 'ACTION & RECOMMENDATIONS', path: '/action', icon: Zap },
+            { label: 'RELIEF CONVOY DETAILS', path: '/mission', icon: Layers },
+            { label: 'GOVERNANCE AUDIT TRAIL', path: '/history', icon: CheckCircle2 },
           ].map((act, i) => {
             const Icon = act.icon;
             return (

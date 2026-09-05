@@ -8,14 +8,9 @@ import { MapOverview } from './pages/MapOverview';
 import { MissionDetail } from './pages/MissionDetail';
 import { ActionCenter } from './pages/ActionCenter';
 import { DriverInterface } from './pages/DriverInterface';
-import { ReplanningView } from './pages/ReplanningView';
 import { DecisionHistory } from './pages/DecisionHistory';
-import { DemoController } from './pages/DemoController';
 import { BaselineComparison } from './pages/BaselineComparison';
 import { SystemHealth } from './pages/SystemHealth';
-import { ReportPage } from './pages/ReportPage';
-import { MultimodalOperations } from './pages/MultimodalOperations';
-import { RiskDashboard } from './pages/RiskDashboard';
 import { ResourceDashboard } from './pages/ResourceDashboard';
 import { CommunicationCenter } from './pages/CommunicationCenter';
 import { WhatsAppPreviewModal } from './components/Communication/WhatsAppPreviewModal';
@@ -56,16 +51,16 @@ function AppShell() {
             <Route path="/resources" element={<ResourceDashboard />} />
             <Route path="/communications" element={<CommunicationCenter />} />
             <Route path="/alerts" element={<ActionCenter />} />
-            <Route path="/multimodal" element={<MultimodalOperations />} />
-            <Route path="/risk" element={<RiskDashboard />} />
-            <Route path="/mission" element={<MissionDetail />} />
             <Route path="/action" element={<ActionCenter />} />
-            <Route path="/replan" element={<ReplanningView />} />
-            <Route path="/reports" element={<ReportPage />} />
+            <Route path="/mission" element={<MissionDetail />} />
             <Route path="/history" element={<DecisionHistory />} />
             <Route path="/baseline" element={<BaselineComparison />} />
-            <Route path="/demo" element={<DemoController />} />
             <Route path="/health" element={<SystemHealth />} />
+            <Route path="/risk" element={<Navigate to="/map" replace />} />
+            <Route path="/replan" element={<Navigate to="/action" replace />} />
+            <Route path="/multimodal" element={<Navigate to="/command" replace />} />
+            <Route path="/demo" element={<Navigate to="/command" replace />} />
+            <Route path="/reports" element={<Navigate to="/command" replace />} />
             <Route path="*" element={<Navigate to="/command" replace />} />
           </Routes>
         </main>

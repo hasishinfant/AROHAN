@@ -53,13 +53,13 @@ export function TopBar() {
     if (e.key === 'Enter' && searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       if (q.includes('risk') || q.includes('landslide') || q.includes('flood') || q.includes('nh-') || q.includes('corridor')) {
-        navigate('/risk');
+        navigate('/map');
       } else if (q.includes('resource') || q.includes('food') || q.includes('oxygen') || q.includes('shortage')) {
         navigate('/resources');
-      } else if (q.includes('action') || q.includes('alert') || q.includes('recommend')) {
+      } else if (q.includes('action') || q.includes('alert') || q.includes('recommend') || q.includes('route') || q.includes('replan')) {
         navigate('/action');
-      } else if (q.includes('route') || q.includes('replan')) {
-        navigate('/replan');
+      } else if (q.includes('whatsapp') || q.includes('driver') || q.includes('coordination')) {
+        navigate('/communications');
       } else {
         navigate('/command');
       }
@@ -299,7 +299,7 @@ export function TopBar() {
         <div style={{ position: 'relative' }}>
           <button
             type="button"
-            onClick={() => navigate('/risk')}
+            onClick={() => navigate('/action')}
             style={{
               width: 36,
               height: 36,
