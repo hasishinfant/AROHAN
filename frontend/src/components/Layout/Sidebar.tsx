@@ -61,8 +61,8 @@ export function Sidebar() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
-                SANCHAR AI
+              <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#064E3B', letterSpacing: '-0.02em' }}>
+                AROHAN
               </span>
               <span style={{
                 fontSize: '0.62rem',
@@ -73,11 +73,11 @@ export function Sidebar() {
                 borderRadius: 9999,
                 padding: '1px 6px'
               }}>
-                PRO
+                MDoNER
               </span>
             </div>
-            <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 500 }}>
-              National Logistics Copilot
+            <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600 }}>
+              NER Logistics Risk Intelligence
             </span>
           </div>
         </div>

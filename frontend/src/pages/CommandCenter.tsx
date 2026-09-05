@@ -323,7 +323,7 @@ export function CommandCenter() {
               <Sparkles size={16} />
             </div>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1E3A8A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              AI ROUTE RECOMMENDATION
+              AROHAN LOGISTICS COPILOT — PROACTIVE ROUTE RECOMMENDATION
             </span>
             <span style={{
               display: 'inline-flex',
