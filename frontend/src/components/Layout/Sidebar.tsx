@@ -13,13 +13,15 @@ import {
   Activity,
   Compass,
   FileText,
-  Boxes
+  Boxes,
+  ShieldAlert
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Public Portal', icon: Compass, section: 'OVERVIEW' },
   { path: '/command', label: 'Command Center', icon: LayoutDashboard, section: 'OPERATIONS' },
   { path: '/multimodal', label: 'Multimodal Operations', icon: Boxes, section: 'OPERATIONS' },
+  { path: '/risk', label: 'Risk Dashboard', icon: ShieldAlert, section: 'OPERATIONS' },
   { path: '/mission', label: 'Mission Detail', icon: Package, section: 'OPERATIONS' },
   { path: '/action', label: 'Action Center', icon: Zap, section: 'OPERATIONS', alertKey: 'pending' },
   { path: '/replan', label: 'Replanning View', icon: GitCompare, section: 'OPERATIONS' },
