@@ -136,53 +136,8 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* 3. RIGHT: QUICK ACCESS & USER PROFILE */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Quick Shortcut: Map Overview */}
-        <button
-          type="button"
-          onClick={() => navigate('/map')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '6px 10px',
-            borderRadius: 6,
-            backgroundColor: '#F8FAFC',
-            border: '1px solid #CBD5E1',
-            color: '#334155',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-          title="Open GIS Operational Map"
-        >
-          <Compass size={14} color="#059669" />
-          <span>GIS Map</span>
-        </button>
-
-        {/* Quick Shortcut: Buffer Stock */}
-        <button
-          type="button"
-          onClick={() => navigate('/resources')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '6px 10px',
-            borderRadius: 6,
-            backgroundColor: '#F8FAFC',
-            border: '1px solid #CBD5E1',
-            color: '#334155',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-          title="Open District Stock Redistribution"
-        >
-          <Boxes size={14} color="#059669" />
-          <span>Buffers</span>
-        </button>
+      {/* 3. RIGHT: NOTIFICATION & USER PROFILE */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
 
         {/* Notification Bell with indicator */}
         <div style={{ position: 'relative' }}>

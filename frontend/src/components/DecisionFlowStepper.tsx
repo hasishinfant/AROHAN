@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldAlert, GitCompare, Boxes, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Boxes, CheckCircle2, ChevronRight, Sparkles, MessageSquare, Compass, Zap } from 'lucide-react';
 
 interface StepItem {
   id: string;
@@ -20,17 +20,17 @@ export function DecisionFlowStepper() {
       id: 'predict',
       stage: '01 PREDICT',
       title: 'Terrain Risk',
-      path: '/risk',
-      icon: ShieldAlert,
-      metric: 'NH-6 Landslide 74%',
+      path: '/map',
+      icon: Compass,
+      metric: 'NH-6 Landslide (74%)',
     },
     {
       id: 'reroute',
       stage: '02 REROUTE',
-      title: 'Corridor Bypass',
-      path: '/replan',
-      icon: GitCompare,
-      metric: 'Route B (Ridge Road)',
+      title: 'Action & Bypass',
+      path: '/action',
+      icon: Zap,
+      metric: 'Sonapur Ridge Bypass',
     },
     {
       id: 'redistribute',
@@ -38,15 +38,15 @@ export function DecisionFlowStepper() {
       title: 'District Matching',
       path: '/resources',
       icon: Boxes,
-      metric: 'Kamrup → Shillong (2.2k MT)',
+      metric: 'Guwahati → Shillong (2.2k MT)',
     },
     {
-      id: 'act',
-      stage: '04 ACT',
-      title: 'Formal Approval',
-      path: '/action',
-      icon: CheckCircle2,
-      metric: 'Action Card #102 Active',
+      id: 'dispatch',
+      stage: '04 DISPATCH',
+      title: 'Driver WhatsApp',
+      path: '/communications',
+      icon: MessageSquare,
+      metric: 'Multilingual Dispatch',
     },
   ];
 
@@ -55,7 +55,7 @@ export function DecisionFlowStepper() {
       style={{
         backgroundColor: '#FFFFFF',
         border: '1px solid #E2E8F0',
-        borderRadius: 14,
+        borderRadius: 10,
         padding: '10px 16px',
         marginBottom: 16,
         display: 'flex',
@@ -63,7 +63,7 @@ export function DecisionFlowStepper() {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: 12,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -72,8 +72,9 @@ export function DecisionFlowStepper() {
             width: 32,
             height: 32,
             borderRadius: 8,
-            backgroundColor: '#064E3B',
-            color: '#FFFFFF',
+            backgroundColor: '#ECFDF5',
+            border: '1px solid #A7F3D0',
+            color: '#059669',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -83,11 +84,17 @@ export function DecisionFlowStepper() {
           <Sparkles size={16} />
         </div>
         <div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#064E3B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0F172A', letterSpacing: '0.04em' }}>
             OPERATIONAL DECISION PIPELINE
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#64748B' }}>
-            Closed-loop governance: Predict $\rightarrow$ Reroute $\rightarrow$ Redistribute $\rightarrow$ Act
+          <div style={{ fontSize: '0.7rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span>Predict</span>
+            <span style={{ color: '#059669', fontWeight: 700 }}>→</span>
+            <span>Reroute</span>
+            <span style={{ color: '#059669', fontWeight: 700 }}>→</span>
+            <span>Redistribute</span>
+            <span style={{ color: '#059669', fontWeight: 700 }}>→</span>
+            <span>Dispatch</span>
           </div>
         </div>
       </div>
@@ -105,15 +112,15 @@ export function DecisionFlowStepper() {
                   alignItems: 'center',
                   gap: 8,
                   padding: '6px 12px',
-                  borderRadius: 10,
+                  borderRadius: 8,
                   backgroundColor: isActive ? '#ECFDF5' : '#F8FAFC',
-                  border: `1px solid ${isActive ? '#059669' : '#E2E8F0'}`,
+                  border: `1px solid ${isActive ? '#A7F3D0' : '#E2E8F0'}`,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
               >
                 <Icon
-                  size={15}
+                  size={14}
                   style={{ color: isActive ? '#059669' : '#64748B' }}
                 />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -132,7 +139,7 @@ export function DecisionFlowStepper() {
                     backgroundColor: isActive ? '#059669' : '#E2E8F0',
                     color: isActive ? '#FFFFFF' : '#475569',
                     padding: '2px 6px',
-                    borderRadius: 9999,
+                    borderRadius: 4,
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -140,7 +147,7 @@ export function DecisionFlowStepper() {
                 </span>
               </div>
               {idx < steps.length - 1 && (
-                <ChevronRight size={14} style={{ color: '#94A3B8' }} />
+                <ChevronRight size={14} style={{ color: '#CBD5E1' }} />
               )}
             </React.Fragment>
           );

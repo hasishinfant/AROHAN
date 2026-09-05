@@ -230,57 +230,44 @@ export function CommandCenter() {
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
+              <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
                 AROHAN COMMAND CENTER
               </h1>
               <span style={{
-                fontSize: '0.7rem',
+                fontSize: '0.68rem',
                 fontWeight: 700,
                 backgroundColor: '#ECFDF5',
                 color: '#047857',
                 border: '1px solid #A7F3D0',
-                borderRadius: 9999,
+                borderRadius: 4,
                 padding: '2px 8px',
               }}>
-                SIH26002
-              </span>
-              <span style={{
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                backgroundColor: '#FEF3C7',
-                color: '#B45309',
-                border: '1px solid #FDE68A',
-                borderRadius: 9999,
-                padding: '2px 8px',
-              }}>
-                SIMULATION / PROTOTYPE DATA
+                DECISION SYSTEM
               </span>
             </div>
-            <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 0', fontWeight: 500 }}>
-              Disaster Logistics & Relief Transport — North Eastern Region of India
+            <p style={{ fontSize: '0.8rem', color: '#64748B', margin: '3px 0 0', fontWeight: 500 }}>
+              Disaster Relief Logistics & Highway Access Coordination — North Eastern Region
             </p>
           </div>
         </div>
 
-        {/* Right: Controls (Region, Search, Refresh, User Department) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          
+        {/* Right: Controls (Region, Refresh, Time) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {/* Region Selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B' }}>REGION:</span>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748B' }}>REGION:</span>
             <select
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
               style={{
-                padding: '6px 12px',
+                padding: '5px 10px',
                 borderRadius: 6,
-                fontSize: '0.8rem',
+                fontSize: '0.78rem',
                 fontWeight: 600,
                 backgroundColor: '#F8FAFC',
                 border: '1px solid #CBD5E1',
                 color: '#0F172A',
                 cursor: 'pointer',
-                outline: 'none',
               }}
             >
               <option value="ALL">All NER (8 States)</option>
@@ -295,22 +282,6 @@ export function CommandCenter() {
             </select>
           </div>
 
-          {/* Department Tag */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '5px 10px',
-            borderRadius: 6,
-            backgroundColor: '#F1F5F9',
-            fontSize: '0.75rem',
-            color: '#334155',
-            fontWeight: 600,
-          }}>
-            <Activity size={14} color="#059669" />
-            <span>NER Disaster Response Logistics Unit</span>
-          </div>
-
           {/* Live Refresh Button */}
           <button
             onClick={handleRefresh}
@@ -319,9 +290,9 @@ export function CommandCenter() {
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              padding: '6px 12px',
+              padding: '5px 10px',
               borderRadius: 6,
-              fontSize: '0.78rem',
+              fontSize: '0.76rem',
               fontWeight: 600,
               backgroundColor: '#ECFDF5',
               color: '#047857',
@@ -330,11 +301,11 @@ export function CommandCenter() {
               transition: 'all 0.15s ease',
             }}
           >
-            <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
-            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+            <span>{isRefreshing ? 'Syncing...' : 'Sync'}</span>
           </button>
 
-          {/* Clock & Status */}
+          {/* Clock */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -343,11 +314,11 @@ export function CommandCenter() {
             borderRadius: 6,
             backgroundColor: '#F8FAFC',
             border: '1px solid #E2E8F0',
-            fontSize: '0.75rem',
+            fontSize: '0.74rem',
             color: '#475569',
             fontWeight: 700,
           }}>
-            <Clock size={13} color="#059669" />
+            <Clock size={12} color="#059669" />
             <span>{currentTime} IST</span>
           </div>
         </div>
@@ -448,47 +419,49 @@ export function CommandCenter() {
             desc: 'Redistribution movements',
             icon: Truck,
             color: '#2563eb',
-            bg: '#DBEAFE',
+            bg: '#EFF6FF',
             onClick: () => navigate('/resources'),
           },
           {
             title: 'FORECAST HORIZON',
-            value: kpis.forecast_horizon || '48h',
+            value: kpis.forecast_horizon,
             desc: 'Predictive planning window',
             icon: Clock,
             color: '#475569',
             bg: '#F1F5F9',
             onClick: () => {},
           },
-        ].map((card, idx) => {
+        ].map((card, i) => {
           const Icon = card.icon;
           return (
             <div
-              key={idx}
+              key={i}
               onClick={card.onClick}
               style={{
                 backgroundColor: '#ffffff',
-                padding: '14px 16px',
-                borderRadius: 10,
+                borderRadius: 8,
                 border: '1px solid #E2E8F0',
+                padding: '12px 14px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.08)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)';
+                e.currentTarget.style.borderColor = '#CBD5E1';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                e.currentTarget.style.borderColor = '#E2E8F0';
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748B', letterSpacing: '0.04em' }}>
+                <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#64748B', letterSpacing: '0.04em' }}>
                   {card.title}
                 </span>
                 <span style={{
@@ -513,60 +486,6 @@ export function CommandCenter() {
             </div>
           );
         })}
-      </div>
-
-      {/* ── QUICK ACTIONS BAR ─────────────────────────────────────────────────── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: 10,
-        backgroundColor: '#ffffff',
-        padding: '12px 18px',
-        borderRadius: 8,
-        border: '1px solid #E2E8F0',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 800, color: '#0F172A' }}>
-          <Sparkles size={15} color="#059669" />
-          <span>OPERATIONAL SHORTCUTS:</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {[
-            { label: 'VIEW MAP OVERVIEW', path: '/map', icon: Compass, primary: true },
-            { label: 'WHATSAPP DISPATCH', action: () => openWhatsAppModal(), icon: MessageSquare, special: true },
-            { label: '5-TIER COORDINATION', path: '/communications', icon: Sparkles },
-            { label: 'CHECK RESOURCE STOCKS', path: '/resources', icon: Boxes },
-            { label: 'ACTION & RECOMMENDATIONS', path: '/action', icon: Zap },
-            { label: 'RELIEF CONVOY DETAILS', path: '/mission', icon: Layers },
-            { label: 'GOVERNANCE AUDIT TRAIL', path: '/history', icon: CheckCircle2 },
-          ].map((act, i) => {
-            const Icon = act.icon;
-            return (
-              <button
-                key={i}
-                onClick={act.action ? act.action : () => navigate(act.path)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 6,
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  backgroundColor: act.primary ? '#059669' : act.special ? '#ECFDF5' : '#F8FAFC',
-                  color: act.primary ? '#ffffff' : act.special ? '#047857' : '#334155',
-                  border: `1px solid ${act.primary ? '#059669' : act.special ? '#A7F3D0' : '#CBD5E1'}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <Icon size={13} />
-                <span>{act.label}</span>
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* ── MAIN DASHBOARD GRID (LEFT: RISK & ACCESSIBILITY | RIGHT: AI RECOMMENDATIONS) ─ */}
