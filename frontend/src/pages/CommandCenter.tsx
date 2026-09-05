@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { MapView } from '../components/Map/MapView';
-import { RiskGauge } from '../components/RiskGauge';
 import { StatusBadge } from '../components/StatusBadge';
 import { useArohanStore } from '../stores/arohanStore';
 import { useNavigate } from 'react-router-dom';
@@ -27,9 +26,10 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle2,
-  Ship,
-  Train,
-  Plane
+  Sparkles,
+  DollarSign,
+  Compass,
+  Boxes
 } from 'lucide-react';
 
 export function CommandCenter() {
@@ -38,13 +38,10 @@ export function CommandCenter() {
     shipmentsList,
     selectedShipmentId,
     selectShipment,
-    risk_results,
-    current_decision,
     scenario_step,
     kpis,
     isConnected,
     gpsUpdate,
-    approveDecision,
     scenarioNext,
     scenarioReset
   } = useArohanStore();
@@ -66,7 +63,6 @@ export function CommandCenter() {
   }, []);
 
   const step = scenario_step ?? -1;
-  const riskA = risk_results ? Object.values(risk_results).find((r: any) => r.route_label === 'A') : null;
 
   // Filtered shipments
   const filteredShipments = (shipmentsList || []).filter((s) => {
@@ -100,92 +96,122 @@ export function CommandCenter() {
   const currentShipment = shipment || (shipmentsList && shipmentsList[0]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%', paddingBottom: 32 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%', paddingBottom: 40 }}>
       
-      {/* 1. TOP HEADER: TITLE & CONTROLS */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+      {/* 1. TOP HEADER: TITLE & CONTROLS (Sanchar AI Style) */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#181a18', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-            Overview
-          </h1>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#717671', fontWeight: 500 }}>
-            Unified national multimodal resilience intelligence & real-time corridor monitoring
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
+              Command Center
+            </h1>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '2px 8px',
+              borderRadius: 9999,
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              backgroundColor: '#ECFDF5',
+              color: '#047857',
+              border: '1px solid #A7F3D0'
+            }}>
+              Active Monitoring
+            </span>
+          </div>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748B', fontWeight: 400 }}>
+            Real-time corridor telemetry, predictive risk indices, and autonomous multimodal dispatch orchestration.
           </p>
         </div>
 
         {/* Header Right Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Live IST Time */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#334155',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+            }}
+          >
+            <Clock size={14} style={{ color: '#059669' }} />
+            <span>{currentTime} IST</span>
+          </div>
+
           {/* Date Picker Pill */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e5e2',
-              borderRadius: 20,
-              padding: '6px 14px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              color: '#181a18',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+              gap: 6,
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#334155',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
             }}
           >
-            <Calendar size={14} style={{ color: '#717671' }} />
+            <Calendar size={14} style={{ color: '#64748B' }} />
             <span>24.04.2026</span>
           </div>
 
-          {/* Demo Controls Pill Button */}
+          {/* Simulation Controls Button */}
           <button
             type="button"
             onClick={() => setShowDemoControls(!showDemoControls)}
+            className="btn btn-secondary"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              backgroundColor: showDemoControls ? '#181a18' : '#ffffff',
-              color: showDemoControls ? '#ffffff' : '#181a18',
-              border: '1px solid #e2e5e2',
-              borderRadius: 20,
+              fontSize: '0.8rem',
+              fontWeight: 600,
               padding: '6px 14px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-              transition: 'all 0.2s ease'
+              borderRadius: 8
             }}
           >
             <Sliders size={14} />
-            <span>Simulation Controls</span>
+            <span>Demo Controls</span>
             {showDemoControls ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>
       </div>
 
-      {/* DEMO CONTROLS BANNER (COLLAPSIBLE) */}
+      {/* DEMO SIMULATION CONTROLS (COLLAPSIBLE) */}
       {showDemoControls && (
         <div
           style={{
-            backgroundColor: '#181a18',
-            color: '#ffffff',
-            borderRadius: 20,
-            padding: '16px 22px',
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            borderRadius: 12,
+            padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 14,
-            boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
+            gap: 12,
+            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Zap size={18} style={{ color: '#d4f934' }} />
+            <Zap size={18} style={{ color: '#34D399' }} />
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.02em', color: '#ffffff' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF' }}>
                 DEMO SCENARIO SIMULATION ENGINE
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>
-                Simulate mountain corridor disruptions, test autonomous reroute logic, and verify live telemetry.
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
+                Trigger hazards, test AI reroute recommendations, and adjust telemetry playback speeds.
               </div>
             </div>
           </div>
@@ -195,55 +221,55 @@ export function CommandCenter() {
               type="button"
               onClick={handleSimulateDisruption}
               style={{
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
+                backgroundColor: '#DC2626',
+                color: '#FFFFFF',
                 border: 'none',
-                padding: '7px 14px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
+                padding: '6px 14px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                borderRadius: 10,
+                borderRadius: 8,
                 cursor: 'pointer'
               }}
             >
               <CloudRain size={14} />
-              <span>Trigger Disruption (Step {step < 0 ? 1 : step + 1})</span>
+              <span>Simulate Disruption (Step {step < 0 ? 1 : step + 1})</span>
             </button>
 
             <button
               type="button"
               onClick={handleTriggerReroute}
               style={{
-                backgroundColor: '#16a34a',
-                color: '#ffffff',
+                backgroundColor: '#059669',
+                color: '#FFFFFF',
                 border: 'none',
-                padding: '7px 14px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
+                padding: '6px 14px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                borderRadius: 10,
+                borderRadius: 8,
                 cursor: 'pointer'
               }}
             >
               <Zap size={14} />
-              <span>Execute Route B Bypass</span>
+              <span>Apply AI Bypass (Route B)</span>
             </button>
 
             <button
               type="button"
               onClick={() => gpsSimulationService.setSpeedMultiplier(50)}
               style={{
-                backgroundColor: '#374151',
-                color: '#ffffff',
+                backgroundColor: '#334155',
+                color: '#FFFFFF',
                 border: 'none',
-                padding: '7px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
-                borderRadius: 10,
+                padding: '6px 12px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                borderRadius: 8,
                 cursor: 'pointer'
               }}
             >
@@ -254,16 +280,16 @@ export function CommandCenter() {
               type="button"
               onClick={handleResetSimulation}
               style={{
-                backgroundColor: '#4b5563',
-                color: '#ffffff',
+                backgroundColor: '#475569',
+                color: '#FFFFFF',
                 border: 'none',
-                padding: '7px 14px',
-                fontSize: '0.74rem',
-                fontWeight: 800,
+                padding: '6px 14px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                borderRadius: 10,
+                borderRadius: 8,
                 cursor: 'pointer'
               }}
             >
@@ -274,604 +300,204 @@ export function CommandCenter() {
         </div>
       )}
 
-      {/* 2. ROW 1: (A) HERO OVERVIEW CARD + (B) UPCOMING EVENTS + (C) POPULAR CATEGORIES DONUT */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr', gap: 18, alignItems: 'stretch' }}>
-        
-        {/* CARD A: HERO SAGE-GREEN CARD WITH 3D TERRAIN CONTOUR & 4 FLOATING METRIC PILLS */}
-        <div
-          style={{
-            backgroundColor: '#dcfce7',
-            backgroundImage: 'radial-gradient(ellipse at 80% 20%, #bbf7d0 0%, #dcfce7 60%)',
-            borderRadius: 22,
-            padding: '24px 24px 20px 24px',
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            minHeight: 280,
-            border: '1px solid #bbf7d0',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
-          }}
-        >
-          {/* Background 3D Topographical Contour Graphics */}
-          <svg
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '100%',
-              height: '100%',
-              opacity: 0.35,
-              pointerEvents: 'none'
-            }}
-            viewBox="0 0 700 280"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M400,60 Q480,20 560,70 T720,50" stroke="#15803d" strokeWidth="1.5" fill="none" />
-            <path d="M360,90 Q450,40 550,100 T730,90" stroke="#15803d" strokeWidth="1.5" fill="none" />
-            <path d="M330,120 Q430,70 540,130 T740,120" stroke="#15803d" strokeWidth="1.5" fill="none" />
-            <path d="M300,150 Q410,100 520,160 T750,150" stroke="#15803d" strokeWidth="1.5" fill="none" />
-            <path d="M280,180 Q390,130 500,190 T760,180" stroke="#15803d" strokeWidth="1.5" fill="none" />
-            <path d="M260,210 Q370,160 480,220 T770,210" stroke="#15803d" strokeWidth="1.5" fill="none" />
-            <ellipse cx="530" cy="110" rx="90" ry="30" stroke="#16a34a" strokeWidth="1" strokeDasharray="3 3" />
-            <ellipse cx="530" cy="110" rx="140" ry="48" stroke="#16a34a" strokeWidth="1" strokeDasharray="3 3" />
-          </svg>
-
-          {/* Hero Top Title & Status */}
-          <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 800, color: '#15803d', marginBottom: 8 }}>
-                <Activity size={13} />
-                <span>INTELLIGENT CORRIDOR OPERATIONS</span>
-              </div>
-              <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#14532d', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                Active Freight Manifest & Dispatch Stream
-              </h2>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#166534', fontWeight: 500, maxWidth: 380 }}>
-                Continuous multimodal GPS tracking with IMD weather radar correlation and autonomous bypass triggers.
-              </p>
+      {/* 2. SANCHAR AI COPILOT INSIGHT CARD (Section 6.B Blueprint) */}
+      <div
+        className="card-ai-insight"
+        style={{
+          border: '1px solid #BFDBFE',
+          background: 'linear-gradient(90deg, rgba(239, 246, 255, 0.6) 0%, rgba(238, 242, 255, 0.25) 100%)',
+          borderRadius: 16,
+          padding: '18px 22px',
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ padding: '6px 8px', borderRadius: 8, backgroundColor: '#EFF6FF', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Sparkles size={16} />
             </div>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1E3A8A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              AI ROUTE RECOMMENDATION
+            </span>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '2px 8px',
+              borderRadius: 9999,
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              backgroundColor: '#DBEAFE',
+              color: '#1E40AF'
+            }}>
+              CONFIDENCE 96%
+            </span>
+          </div>
 
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
-              onClick={() => navigate('/multimodal')}
+              type="button"
+              onClick={handleTriggerReroute}
+              className="btn btn-primary btn-sm"
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255,255,255,0.85)',
-                border: '1px solid #bbf7d0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#15803d',
-                cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                backgroundColor: '#059669',
+                color: '#FFFFFF',
+                borderRadius: 8,
+                padding: '6px 14px',
+                fontSize: '0.78rem',
+                fontWeight: 600
               }}
-              title="Open Multimodal View"
             >
-              <ArrowUpRight size={18} />
+              Apply Recommendation
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowRiskModal(true)}
+              className="btn btn-secondary btn-sm"
+              style={{
+                borderRadius: 8,
+                padding: '6px 12px',
+                fontSize: '0.78rem',
+                fontWeight: 600
+              }}
+            >
+              Inspect Risk ML
             </button>
           </div>
-
-          {/* 4 Floating Overlapping Metric Pills matching Reference Mockup */}
-          <div style={{ position: 'relative', zIndex: 2, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginTop: 24 }}>
-            {/* Pill 1: Lime Yellow Highlight Pill */}
-            <div
-              style={{
-                backgroundColor: '#d4f934',
-                borderRadius: 16,
-                padding: '12px 14px',
-                boxShadow: '0 4px 12px rgba(212, 249, 52, 0.4)',
-                border: '1px solid #c2eb23'
-              }}
-            >
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#2a3b00', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Ton-Km Dispatched
-              </div>
-              <div style={{ fontSize: '1.28rem', fontWeight: 900, color: '#172200', marginTop: 2, letterSpacing: '-0.02em' }}>
-                13,984
-              </div>
-              <div style={{ fontSize: '0.64rem', color: '#445b05', fontWeight: 700, marginTop: 2 }}>
-                +18.4% today
-              </div>
-            </div>
-
-            {/* Pill 2: Frosted White */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.88)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 16,
-                padding: '12px 14px',
-                border: '1px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-              }}
-            >
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                On-Time Rate
-              </div>
-              <div style={{ fontSize: '1.28rem', fontWeight: 900, color: '#0f172a', marginTop: 2 }}>
-                98.4%
-              </div>
-              <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 700, marginTop: 2 }}>
-                Reliable Corridor
-              </div>
-            </div>
-
-            {/* Pill 3: Frosted White */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.88)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 16,
-                padding: '12px 14px',
-                border: '1px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-              }}
-            >
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Delay Mitigated
-              </div>
-              <div style={{ fontSize: '1.28rem', fontWeight: 900, color: '#0f172a', marginTop: 2 }}>
-                {kpis?.delay_avoided_h != null ? `${kpis.delay_avoided_h} hrs` : '5.9 hrs'}
-              </div>
-              <div style={{ fontSize: '0.64rem', color: '#2563eb', fontWeight: 700, marginTop: 2 }}>
-                Sonapur Bypass
-              </div>
-            </div>
-
-            {/* Pill 4: Frosted White */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.88)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 16,
-                padding: '12px 14px',
-                border: '1px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-              }}
-            >
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Cost Saved
-              </div>
-              <div style={{ fontSize: '1.28rem', fontWeight: 900, color: '#0f172a', marginTop: 2 }}>
-                ₹48.2 L
-              </div>
-              <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 700, marginTop: 2 }}>
-                Fleet Fuel & Idle
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* CARD B: UPCOMING EVENTS / CORRIDOR ALERTS */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 22,
-            padding: '20px',
-            border: '1px solid #e2e5e2',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#181a18', margin: 0 }}>
-                Upcoming Events
-              </h3>
-              <button
-                type="button"
-                onClick={() => navigate('/risk')}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  color: '#717671',
-                  cursor: 'pointer',
-                  padding: 4
-                }}
-              >
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
+        <p style={{ margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.5 }}>
+          Rerouting <strong>{currentShipment?.shipment_code || 'SHP-001'}</strong> via Western Sonapur Ridge Corridor bypasses landslide-prone NH-06 kilometer 42, reducing SLA breach exposure by <strong>21%</strong> and cutting transit delay by <strong>5.9 hours</strong>.
+        </p>
+      </div>
 
-            {/* List of Events with Date Pills */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Event 1 */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <span
-                  style={{
-                    backgroundColor: '#181a18',
-                    color: '#ffffff',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    borderRadius: 10,
-                    padding: '3px 7px',
-                    lineHeight: 1.2,
-                    flexShrink: 0
-                  }}
-                >
-                  02/08
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#181a18', lineHeight: 1.2 }}>
-                    Sonapur Hill Landslide Alert
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: '#717671', marginTop: 2 }}>
-                    NH-06 corridor slope saturation 94%
-                  </div>
-                </div>
-              </div>
-
-              {/* Event 2 */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <span
-                  style={{
-                    backgroundColor: '#f1f3f1',
-                    color: '#181a18',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    borderRadius: 10,
-                    padding: '3px 7px',
-                    lineHeight: 1.2,
-                    flexShrink: 0
-                  }}
-                >
-                  04/08
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#181a18', lineHeight: 1.2 }}>
-                    Guwahati Multimodal Hub
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: '#717671', marginTop: 2 }}>
-                    Rail-to-road transshipment surge (+35%)
-                  </div>
-                </div>
-              </div>
-
-              {/* Event 3 */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <span
-                  style={{
-                    backgroundColor: '#f1f3f1',
-                    color: '#181a18',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    borderRadius: 10,
-                    padding: '3px 7px',
-                    lineHeight: 1.2,
-                    flexShrink: 0
-                  }}
-                >
-                  07/08
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#181a18', lineHeight: 1.2 }}>
-                    Pandu Port Barge Scheduling
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: '#717671', marginTop: 2 }}>
-                    NW-2 Brahmaputra draft level normal
-                  </div>
-                </div>
-              </div>
+      {/* 3. CORE METRIC PANELS (Section 6.A Blueprint - 4 Columns) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18 }}>
+        
+        {/* Metric 1: On-Time SLA */}
+        <div className="card" style={{ padding: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              ON-TIME DELIVERY SLA
+            </span>
+            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#059669', border: '1px solid #E2E8F0' }}>
+              <TrendingUp size={16} />
             </div>
           </div>
-
-          <button
-            onClick={() => navigate('/risk')}
-            style={{
-              width: '100%',
-              marginTop: 14,
-              padding: '8px 12px',
-              borderRadius: 12,
-              backgroundColor: '#f8faf9',
-              border: '1px solid #e2e5e2',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              color: '#181a18',
-              cursor: 'pointer',
-              textAlign: 'center'
-            }}
-          >
-            View All Alerts (14)
-          </button>
+          
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>98.4%</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
+              +2.4%
+            </span>
+          </div>
+          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
+            Compared to last week average
+          </p>
         </div>
 
-        {/* CARD C: MULTIMODAL MODE SPLIT (DONUT RING CHART) */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 22,
-            padding: '20px',
-            border: '1px solid #e2e5e2',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#181a18', margin: 0 }}>
-                Popular Categories
-              </h3>
-              <button
-                type="button"
-                onClick={() => navigate('/multimodal')}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  color: '#717671',
-                  cursor: 'pointer',
-                  padding: 4
-                }}
-              >
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
-
-            {/* SVG Donut Chart with Pastel Segments */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: 130 }}>
-              <svg width="130" height="130" viewBox="0 0 42 42">
-                {/* Background Ring */}
-                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="4.5" />
-                {/* Segment 1: Coral / Land Freight (64%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#f87171"
-                  strokeWidth="4.5"
-                  strokeDasharray="64 36"
-                  strokeDashoffset="25"
-                  strokeLinecap="round"
-                />
-                {/* Segment 2: Sky Blue / Rail (22%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#38bdf8"
-                  strokeWidth="4.5"
-                  strokeDasharray="22 78"
-                  strokeDashoffset="61"
-                  strokeLinecap="round"
-                />
-                {/* Segment 3: Mint Green / Water (10%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#4ade80"
-                  strokeWidth="4.5"
-                  strokeDasharray="10 90"
-                  strokeDashoffset="39"
-                  strokeLinecap="round"
-                />
-                {/* Segment 4: Lavender / Air (4%) */}
-                <circle
-                  cx="21"
-                  cy="21"
-                  r="15.915"
-                  fill="transparent"
-                  stroke="#a78bfa"
-                  strokeWidth="4.5"
-                  strokeDasharray="4 96"
-                  strokeDashoffset="29"
-                  strokeLinecap="round"
-                />
-              </svg>
-              {/* Donut Center Label */}
-              <div
-                style={{
-                  position: 'absolute',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center'
-                }}
-              >
-                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#717671', textTransform: 'uppercase' }}>
-                  Total
-                </span>
-                <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#181a18', lineHeight: 1 }}>
-                  150
-                </span>
-                <span style={{ fontSize: '0.58rem', color: '#9ca3af', fontWeight: 600 }}>
-                  Missions
-                </span>
-              </div>
-            </div>
-
-            {/* Pastel Legend */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 8px', marginTop: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#f87171' }} />
-                <span style={{ fontSize: '0.68rem', color: '#4b5563', fontWeight: 600 }}>Highway (64%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#38bdf8' }} />
-                <span style={{ fontSize: '0.68rem', color: '#4b5563', fontWeight: 600 }}>Rail (22%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#4ade80' }} />
-                <span style={{ fontSize: '0.68rem', color: '#4b5563', fontWeight: 600 }}>Water (10%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#a78bfa' }} />
-                <span style={{ fontSize: '0.68rem', color: '#4b5563', fontWeight: 600 }}>Air (4%)</span>
-              </div>
+        {/* Metric 2: Freight Volume Dispatched */}
+        <div className="card" style={{ padding: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              TOTAL TON-KM DISPATCHED
+            </span>
+            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#3B82F6', border: '1px solid #E2E8F0' }}>
+              <Truck size={16} />
             </div>
           </div>
-
-          <div style={{ fontSize: '0.68rem', color: '#9ca3af', textAlign: 'center', marginTop: 8 }}>
-            Auto-balanced across 4 modes
+          
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>13,984</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
+              +18.4%
+            </span>
           </div>
+          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
+            Active multimodal movement
+          </p>
+        </div>
+
+        {/* Metric 3: Delay Mitigated */}
+        <div className="card" style={{ padding: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              EXPECTED DELAY AVOIDED
+            </span>
+            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#F59E0B', border: '1px solid #E2E8F0' }}>
+              <Clock size={16} />
+            </div>
+          </div>
+          
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A' }}>
+              {kpis?.delay_avoided_h != null ? `${kpis.delay_avoided_h} hrs` : '5.9 hrs'}
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#EFF6FF', color: '#1D4ED8' }}>
+              Route B
+            </span>
+          </div>
+          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
+            Landslide bypass mitigation
+          </p>
+        </div>
+
+        {/* Metric 4: Direct Savings */}
+        <div className="card" style={{ padding: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              LOGISTICS COST SAVED
+            </span>
+            <div style={{ padding: 8, borderRadius: 10, backgroundColor: '#F8FAFC', color: '#059669', border: '1px solid #E2E8F0' }}>
+              <DollarSign size={16} />
+            </div>
+          </div>
+          
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.025em', color: '#059669' }}>₹48.2 L</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#ECFDF5', color: '#047857' }}>
+              Optimal
+            </span>
+          </div>
+          <p style={{ marginTop: 4, margin: 0, fontSize: '0.75rem', color: '#94A3B8', fontWeight: 500 }}>
+            Idle fuel & disruption penalty reduction
+          </p>
         </div>
       </div>
 
-      {/* 3. ROW 2: (D) TOP CORRIDORS + (E) TELEMETRY & RISK REPORT + (F) ACTIVE FLEET BAR CHART */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr 1fr', gap: 18, alignItems: 'stretch' }}>
+      {/* 4. VISUALIZATION & ANALYTICS ROW (Section 7 Blueprint - Emerald & Multi-Series) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 1fr 1fr', gap: 18, alignItems: 'stretch' }}>
         
-        {/* CARD D: TOP CORRIDORS / PRIORITY SHIPMENTS */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 22,
-            padding: '20px',
-            border: '1px solid #e2e5e2',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
+        {/* CHART 1: TELEMETRY & RISK REPORT (Area Chart with #059669 Emerald Gradient) */}
+        <div className="card" style={{ padding: 22, justifyContent: 'space-between' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#181a18', margin: 0 }}>
-                Priority Shipments
-              </h3>
-              <button
-                type="button"
-                onClick={() => navigate('/command')}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  color: '#717671',
-                  cursor: 'pointer',
-                  padding: 4
-                }}
-              >
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {(shipmentsList || []).slice(0, 3).map((s) => {
-                const isCurrent = (selectedShipmentId || 1) === s.id;
-                return (
-                  <div
-                    key={s.id}
-                    onClick={() => selectShipment(s.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '10px 12px',
-                      borderRadius: 14,
-                      backgroundColor: isCurrent ? '#f4f7f4' : '#ffffff',
-                      border: `1px solid ${isCurrent ? '#c2e0c0' : '#f1f3f1'}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 10,
-                          backgroundColor: isCurrent ? '#181a18' : '#f1f3f1',
-                          color: isCurrent ? '#ffffff' : '#4b5563',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <Truck size={16} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#181a18' }}>
-                          {s.shipment_code}
-                        </div>
-                        <div style={{ fontSize: '0.68rem', color: '#717671' }}>
-                          {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#181a18', fontFamily: 'monospace' }}>
-                        {s.updated_eta || s.planned_eta}
-                      </div>
-                      <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 700 }}>
-                        {s.weight_kg} kg
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowRiskModal(true)}
-            style={{
-              width: '100%',
-              marginTop: 14,
-              padding: '8px 12px',
-              borderRadius: 12,
-              backgroundColor: '#f8faf9',
-              border: '1px solid #e2e5e2',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              color: '#181a18',
-              cursor: 'pointer',
-              textAlign: 'center'
-            }}
-          >
-            Inspect Risk Breakdown →
-          </button>
-        </div>
-
-        {/* CARD E: TELEMETRY & RISK REPORT (SMOOTH CURVED SVG AREA CHART) */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 22,
-            padding: '20px 24px',
-            border: '1px solid #e2e5e2',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div>
-            {/* Header with Title & Filter Pills */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#181a18', margin: 0 }}>
-                  Telemetry & Risk Report
+                <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
+                  Telemetry & Risk Exposure Curve
                 </h3>
-                <div style={{ fontSize: '0.72rem', color: '#717671', marginTop: 2 }}>
-                  Dynamic corridor vulnerability curve & IMD sensor streams
+                <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: 2 }}>
+                  Dynamic corridor vulnerability index & sensor stream
                 </div>
               </div>
 
               {/* Range Filters */}
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 4 }}>
                 {(['Real-time', 'Daily'] as const).map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setReportRange(r)}
                     style={{
-                      border: 'none',
-                      backgroundColor: reportRange === r ? '#181a18' : '#f1f3f1',
-                      color: reportRange === r ? '#ffffff' : '#4b5563',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
+                      border: '1px solid',
+                      borderColor: reportRange === r ? '#059669' : '#E2E8F0',
+                      backgroundColor: reportRange === r ? '#ECFDF5' : '#FFFFFF',
+                      color: reportRange === r ? '#047857' : '#475569',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
                       padding: '4px 10px',
-                      borderRadius: 14,
+                      borderRadius: 6,
                       cursor: 'pointer'
                     }}
                   >
@@ -881,66 +507,76 @@ export function CommandCenter() {
               </div>
             </div>
 
-            {/* Smooth Spline SVG Area Chart with Tooltip Pill */}
+            {/* SVG Spline Area Chart with Sanchar AI Emerald Gradient (Section 7 Spec) */}
             <div style={{ position: 'relative', width: '100%', height: 140 }}>
               <svg width="100%" height="100%" viewBox="0 0 500 140" preserveAspectRatio="none">
                 <defs>
-                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#86efac" stopOpacity="0.55" />
-                    <stop offset="100%" stopColor="#86efac" stopOpacity="0.0" />
+                  {/* Sanchar AI Emerald Gradient Pattern */}
+                  <linearGradient id="colorEmerald" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#059669" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
 
-                {/* Horizontal Grid lines */}
-                <line x1="0" y1="30" x2="500" y2="30" stroke="#f1f3f1" strokeDasharray="3 3" />
-                <line x1="0" y1="70" x2="500" y2="70" stroke="#f1f3f1" strokeDasharray="3 3" />
-                <line x1="0" y1="110" x2="500" y2="110" stroke="#f1f3f1" strokeDasharray="3 3" />
+                {/* Dashed Background Grid Lines */}
+                <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" strokeDasharray="3 3" />
+                <line x1="0" y1="70" x2="500" y2="70" stroke="#E2E8F0" strokeDasharray="3 3" />
+                <line x1="0" y1="110" x2="500" y2="110" stroke="#E2E8F0" strokeDasharray="3 3" />
 
-                {/* Smooth Gradient Fill Path */}
+                {/* Gradient Fill Path */}
                 <path
                   d="M0,110 C80,105 120,40 180,35 C240,30 280,85 340,70 C400,55 440,25 500,20 L500,140 L0,140 Z"
-                  fill="url(#areaGradient)"
+                  fill="url(#colorEmerald)"
                 />
 
-                {/* Smooth Curve Line */}
+                {/* Primary Emerald Line (#059669) */}
                 <path
                   d="M0,110 C80,105 120,40 180,35 C240,30 280,85 340,70 C400,55 440,25 500,20"
                   fill="none"
-                  stroke="#16a34a"
+                  stroke="#059669"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />
 
-                {/* Peak Indicator Dot */}
-                <circle cx="180" cy="35" r="4.5" fill="#15803d" stroke="#ffffff" strokeWidth="2" />
-                <circle cx="500" cy="20" r="4.5" fill="#15803d" stroke="#ffffff" strokeWidth="2" />
+                {/* Secondary Blue Line (#3B82F6) */}
+                <path
+                  d="M0,120 C80,115 140,85 200,80 C260,75 320,95 380,85 C440,75 480,50 500,45"
+                  fill="none"
+                  stroke="#3B82F6"
+                  strokeWidth="1.8"
+                  strokeDasharray="4 4"
+                />
+
+                {/* Key Risk Peak Marker */}
+                <circle cx="180" cy="35" r="4" fill="#059669" stroke="#FFFFFF" strokeWidth="2" />
+                <circle cx="500" cy="20" r="4" fill="#059669" stroke="#FFFFFF" strokeWidth="2" />
               </svg>
 
-              {/* Floating Highlight Tooltip Pill */}
+              {/* Tooltip Pill */}
               <div
                 style={{
                   position: 'absolute',
                   top: 10,
-                  left: 130,
-                  backgroundColor: '#181a18',
-                  color: '#ffffff',
-                  fontSize: '0.65rem',
-                  fontWeight: 800,
+                  left: 140,
+                  backgroundColor: '#0F172A',
+                  color: '#FFFFFF',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
                   padding: '3px 8px',
-                  borderRadius: 10,
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                  borderRadius: 6,
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 4
+                  gap: 5
                 }}
               >
-                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#d4f934' }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#34D399' }} />
                 <span>Peak Risk 82% @ 12:40</span>
               </div>
             </div>
 
-            {/* X-Axis Timestamps */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#9ca3af', fontWeight: 600, marginTop: 6 }}>
+            {/* Timestamps */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94A3B8', fontWeight: 500, marginTop: 8 }}>
               <span>00:00</span>
               <span>04:00</span>
               <span>08:00</span>
@@ -950,80 +586,163 @@ export function CommandCenter() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #f1f3f1', marginTop: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: '#4b5563' }}>
-              <Shield size={14} style={{ color: '#16a34a' }} />
-              <span>Bypass recommendation: <strong>Route B (+5.9h saved)</strong></span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #F1F5F9', marginTop: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: '#334155' }}>
+              <Shield size={14} style={{ color: '#059669' }} />
+              <span>Recommended bypass: <strong>Route B (+5.9h saved)</strong></span>
             </div>
             <button
               onClick={handleTriggerReroute}
-              style={{
-                backgroundColor: '#181a18',
-                color: '#ffffff',
-                border: 'none',
-                padding: '5px 12px',
-                borderRadius: 10,
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                cursor: 'pointer'
-              }}
+              className="btn btn-primary btn-sm"
+              style={{ padding: '4px 10px', fontSize: '0.72rem' }}
             >
               Trigger Reroute
             </button>
           </div>
         </div>
 
-        {/* CARD F: ACTIVE FLEET DRIVERS / VEHICLES (BAR CHART) */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 22,
-            padding: '20px',
-            border: '1px solid #e2e5e2',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
+        {/* CHART 2: MULTIMODAL MODE SPLIT (Donut Ring Chart) */}
+        <div className="card" style={{ padding: 22, justifyContent: 'space-between' }}>
           <div>
-            {/* Header with Title & 94% Active Pill */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#181a18', margin: 0 }}>
-                Active Fleet
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
+                Multimodal Mode Split
               </h3>
-              <span
-                style={{
-                  backgroundColor: '#d4f934',
-                  color: '#172200',
-                  fontSize: '0.68rem',
-                  fontWeight: 900,
-                  padding: '3px 8px',
-                  borderRadius: 12
-                }}
+              <button
+                type="button"
+                onClick={() => navigate('/multimodal')}
+                style={{ border: 'none', background: 'transparent', color: '#64748B', cursor: 'pointer', padding: 2 }}
               >
+                <ArrowUpRight size={16} />
+              </button>
+            </div>
+
+            {/* Donut Chart */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: 130 }}>
+              <svg width="130" height="130" viewBox="0 0 42 42">
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F1F5F9" strokeWidth="4.5" />
+                {/* Emerald 600 - Highway Freight (64%) */}
+                <circle
+                  cx="21"
+                  cy="21"
+                  r="15.915"
+                  fill="transparent"
+                  stroke="#059669"
+                  strokeWidth="4.5"
+                  strokeDasharray="64 36"
+                  strokeDashoffset="25"
+                  strokeLinecap="round"
+                />
+                {/* Blue 500 - Rail Express (22%) */}
+                <circle
+                  cx="21"
+                  cy="21"
+                  r="15.915"
+                  fill="transparent"
+                  stroke="#3B82F6"
+                  strokeWidth="4.5"
+                  strokeDasharray="22 78"
+                  strokeDashoffset="61"
+                  strokeLinecap="round"
+                />
+                {/* Amber 500 - Inland Waterways (10%) */}
+                <circle
+                  cx="21"
+                  cy="21"
+                  r="15.915"
+                  fill="transparent"
+                  stroke="#F59E0B"
+                  strokeWidth="4.5"
+                  strokeDasharray="10 90"
+                  strokeDashoffset="39"
+                  strokeLinecap="round"
+                />
+                {/* Purple - Air Cargo (4%) */}
+                <circle
+                  cx="21"
+                  cy="21"
+                  r="15.915"
+                  fill="transparent"
+                  stroke="#8B5CF6"
+                  strokeWidth="4.5"
+                  strokeDasharray="4 96"
+                  strokeDashoffset="29"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.62rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>TOTAL</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0F172A', lineHeight: 1 }}>150</span>
+                <span style={{ fontSize: '0.62rem', color: '#94A3B8' }}>Missions</span>
+              </div>
+            </div>
+
+            {/* Sanchar AI Legend */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 8px', marginTop: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#059669' }} />
+                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Highway (64%)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6' }} />
+                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Rail (22%)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F59E0B' }} />
+                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Water (10%)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#8B5CF6' }} />
+                <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 500 }}>Air (4%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '0.72rem', color: '#94A3B8', textAlign: 'center', marginTop: 8 }}>
+            Auto-balanced multimodal matrix
+          </div>
+        </div>
+
+        {/* CHART 3: ACTIVE FLEET DRIVERS & VEHICLES (Emerald Bar Chart) */}
+        <div className="card" style={{ padding: 22, justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
+                Active Fleet Status
+              </h3>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '2px 8px',
+                borderRadius: 9999,
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                backgroundColor: '#ECFDF5',
+                color: '#047857',
+                border: '1px solid #A7F3D0'
+              }}>
                 94% Active
               </span>
             </div>
 
-            {/* Bar Chart with Rounded Pills */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: 130, padding: '0 8px' }}>
+            {/* Bar Chart with Emerald Fill */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: 130, padding: '0 6px' }}>
               {[
-                { day: 'Mon', active: 85, standby: 15 },
-                { day: 'Tue', active: 92, standby: 8 },
-                { day: 'Wed', active: 78, standby: 22 },
-                { day: 'Thu', active: 95, standby: 5 },
-                { day: 'Fri', active: 88, standby: 12 },
-                { day: 'Sat', active: 94, standby: 6 },
-                { day: 'Sun', active: 70, standby: 30 }
+                { day: 'Mon', active: 85 },
+                { day: 'Tue', active: 92 },
+                { day: 'Wed', active: 78 },
+                { day: 'Thu', active: 95 },
+                { day: 'Fri', active: 88 },
+                { day: 'Sat', active: 94 },
+                { day: 'Sun', active: 70 }
               ].map((b) => (
                 <div key={b.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                   <div
                     style={{
                       width: 14,
                       height: 100,
-                      backgroundColor: '#f1f3f1',
-                      borderRadius: 10,
+                      backgroundColor: '#F1F5F9',
+                      borderRadius: 6,
                       position: 'relative',
                       overflow: 'hidden',
                       display: 'flex',
@@ -1035,13 +754,13 @@ export function CommandCenter() {
                       style={{
                         width: '100%',
                         height: `${b.active}%`,
-                        backgroundColor: b.active >= 90 ? '#181a18' : '#64748b',
-                        borderRadius: 10,
+                        backgroundColor: b.active >= 90 ? '#059669' : '#10B981',
+                        borderRadius: 6,
                         transition: 'height 0.3s ease'
                       }}
                     />
                   </div>
-                  <span style={{ fontSize: '0.62rem', color: '#9ca3af', fontWeight: 700 }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 500 }}>
                     {b.day}
                   </span>
                 </div>
@@ -1049,80 +768,61 @@ export function CommandCenter() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 10, borderTop: '1px solid #f1f3f1' }}>
-            <span style={{ fontSize: '0.68rem', color: '#717671', fontWeight: 600 }}>Total Fleet: 148 units</span>
-            <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 800 }}>8 in reserve</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 10, borderTop: '1px solid #F1F5F9' }}>
+            <span style={{ fontSize: '0.72rem', color: '#64748B' }}>Total Fleet: 148 units</span>
+            <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>8 in standby</span>
           </div>
         </div>
       </div>
 
-      {/* 4. ROW 3: PRIMARY GIS LIVE CORRIDOR MAP DISPLAY */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: 22,
-          padding: '20px',
-          border: '1px solid #e2e5e2',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid #f1f3f1', flexWrap: 'wrap', gap: 10 }}>
+      {/* 5. PRIMARY GIS CORRIDOR MONITORING DISPLAY */}
+      <div className="card" style={{ padding: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: '#f1f3f1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#181a18' }}>
+            <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
               <Radio size={16} />
             </div>
             <div>
-              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#181a18' }}>
+              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0F172A' }}>
                 Primary GIS Corridor Monitoring Display — {currentShipment?.shipment_code || 'SHP-001'}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#717671' }}>
-                Live GPS telemetry, terrain slope contours, and alternative route calculations
+              <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                Geospatial vehicle tracking with animated route vectors & terrain elevation mapping
               </div>
             </div>
           </div>
 
-          {/* Quick Route Info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.76rem', color: '#4b5563' }}>
-            <span>Origin: <strong style={{ color: '#181a18' }}>{currentShipment?.origin.split(' ')[0]}</strong></span>
-            <ArrowRight size={14} style={{ color: '#9ca3af' }} />
-            <span>Destination: <strong style={{ color: '#181a18' }}>{currentShipment?.destination.split(' ')[0]}</strong></span>
-            <span style={{ color: '#e5e7eb' }}>|</span>
-            <span>Speed: <strong style={{ color: '#181a18' }}>{gpsUpdate?.speed_kmh || 60} km/h</strong></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.78rem', color: '#475569' }}>
+            <span>Origin: <strong style={{ color: '#0F172A' }}>{currentShipment?.origin.split(' ')[0]}</strong></span>
+            <ArrowRight size={14} style={{ color: '#94A3B8' }} />
+            <span>Destination: <strong style={{ color: '#0F172A' }}>{currentShipment?.destination.split(' ')[0]}</strong></span>
+            <span style={{ color: '#E2E8F0' }}>|</span>
+            <span>Speed: <strong style={{ color: '#059669' }}>{gpsUpdate?.speed_kmh || 60} km/h</strong></span>
           </div>
         </div>
 
-        {/* Main Map Container */}
-        <div style={{ height: 480, width: '100%', borderRadius: 16, overflow: 'hidden' }}>
+        {/* Map Container */}
+        <div style={{ height: 480, width: '100%', borderRadius: 12, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
           <MapView />
         </div>
       </div>
 
-      {/* 5. ROW 4: FLEET OPERATIONS MANIFEST TABLE */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: 22,
-          padding: '24px',
-          border: '1px solid #e2e5e2',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid #f1f3f1', flexWrap: 'wrap', gap: 12 }}>
+      {/* 6. FLEET OPERATIONS MANIFEST TABLE (Section 6.E Blueprint) */}
+      <div className="card" style={{ padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, paddingBottom: 12, borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#181a18', margin: 0 }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
               Fleet Operations Manifest
             </h3>
-            <div style={{ fontSize: '0.72rem', color: '#717671', marginTop: 2 }}>
-              Active shipments, designated transit corridors, and real-time status
+            <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: 2 }}>
+              Active shipments, designated transit corridors, and real-time SLA metrics
             </div>
           </div>
 
-          {/* Search & Status Filters */}
+          {/* Search Box & Status Filter Pills */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', width: 240 }}>
-              <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+            <div style={{ position: 'relative', width: 220 }}>
+              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input
                 type="text"
                 placeholder="Search shipment, route..."
@@ -1130,12 +830,12 @@ export function CommandCenter() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '6px 12px 6px 34px',
+                  padding: '6px 10px 6px 30px',
                   fontSize: '0.78rem',
-                  border: '1px solid #e2e5e2',
-                  borderRadius: 20,
+                  border: '1px solid #E2E8F0',
+                  borderRadius: 8,
                   outline: 'none',
-                  backgroundColor: '#f8faf9'
+                  backgroundColor: '#F8FAFC'
                 }}
               />
             </div>
@@ -1148,13 +848,14 @@ export function CommandCenter() {
                   type="button"
                   onClick={() => setStatusFilter(st)}
                   style={{
-                    border: 'none',
-                    backgroundColor: statusFilter === st ? '#181a18' : '#f1f3f1',
-                    color: statusFilter === st ? '#ffffff' : '#4b5563',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    padding: '5px 12px',
-                    borderRadius: 16,
+                    border: '1px solid',
+                    borderColor: statusFilter === st ? '#059669' : '#E2E8F0',
+                    backgroundColor: statusFilter === st ? '#ECFDF5' : '#FFFFFF',
+                    color: statusFilter === st ? '#047857' : '#475569',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    padding: '4px 10px',
+                    borderRadius: 6,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
@@ -1166,21 +867,20 @@ export function CommandCenter() {
           </div>
         </div>
 
-        {/* Structured Manifest Table */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+        {/* Structured Data Table */}
+        <div className="table-container">
+          <table className="table">
             <thead>
-              <tr style={{ borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>
-                <th style={{ padding: '10px 14px', width: 36 }}>
-                  <input type="checkbox" style={{ accentColor: '#181a18', cursor: 'pointer' }} />
+              <tr>
+                <th style={{ width: '4%' }}>
+                  <input type="checkbox" style={{ accentColor: '#059669', cursor: 'pointer' }} />
                 </th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>Shipment</th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>Corridor Route</th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>Cargo Manifest</th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>Vehicle ID</th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>Risk Level</th>
-                <th style={{ padding: '10px 14px', color: '#6b7280', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase' }}>ETA</th>
+                <th style={{ width: '13%' }}>Shipment</th>
+                <th style={{ width: '25%' }}>Corridor / Lane</th>
+                <th style={{ width: '22%' }}>Cargo Manifest</th>
+                <th style={{ width: '11%' }}>Vehicle ID</th>
+                <th style={{ width: '13%' }}>SLA Status</th>
+                <th style={{ width: '12%' }}>ETA</th>
               </tr>
             </thead>
             <tbody>
@@ -1193,65 +893,50 @@ export function CommandCenter() {
                     onClick={() => selectShipment(s.id)}
                     style={{
                       cursor: 'pointer',
-                      borderBottom: '1px solid #f3f4f6',
-                      backgroundColor: isSelected ? '#f8faf9' : 'transparent',
-                      transition: 'background-color 0.15s ease'
+                      backgroundColor: isSelected ? '#F8FAFC' : 'transparent',
+                      borderLeft: isSelected ? '4px solid #059669' : '4px solid transparent'
                     }}
                   >
-                    <td style={{ padding: '12px 14px' }}>
+                    <td>
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => selectShipment(s.id)}
-                        style={{ accentColor: '#181a18', cursor: 'pointer' }}
+                        style={{ accentColor: '#059669', cursor: 'pointer' }}
                       />
                     </td>
-                    <td style={{ padding: '12px 14px' }}>
-                      <strong style={{ color: '#181a18' }}>{s.shipment_code}</strong>
+                    <td>
+                      <strong style={{ color: isSelected ? '#059669' : '#0F172A' }}>{s.shipment_code}</strong>
                     </td>
-                    <td style={{ padding: '12px 14px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#374151' }}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#334155' }}>
                         <span>{s.origin.split(' ')[0]}</span>
-                        <ArrowRight size={12} style={{ color: '#9ca3af' }} />
+                        <ArrowRight size={12} style={{ color: '#94A3B8' }} />
                         <span>{s.destination.split(' ')[0]}</span>
                       </div>
                     </td>
-                    <td style={{ padding: '12px 14px', color: '#4b5563' }}>
+                    <td style={{ color: '#475569' }}>
                       {s.cargo_type}
                     </td>
-                    <td style={{ padding: '12px 14px' }}>
+                    <td>
                       <span
                         style={{
-                          backgroundColor: '#f1f3f1',
-                          color: '#181a18',
-                          padding: '3px 8px',
-                          borderRadius: 8,
+                          backgroundColor: '#F1F5F9',
+                          color: '#0F172A',
+                          padding: '2px 6px',
+                          borderRadius: 6,
                           fontSize: '0.72rem',
                           fontFamily: 'monospace',
-                          fontWeight: 700
+                          fontWeight: 600
                         }}
                       >
                         TRK-00{s.id}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 14px' }}>
+                    <td>
                       <StatusBadge status={activeGps?.simulated_status || s.status} />
                     </td>
-                    <td style={{ padding: '12px 14px' }}>
-                      <span
-                        style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 800,
-                          padding: '3px 8px',
-                          borderRadius: 10,
-                          color: s.urgency >= 5 || s.status === 'DISRUPTED' ? '#dc2626' : s.urgency === 4 ? '#b45309' : '#15803d',
-                          backgroundColor: s.urgency >= 5 || s.status === 'DISRUPTED' ? '#fef2f2' : s.urgency === 4 ? '#fffbeb' : '#f0fdf4'
-                        }}
-                      >
-                        {s.urgency >= 5 || s.status === 'DISRUPTED' ? 'High Risk' : s.urgency === 4 ? 'Moderate' : 'Low Risk'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontWeight: 800, color: '#181a18' }}>
+                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0F172A' }}>
                       {activeGps?.eta_formatted || (s.updated_eta || s.planned_eta)}
                     </td>
                   </tr>
@@ -1262,14 +947,14 @@ export function CommandCenter() {
         </div>
       </div>
 
-      {/* 6. RISK BREAKDOWN MODAL */}
+      {/* 7. RISK BREAKDOWN MODAL */}
       {showRiskModal && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(24, 26, 24, 0.65)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
             zIndex: 100,
             display: 'flex',
             alignItems: 'center',
@@ -1279,23 +964,23 @@ export function CommandCenter() {
         >
           <div
             style={{
-              backgroundColor: '#ffffff',
-              borderRadius: 22,
+              backgroundColor: '#FFFFFF',
+              borderRadius: 16,
               width: '100%',
               maxWidth: 580,
               padding: 24,
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
-              border: '1px solid #e2e5e2'
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #E2E8F0'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f3f1', paddingBottom: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 12, marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <ShieldAlert size={22} style={{ color: '#dc2626' }} />
+                <ShieldAlert size={22} style={{ color: '#DC2626' }} />
                 <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#181a18', margin: 0 }}>
-                    AI Risk & Vulnerability Analysis
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
+                    AI Risk & Disruption Factor Analysis
                   </h3>
-                  <div style={{ fontSize: '0.72rem', color: '#717671' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
                     Corridor {currentShipment?.shipment_code} ({currentShipment?.origin.split(' ')[0]} → {currentShipment?.destination.split(' ')[0]})
                   </div>
                 </div>
@@ -1303,46 +988,46 @@ export function CommandCenter() {
               <button
                 type="button"
                 onClick={() => setShowRiskModal(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#717671' }}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748B' }}
               >
                 <X size={20} />
               </button>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ backgroundColor: '#f0fdf4', padding: 12, borderRadius: 12, border: '1px solid #bbf7d0', fontSize: '0.75rem', color: '#15803d' }}>
-                <strong>ML Confidence Index: 92%</strong> — Ingesting IMD rainfall radar grids, slope gradient maps, and soil saturation sensors in real time.
+              <div style={{ backgroundColor: '#ECFDF5', padding: 12, borderRadius: 8, border: '1px solid #A7F3D0', fontSize: '0.8rem', color: '#047857' }}>
+                <strong>ML Confidence Score: 92%</strong> — Ingesting IMD rainfall radar grids, slope incline contours, and ground soil saturation telemetry.
               </div>
 
               {/* Factors */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, marginBottom: 4 }}>
                     <span>Precipitation Rate (IMD Radar)</span>
-                    <span style={{ color: '#dc2626' }}>82 mm/hr (Heavy Rainfall)</span>
+                    <span style={{ color: '#DC2626' }}>82 mm/hr (Heavy Storm)</span>
                   </div>
-                  <div style={{ width: '100%', height: 6, backgroundColor: '#f1f3f1', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: '82%', height: '100%', backgroundColor: '#dc2626' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, marginBottom: 4 }}>
-                    <span>Slope Incline Vulnerability</span>
-                    <span style={{ color: '#ea580c' }}>42° Mountain Sector</span>
-                  </div>
-                  <div style={{ width: '100%', height: 6, backgroundColor: '#f1f3f1', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: '74%', height: '100%', backgroundColor: '#ea580c' }} />
+                  <div style={{ width: '100%', height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: '82%', height: '100%', backgroundColor: '#DC2626' }} />
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, marginBottom: 4 }}>
+                    <span>Mountain Slope Incline</span>
+                    <span style={{ color: '#F59E0B' }}>42° Steep Gradient</span>
+                  </div>
+                  <div style={{ width: '100%', height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: '74%', height: '100%', backgroundColor: '#F59E0B' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, marginBottom: 4 }}>
                     <span>Soil Saturation Index</span>
-                    <span style={{ color: '#dc2626' }}>94% (Landslide Hazard)</span>
+                    <span style={{ color: '#DC2626' }}>94% (Landslide Alert)</span>
                   </div>
-                  <div style={{ width: '100%', height: 6, backgroundColor: '#f1f3f1', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: '94%', height: '100%', backgroundColor: '#dc2626' }} />
+                  <div style={{ width: '100%', height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: '94%', height: '100%', backgroundColor: '#DC2626' }} />
                   </div>
                 </div>
               </div>
@@ -1355,15 +1040,13 @@ export function CommandCenter() {
                   handleTriggerReroute();
                   setShowRiskModal(false);
                 }}
+                className="btn btn-primary"
                 style={{
-                  backgroundColor: '#16a34a',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: 12,
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
+                  backgroundColor: '#059669',
+                  color: '#FFFFFF',
+                  borderRadius: 8,
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6
@@ -1375,15 +1058,11 @@ export function CommandCenter() {
               <button
                 type="button"
                 onClick={() => setShowRiskModal(false)}
+                className="btn btn-secondary"
                 style={{
-                  backgroundColor: '#f1f3f1',
-                  color: '#181a18',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: 12,
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
+                  borderRadius: 8,
+                  fontSize: '0.8rem',
+                  fontWeight: 600
                 }}
               >
                 Close
