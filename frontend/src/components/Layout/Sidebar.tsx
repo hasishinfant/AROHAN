@@ -83,15 +83,26 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Sidebar Footer */}
-      <div className="sidebar-footer">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isConnected ? '#16a34a' : '#dc2626' }} />
-          <span style={{ fontWeight: 700, color: '#cbd5e1', fontSize: '0.7rem' }}>
-            {isConnected ? 'STREAM: ONLINE' : 'STREAM: DISCONNECTED'}
+      {/* Sidebar Footer — Translucent Glass Card */}
+      <div style={{
+        margin: '12px 10px',
+        padding: '10px 12px',
+        borderRadius: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.04)',
+        border: '1px solid rgba(45, 212, 191, 0.2)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+          <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.72rem', letterSpacing: '0.02em' }}>
+            System Online
           </span>
         </div>
-        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>GOVT LOGISTICS RISK SYSTEM</div>
+        <div style={{ fontSize: '0.65rem', color: '#99f6e4', opacity: 0.8, fontWeight: 600 }}>v1.0.0</div>
+        <div style={{ fontSize: '0.62rem', color: '#5eead4', opacity: 0.6, fontWeight: 500 }}>Arohan NER Logistics Control</div>
       </div>
     </aside>
   );

@@ -15,6 +15,7 @@ import {
   Truck,
   Zap,
   CloudRain,
+  Shield,
   ShieldAlert,
   Search,
   RotateCcw,
@@ -24,7 +25,10 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  MapPin
+  MapPin,
+  Gauge,
+  Compass,
+  AlertTriangle
 } from 'lucide-react';
 
 export function CommandCenter() {
@@ -198,6 +202,97 @@ export function CommandCenter() {
           <button onClick={() => navigate('/multimodal')} className="btn btn-outline btn-xs" style={{ fontSize: '0.7rem', fontWeight: 800, color: '#1d4ed8', borderColor: '#bfdbfe' }}>
             OPEN MULTIMODAL OPERATIONS CENTER →
           </button>
+        </div>
+      </div>
+
+      {/* 8 TELEMETRY METRIC STRIP CARDS MATCHING MOCK UI SCREENSHOT */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 8 }}>
+        {/* Card 1: Active Mission */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#f0fdf4', color: '#16a34a', flexShrink: 0 }}>
+            <Truck size={16} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Active Mission</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentShipment?.shipment_code || 'SHP-001'} (Medical)</div>
+          </div>
+        </div>
+
+        {/* Card 2: Current Status */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#f0fdf4', color: '#16a34a', flexShrink: 0 }}>
+            <Activity size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Current Status</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#16a34a' }}>In Transit</div>
+          </div>
+        </div>
+
+        {/* Card 3: Vehicle */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#f8fafc', color: '#1d4ed8', flexShrink: 0 }}>
+            <Truck size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Vehicle</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#0f172a' }}>TRK-001</div>
+          </div>
+        </div>
+
+        {/* Card 4: Current Speed */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#f0fdf4', color: '#059669', flexShrink: 0 }}>
+            <Gauge size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Current Speed</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#0f172a' }}>{gpsUpdate?.speed_kmh || 60} km/h</div>
+          </div>
+        </div>
+
+        {/* Card 5: Next Checkpoint */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#f0fdf4', color: '#16a34a', flexShrink: 0 }}>
+            <MapPin size={16} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Next Checkpoint</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Umiam (30.4 km)</div>
+          </div>
+        </div>
+
+        {/* Card 6: Risk Level */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8, borderColor: '#fde68a', backgroundColor: '#fffbeb' }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#fef3c7', color: '#b45309', flexShrink: 0 }}>
+            <AlertTriangle size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#92400e', textTransform: 'uppercase' }}>Risk Level</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#b45309' }}>{gpsUpdate?.current_risk_level || 'Moderate'}</div>
+          </div>
+        </div>
+
+        {/* Card 7: ETA */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8, borderColor: '#fecaca', backgroundColor: '#fff5f5' }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#fee2e2', color: '#dc2626', flexShrink: 0 }}>
+            <Clock size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase' }}>ETA</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#dc2626' }}>{currentShipment?.updated_eta || '13:12'}</div>
+          </div>
+        </div>
+
+        {/* Card 8: Corridor Clear */}
+        <div className="card" style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 6, borderRadius: 6, backgroundColor: '#f0fdf4', color: '#16a34a', flexShrink: 0 }}>
+            <Shield size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Corridor Clear</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#16a34a' }}>30.4 km</div>
+          </div>
         </div>
       </div>
 

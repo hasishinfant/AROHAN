@@ -131,46 +131,49 @@ body {
   background-color: var(--bg-canvas);
 }
 
-/* ── Institutional Government Sidebar ─────────────────────── */
+/* ── Glassmorphic Institutional Sidebar ─────────────────────── */
 .sidebar {
   width: 240px;
-  background-color: var(--bg-sidebar-navy);
+  background: linear-gradient(180deg, #041d1a 0%, #072b26 50%, #031613 100%);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   color: #ffffff;
-  border-right: 1px solid var(--border-dark);
+  border-right: 1px solid rgba(45, 212, 191, 0.15);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-header {
-  height: 56px;
+  height: 64px;
   display: flex;
   align-items: center;
   padding: 0 var(--space-4);
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid rgba(45, 212, 191, 0.12);
   gap: var(--space-3);
-  background-color: #090d16;
+  background: rgba(4, 29, 26, 0.6);
+  backdrop-filter: blur(10px);
 }
 
 .sidebar-logo-mark {
-  background-color: var(--primary-blue);
+  background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
   color: #ffffff;
   font-weight: 800;
   font-size: 0.9rem;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #60a5fa;
+  border: 1px solid rgba(94, 234, 212, 0.4);
+  box-shadow: 0 2px 10px rgba(20, 184, 166, 0.3);
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-3) 10px;
   flex: 1;
   overflow-y: auto;
 }
@@ -178,43 +181,49 @@ body {
 .sidebar-section-title {
   font-size: 0.65rem;
   font-weight: 800;
-  color: #94a3b8;
+  color: #2dd4bf;
+  opacity: 0.75;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 8px 10px 4px 10px;
-  border-bottom: 1px solid #1e293b;
-  margin-bottom: 4px;
+  letter-spacing: 0.1em;
+  padding: 10px 10px 4px 10px;
+  margin-top: 4px;
+  margin-bottom: 2px;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  color: #cbd5e1;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #99f6e4;
+  opacity: 0.85;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.82rem;
-  transition: all 0.15s ease-in-out;
-  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   width: 100%;
   text-align: left;
-  border-left: 3px solid transparent;
 }
 
 .sidebar-link:hover {
-  background-color: var(--bg-sidebar-hover);
-  color: #ffffff;
+  background: rgba(20, 184, 166, 0.12);
+  color: #5eead4;
+  opacity: 1;
+  transform: translateX(2px);
 }
 
 .sidebar-link.active {
-  background-color: #1e293b;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.24) 0%, rgba(13, 148, 136, 0.16) 100%);
   color: #ffffff;
-  font-weight: 700;
-  border-left-color: #3b82f6;
+  opacity: 1;
+  font-weight: 800;
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
 }
 
 .sidebar-link-icon {
