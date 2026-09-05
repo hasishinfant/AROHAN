@@ -184,6 +184,46 @@ export function MissionDetail() {
           </table>
         </div>
       </div>
+
+      {/* Multimodal Journey Legs Section */}
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
+            <Route size={15} style={{ color: '#1d4ed8' }} />
+            <span>MULTIMODAL JOURNEY LEGS & TRANSFER POINTS</span>
+          </div>
+          <span className="data-tag data-tag-real">MULTIMODAL INTELLIGENCE</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: 12, borderRadius: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1e40af' }}>LEG 1: LAND / ROAD</span>
+              <span className="badge badge-success">COMPLETED</span>
+            </div>
+            <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>Guwahati → Jogighopa MMLP</strong>
+            <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: 4 }}>Vehicle: TRK-007 (142 km)</div>
+          </div>
+
+          <div style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: 12, borderRadius: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0369a1' }}>LEG 2: WATER (NW-2)</span>
+              <span className="badge badge-success">ACTIVE</span>
+            </div>
+            <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>Jogighopa → Pandu Port</strong>
+            <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: 4 }}>Barge: MB-BRAHMAPUTRA-04 (118 km)</div>
+          </div>
+
+          <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: 12, borderRadius: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569' }}>LEG 3: LAND FEEDER</span>
+              <span className="badge badge-neutral">PLANNED</span>
+            </div>
+            <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>Pandu Port → Shillong Hub</strong>
+            <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: 4 }}>Vehicle: TRK-014 (104 km)</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

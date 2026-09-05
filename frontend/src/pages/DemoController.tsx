@@ -136,6 +136,35 @@ export function DemoController() {
         )}
       </div>
 
+      {/* Multimodal Transport Mode Simulation Controls */}
+      <div className="card" style={{ borderLeft: '4px solid #1d4ed8' }}>
+        <div className="card-header">
+          <div className="card-title">
+            <Sliders size={14} style={{ color: '#1d4ed8' }} />
+            <span>MULTIMODAL TRANSPORT MODE TEST PANEL</span>
+          </div>
+          <span className="data-tag data-tag-real">MULTIMODAL CONTROLLER</span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.8rem' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {['LAND', 'RAIL', 'WATER', 'AIR'].map((mode) => (
+              <a
+                key={mode}
+                href="/multimodal"
+                className="btn btn-sm btn-secondary"
+                style={{ fontSize: '0.75rem', fontWeight: 800 }}
+              >
+                TEST [{mode}] SIMULATION MAP
+              </a>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            Supports <strong>1x, 5x, 10x, 20x, 50x, 100x</strong> speed multipliers for Land (Truck), Rail (Freight Train), Water (IWAI Barge), and Air (Cargo Aircraft).
+          </div>
+        </div>
+      </div>
+
       {/* 20-Step Acceptance Test Matrix */}
       <div className="card">
         <div className="card-header">

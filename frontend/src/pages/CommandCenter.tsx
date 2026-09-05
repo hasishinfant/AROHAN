@@ -24,7 +24,8 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  MapPin
+  MapPin,
+  Layers
 } from 'lucide-react';
 
 export function CommandCenter() {
@@ -244,6 +245,10 @@ export function CommandCenter() {
             <span>Origin: <strong>{currentShipment?.origin.split(' ')[0]}</strong></span>
             <span>→</span>
             <span>Destination: <strong>{currentShipment?.destination.split(' ')[0]}</strong></span>
+            <button onClick={() => navigate('/multimodal')} className="btn btn-sm btn-blue" style={{ fontSize: '0.72rem', padding: '4px 10px', gap: 6, fontWeight: 800, marginLeft: 8 }}>
+              <Layers size={13} />
+              <span>MULTIMODAL OPS</span>
+            </button>
           </div>
         </div>
         <div style={{ flex: 1, width: '100%', borderRadius: 6, overflow: 'hidden' }}>

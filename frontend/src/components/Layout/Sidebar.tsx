@@ -12,7 +12,8 @@ import {
   BarChart3,
   Activity,
   Compass,
-  FileText
+  FileText,
+  Layers
 } from 'lucide-react';
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { path: '/mission', label: 'Mission Detail', icon: Package, section: 'OPERATIONS' },
   { path: '/action', label: 'Action Center', icon: Zap, section: 'OPERATIONS', alertKey: 'pending' },
   { path: '/replan', label: 'Replanning View', icon: GitCompare, section: 'OPERATIONS' },
+  { path: '/multimodal', label: 'Multimodal Operations', icon: Layers, section: 'OPERATIONS' },
   { path: '/reports', label: 'Risk Intelligence', icon: FileText, section: 'ANALYTICS' },
   { path: '/history', label: 'Decision History', icon: History, section: 'ANALYTICS' },
   { path: '/baseline', label: 'Baseline Comparison', icon: BarChart3, section: 'ANALYTICS' },

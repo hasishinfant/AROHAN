@@ -17,6 +17,41 @@ export type DriverStatus = 'IDLE' | 'NOTIFIED' | 'ACKNOWLEDGED' | 'REPORTING';
 export type ScenarioStatus = 'IDLE' | 'RUNNING' | 'PAUSED' | 'COMPLETE';
 export type ConditionReport = 'CLEAR' | 'SLOW' | 'PARTIAL' | 'BLOCKED';
 
+export type TransportMode = 'LAND' | 'RAIL' | 'WATER' | 'AIR';
+export type DataStatus = 'CONNECTED' | 'SIMULATION' | 'STATIC_DATA' | 'NOT_CONFIGURED' | 'DEGRADED';
+export type LegStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'DISRUPTED';
+
+export interface JourneyLeg {
+  id: string | number;
+  leg_number: number;
+  mode: TransportMode;
+  origin: string;
+  destination: string;
+  origin_coords: [number, number]; // [lat, lng]
+  destination_coords: [number, number]; // [lat, lng]
+  route_geometry_geojson?: string;
+  status: LegStatus;
+  scheduled_start: string;
+  estimated_arrival: string;
+  vehicle_id: string;
+  vehicle_name: string;
+  terminal_origin: string;
+  terminal_destination: string;
+  distance_km: number;
+  speed_kmh: number;
+  progress_pct: number;
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  data_status: DataStatus;
+  disruption_notes?: string;
+}
+
+export interface MultimodalJourney {
+  id: string | number;
+  shipment_id: number;
+  journey_type: 'ROAD' | 'MULTIMODAL';
+  legs: JourneyLeg[];
+}
+
 export interface RouteData {
   id: number;
   label: RouteLabel;
@@ -99,6 +134,7 @@ export interface ShipmentData {
   planned_eta: string;
   updated_eta: string | null;
   created_at: string;
+  journey?: MultimodalJourney;
 }
 
 export interface NetworkEvent {

@@ -171,6 +171,25 @@ export function ReportPage() {
         </div>
       </div>
 
+      {/* Multimodal Transport Mode Selector Bar */}
+      <div className="card" style={{ padding: '8px 16px', backgroundColor: '#ffffff', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+          REPORT TRANSPORT MODE FILTER:
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {['LAND', 'RAIL', 'WATER', 'AIR'].map((m) => (
+            <button
+              key={m}
+              onClick={() => setSelectedRiskFilter(m)}
+              className={`btn btn-sm ${selectedRiskFilter === m ? 'btn-blue' : 'btn-secondary'}`}
+              style={{ fontSize: '0.72rem', fontWeight: 800, padding: '4px 12px' }}
+            >
+              [{m}] MODE
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 2. TOP SUMMARY METRICS (4 EXECUTIVE CARDS) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
         
