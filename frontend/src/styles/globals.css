@@ -12,34 +12,35 @@
 
 html {
   font-size: 14px;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #363a37;
+  color: #181a18;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #363a37;
+  color: #181a18;
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Institutional Design System Variables ────────────────── */
+/* ── Modern Light Minimalist Design System Variables ────────────────── */
 :root {
   /* Canvas & Surface Colors */
-  --bg-canvas: #f8fafc;
+  --bg-canvas: #eff1ee;
   --bg-surface: #ffffff;
-  --bg-panel: #f8fafc;
-  --bg-subtle: #f1f5f9;
+  --bg-panel: #ffffff;
+  --bg-subtle: #f4f6f3;
+  --bg-frame: #363a37;
 
-  /* Primary Government Navy & Control Elements */
-  --bg-sidebar-navy: #0f172a;
-  --bg-sidebar-hover: #1e293b;
-  --bg-sidebar-active: #1e3a8a;
-  --primary-navy: #0f172a;
-  --primary-blue: #2563eb;
+  /* Primary Dark Charcoal & Accents */
+  --primary-dark: #181a18;
+  --primary-navy: #181a18;
+  --primary-blue: #1d4ed8;
+  --primary-lime: #d4f934;
+  --primary-sage: #dcfce7;
   --primary-blue-light: #eff6ff;
   --primary-blue-border: #bfdbfe;
 
@@ -49,15 +50,15 @@ body {
   --accent-amber-border: #fde68a;
 
   /* Borders - Soft & Refined */
-  --border-subtle: #f1f5f9;
-  --border-medium: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --border-dark: #334155;
+  --border-subtle: rgba(0, 0, 0, 0.03);
+  --border-medium: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --border-dark: #181a18;
 
   /* Typography Colors */
-  --text-main: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-main: #181a18;
+  --text-secondary: #4b5563;
+  --text-muted: #8a9088;
   --text-inverse: #ffffff;
 
   /* Status Colors */
@@ -71,11 +72,6 @@ body {
   --status-warning-border: #ffedd5;
   --status-warning-accent: #ea580c;
 
-  --status-amber-text: #713f12;
-  --status-amber-bg: #fefce8;
-  --status-amber-border: #fef08a;
-  --status-amber-accent: #ca8a04;
-
   --status-success-text: #14532d;
   --status-success-bg: #f0fdf4;
   --status-success-border: #bbf7d0;
@@ -86,7 +82,7 @@ body {
   --status-info-border: #bfdbfe;
   --status-info-accent: #2563eb;
 
-  /* Spacing - Decompressed for breathing room */
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 14px;
@@ -94,26 +90,39 @@ body {
   --space-5: 24px;
   --space-6: 32px;
 
-  /* Smooth Refined Radii */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Smooth Radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
   --radius-pill: 9999px;
 
   /* Soft Elevation & Subtle Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* ── Main App Shell Container ─────────────────────────────── */
+/* ── Main App Shell Container (Floating Rounded Canvas) ─────── */
 .app-container {
   display: flex;
-  min-height: 100vh;
-  width: 100vw;
+  min-height: calc(100vh - 28px);
+  margin: 14px;
+  border-radius: 28px;
   background-color: var(--bg-canvas);
-  overflow-x: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 1024px) {
+  .app-container {
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
 }
 
 .app-main {
@@ -122,129 +131,96 @@ body {
   flex-direction: column;
   background-color: var(--bg-canvas);
   min-width: 0;
+  overflow-y: auto;
 }
 
 .app-content {
   flex: 1;
-  overflow-y: auto;
-  padding: var(--space-4);
+  padding: 16px 24px 28px 24px;
   background-color: var(--bg-canvas);
 }
 
-/* ── Glassmorphic Institutional Sidebar (Pure White & Royal Blue Theme) ── */
+/* ── Slim Minimalist Floating Icon Dock Sidebar ──────────── */
 .sidebar {
-  width: 240px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%);
+  width: 76px;
+  background: var(--bg-canvas);
   display: flex;
   flex-direction: column;
+  align-items: center;
   flex-shrink: 0;
-  color: #0f172a;
-  border-right: 1px solid #e2e8f0;
-  box-shadow: 4px 0 20px rgba(30, 58, 138, 0.05);
+  padding: 18px 10px;
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
+  gap: 14px;
+  justify-content: space-between;
 }
 
 .sidebar-header {
-  height: 64px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 0 var(--space-4);
-  border-bottom: 1px solid #e2e8f0;
-  gap: var(--space-3);
-  background: #ffffff;
-}
-
-.sidebar-logo-mark {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 0.9rem;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #93c5fd;
-  box-shadow: 0 2px 10px rgba(29, 78, 216, 0.25);
+  gap: 10px;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3) 10px;
+  align-items: center;
+  gap: 8px;
   flex: 1;
-  overflow-y: auto;
-}
-
-.sidebar-section-title {
-  font-size: 0.68rem;
-  font-weight: 900;
-  color: #1d4ed8;
-  opacity: 0.9;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 10px 10px 4px 10px;
-  margin-top: 4px;
-  margin-bottom: 2px;
+  margin-top: 12px;
 }
 
 .sidebar-link {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #475569;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.82rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
+  justify-content: center;
   background: transparent;
+  border: none;
   cursor: pointer;
-  width: 100%;
-  text-align: left;
+  color: #6b7280;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .sidebar-link:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #dbeafe;
-  transform: translateX(2px);
+  background: #ffffff;
+  color: #181a18;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
 }
 
 .sidebar-link.active {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  background: #181a18;
   color: #ffffff;
-  font-weight: 800;
-  border: 1px solid #1d4ed8;
-  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.3);
+  box-shadow: 0 4px 14px rgba(24, 26, 24, 0.3);
 }
 
 .sidebar-link-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
 .sidebar-footer {
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid #e2e8f0;
-  font-size: 0.72rem;
-  color: #64748b;
-  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-/* ── Top Bar Header (Institutional Government Bar) ───────── */
+/* ── Top Bar Header ──────────────────────────────────────── */
 .topbar {
   height: 64px;
-  background-color: #ffffff;
-  border-bottom: 1px solid var(--border-medium);
+  background-color: var(--bg-canvas);
+  border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-4);
+  padding: 14px 24px 0 24px;
+  gap: 14px;
 }
 
 .topbar-branding {
@@ -342,21 +318,18 @@ body {
 /* ── Smooth Refined Cards & Information Panels ────────────── */
 /* ── Smooth Refined Glassmorphic Cards & Information Panels ── */
 .card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .card:hover {
-  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
-  border-color: rgba(20, 184, 166, 0.35);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {

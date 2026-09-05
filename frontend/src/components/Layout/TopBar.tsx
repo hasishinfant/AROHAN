@@ -1,21 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../../stores/arohanStore';
-import { Shield, AlertTriangle, CheckCircle2, Clock, Radio, Search, LogOut, Truck } from 'lucide-react';
-
-import { Logo } from '../Logo';
+import {
+  Menu,
+  Search,
+  Bell,
+  MessageSquare,
+  ChevronDown,
+  LogOut,
+  Volume2,
+  VolumeX
+} from 'lucide-react';
 
 export function TopBar() {
   const navigate = useNavigate();
-  const { shipment, shipmentsList, selectedShipmentId, selectShipment, scenario_status, scenario_step, user, logout } = useArohanStore();
+  const {
+    shipmentsList,
+    selectedShipmentId,
+    selectShipment,
+    scenario_step,
+    user,
+    logout,
+    isConnected
+  } = useArohanStore();
+
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
 
   const systemStatus = () => {
     const step = scenario_step ?? -1;
-    if (step >= 7) return { badgeClass: 'badge-critical', label: 'OBSTRUCTION REPORTED', Icon: AlertTriangle };
-    if (step >= 4) return { badgeClass: 'badge-warning', label: 'PROACTIVE REROUTE ACTIVE', Icon: Shield };
-    if (step >= 2) return { badgeClass: 'badge-warning', label: 'RISK THRESHOLD EXCEEDED', Icon: AlertTriangle };
-    if (step >= 0) return { badgeClass: 'badge-info', label: 'MISSION ACTIVE', Icon: Radio };
-    return { badgeClass: 'badge-neutral', label: 'MONITORING IDLE', Icon: CheckCircle2 };
+    if (step >= 7) return { bg: '#fef2f2', text: '#dc2626', border: '#fecaca', label: 'Obstruction Reported', dot: '#dc2626' };
+    if (step >= 4) return { bg: '#fff7ed', text: '#ea580c', border: '#ffedd5', label: 'Reroute Active', dot: '#ea580c' };
+    if (step >= 2) return { bg: '#fffbeb', text: '#b45309', border: '#fde68a', label: 'Risk Elevated', dot: '#d97706' };
+    if (step >= 0) return { bg: '#eff6ff', text: '#2563eb', border: '#bfdbfe', label: 'Mission Active', dot: '#2563eb' };
+    return { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0', label: 'Corridor Normal', dot: '#16a34a' };
   };
 
   const sys = systemStatus();
@@ -26,54 +44,69 @@ export function TopBar() {
   };
 
   return (
-    <header className="topbar" style={{
-      height: 64,
-      padding: '0 20px',
-      borderBottom: '1px solid #e2e8f0',
-      backgroundColor: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 16
-    }}>
-      {/* 1. LEFT BRANDING & ACTIVE MISSION SELECTOR */}
+    <header
+      className="topbar"
+      style={{
+        height: 72,
+        padding: '0 28px',
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 20,
+        zIndex: 20
+      }}
+    >
+      {/* 1. LEFT: HAMBURGER & ACTIVE MISSION DROPDOWN */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        {/* Navigation Icon Button */}
+        {/* Rounded Hamburger Button */}
         <button
+          type="button"
           onClick={() => navigate('/command')}
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            backgroundColor: '#1d4ed8',
-            color: '#ffffff',
-            border: 'none',
+            width: 40,
+            height: 40,
+            borderRadius: 14,
+            backgroundColor: '#f4f5f4',
+            border: '1px solid #e2e5e2',
+            color: '#181a18',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(29, 78, 216, 0.25)'
+            transition: 'background-color 0.2s ease'
           }}
+          title="Toggle Navigation Menu"
         >
-          <Truck size={18} />
+          <Menu size={18} />
         </button>
 
-        {/* 2. UNIFIED ACTIVE MISSION SELECTOR */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.04em' }}>
-            Active Mission
-          </div>
-          <div style={{
+        {/* Mission Selector Pill */}
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            backgroundColor: '#f8fafc',
-            border: '1px solid #cbd5e1',
-            borderRadius: 18,
-            padding: '3px 12px',
-            minWidth: 280,
-            maxWidth: 320
-          }}>
+            gap: 8,
+            backgroundColor: '#f8faf9',
+            border: '1px solid #e2e5e2',
+            borderRadius: 24,
+            padding: '6px 14px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              backgroundColor: isConnected ? '#16a34a' : '#2563eb'
+            }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#717671', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Active Mission
+            </span>
             <select
               value={selectedShipmentId || 1}
               onChange={(e) => selectShipment(Number(e.target.value))}
@@ -82,18 +115,15 @@ export function TopBar() {
                 background: 'transparent',
                 fontWeight: 800,
                 fontSize: '0.78rem',
-                color: '#0f172a',
+                color: '#181a18',
                 outline: 'none',
                 cursor: 'pointer',
-                width: '100%',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap'
+                paddingRight: 6
               }}
             >
               {shipmentsList?.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.shipment_code} · {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]} ({s.cargo_type.split(' ')[0]})
+                  {s.shipment_code} — {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]} ({s.cargo_type})
                 </option>
               ))}
             </select>
@@ -101,93 +131,242 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* 3. RIGHT META ACTIONS & OPERATIONAL STATUS */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Search Input */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          backgroundColor: '#ffffff',
-          border: '1px solid #cbd5e1',
-          borderRadius: 18,
-          padding: '5px 14px',
-          width: 260
-        }}>
-          <Search size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
+      {/* 2. CENTER: PILL SEARCH BAR */}
+      <div style={{ flex: 1, maxWidth: 520 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            backgroundColor: '#f8faf9',
+            border: '1px solid #e2e5e2',
+            borderRadius: 9999,
+            padding: '8px 18px',
+            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+          }}
+        >
+          <Search size={16} style={{ color: '#8c928c', flexShrink: 0 }} />
           <input
             type="text"
-            placeholder="Search corridor, vehicle, location, risk..."
+            placeholder="Search missions, corridors, vehicles, alerts..."
             style={{
               border: 'none',
               outline: 'none',
               width: '100%',
-              fontSize: '0.75rem',
-              color: '#0f172a',
-              background: 'transparent'
+              fontSize: '0.82rem',
+              color: '#181a18',
+              backgroundColor: 'transparent',
+              fontWeight: 500
+            }}
+          />
+        </div>
+      </div>
+
+      {/* 3. RIGHT: STATUS PILL, ICONS & USER AVATAR */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Operational Status Pill */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            padding: '6px 14px',
+            borderRadius: 20,
+            backgroundColor: sys.bg,
+            color: sys.text,
+            border: `1px solid ${sys.border}`
+          }}
+        >
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              backgroundColor: sys.dot
+            }}
+          />
+          <span>{sys.label}</span>
+        </div>
+
+        {/* Audio Alert Toggle */}
+        <button
+          type="button"
+          onClick={() => setAudioEnabled(!audioEnabled)}
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 14,
+            backgroundColor: '#f8faf9',
+            border: '1px solid #e2e5e2',
+            color: audioEnabled ? '#181a18' : '#8c928c',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          title={audioEnabled ? 'Mute Alerts' : 'Enable Audio Alerts'}
+        >
+          {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+        </button>
+
+        {/* Message / Chat Button */}
+        <button
+          type="button"
+          onClick={() => navigate('/action')}
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 14,
+            backgroundColor: '#f8faf9',
+            border: '1px solid #e2e5e2',
+            color: '#181a18',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          title="Team Communication"
+        >
+          <MessageSquare size={16} />
+        </button>
+
+        {/* Notification Bell with alert dot */}
+        <div style={{ position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => navigate('/risk')}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 14,
+              backgroundColor: '#f8faf9',
+              border: '1px solid #e2e5e2',
+              color: '#181a18',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+            title="Corridor Alerts"
+          >
+            <Bell size={16} />
+          </button>
+          <span
+            style={{
+              position: 'absolute',
+              top: 7,
+              right: 7,
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              backgroundColor: '#ef4444',
+              border: '1.5px solid #ffffff'
             }}
           />
         </div>
 
-        {/* Operational Status Pill */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: '0.72rem',
-          fontWeight: 800,
-          padding: '5px 12px',
-          borderRadius: 18,
-          backgroundColor: sys.badgeClass.includes('critical') ? '#fef2f2' : sys.badgeClass.includes('warning') ? '#fff7ed' : '#dcfce7',
-          color: sys.badgeClass.includes('critical') ? '#dc2626' : sys.badgeClass.includes('warning') ? '#ea580c' : '#15803d',
-          border: `1px solid ${sys.badgeClass.includes('critical') ? '#fecaca' : sys.badgeClass.includes('warning') ? '#ffedd5' : '#86efac'}`,
-          letterSpacing: '0.02em'
-        }}>
-          <span style={{
-            width: 7,
-            height: 7,
-            borderRadius: '50%',
-            backgroundColor: sys.badgeClass.includes('critical') ? '#dc2626' : sys.badgeClass.includes('warning') ? '#ea580c' : '#16a34a'
-          }} />
-          <span>{sys.label}</span>
-        </div>
-
-        {/* Journey Step Indicator */}
-        {scenario_status && scenario_status !== 'IDLE' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3px 10px', backgroundColor: '#f1f5f9', borderRadius: 6, border: '1px solid #cbd5e1' }}>
-            <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Journey</span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a', fontFamily: 'monospace' }}>
-              {(scenario_step ?? -1) + 1} / 9
-            </span>
-          </div>
-        )}
-
-        {/* Dynamic ETA */}
-        {shipment && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '3px 10px', backgroundColor: '#fff5f5', borderRadius: 6, border: '1px solid #fecaca' }}>
-            <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase' }}>ETA</span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#dc2626', fontFamily: 'monospace' }}>
-              {shipment.updated_eta ?? shipment.planned_eta}
-            </span>
-          </div>
-        )}
-
-        {/* User Block matching screenshot */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 20 }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#04221e', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>
-            {user?.avatarText || 'AS'}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>{user?.name || 'Arjun Sharma'}</span>
-            <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 600 }}>Mission Operator</span>
-          </div>
-          <button
-            onClick={handleLogout}
-            title="Log Out"
-            style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#94a3b8', marginLeft: 4 }}
+        {/* User Profile Pill */}
+        <div style={{ position: 'relative' }}>
+          <div
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '4px 12px 4px 6px',
+              backgroundColor: '#f8faf9',
+              border: '1px solid #e2e5e2',
+              borderRadius: 24,
+              cursor: 'pointer',
+              userSelect: 'none'
+            }}
           >
-            <LogOut size={14} />
-          </button>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                backgroundColor: '#181a18',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                position: 'relative'
+              }}
+            >
+              {user?.avatarText || 'AS'}
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  width: 9,
+                  height: 9,
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  border: '2px solid #ffffff'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#181a18', lineHeight: 1.1 }}>
+                {user?.name || 'Arjun Sharma'}
+              </span>
+              <span style={{ fontSize: '0.64rem', color: '#717671', fontWeight: 600 }}>
+                Mission Director
+              </span>
+            </div>
+            <ChevronDown size={14} style={{ color: '#717671', marginLeft: 2 }} />
+          </div>
+
+          {/* User Dropdown Menu */}
+          {showUserMenu && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 46,
+                right: 0,
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e5e2',
+                borderRadius: 16,
+                padding: '8px',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.12)',
+                minWidth: 180,
+                zIndex: 50
+              }}
+            >
+              <div style={{ padding: '8px 12px', borderBottom: '1px solid #f1f3f1' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#181a18' }}>{user?.name || 'Arjun Sharma'}</div>
+                <div style={{ fontSize: '0.68rem', color: '#717671' }}>{user?.email || 'arjun@arohan.gov.in'}</div>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 12px',
+                  marginTop: 4,
+                  backgroundColor: '#fef2f2',
+                  border: 'none',
+                  borderRadius: 10,
+                  color: '#dc2626',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                <LogOut size={14} />
+                <span>Log Out</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

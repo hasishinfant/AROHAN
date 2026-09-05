@@ -3,106 +3,188 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../../stores/arohanStore';
 import {
   LayoutDashboard,
+  Boxes,
+  ShieldAlert,
   Package,
   Zap,
-  GitCompare,
-  History,
-  Sliders,
-  Smartphone,
-  BarChart3,
-  Activity,
-  Compass,
   FileText,
-  Boxes,
-  ShieldAlert
+  History,
+  BarChart3,
+  Smartphone,
+  LogOut,
+  Sliders,
+  Compass,
+  MessageSquare,
+  Layers
 } from 'lucide-react';
-
-const navItems = [
-  { path: '/', label: 'Public Portal', icon: Compass, section: 'OVERVIEW' },
-  { path: '/command', label: 'Command Center', icon: LayoutDashboard, section: 'OPERATIONS' },
-  { path: '/multimodal', label: 'Multimodal Operations', icon: Boxes, section: 'OPERATIONS' },
-  { path: '/risk', label: 'Risk Dashboard', icon: ShieldAlert, section: 'OPERATIONS' },
-  { path: '/mission', label: 'Mission Detail', icon: Package, section: 'OPERATIONS' },
-  { path: '/action', label: 'Action Center', icon: Zap, section: 'OPERATIONS', alertKey: 'pending' },
-  { path: '/replan', label: 'Replanning View', icon: GitCompare, section: 'OPERATIONS' },
-  { path: '/reports', label: 'Risk Intelligence', icon: FileText, section: 'ANALYTICS' },
-  { path: '/history', label: 'Decision History', icon: History, section: 'ANALYTICS' },
-  { path: '/baseline', label: 'Baseline Comparison', icon: BarChart3, section: 'ANALYTICS' },
-  { path: '/demo', label: 'Demo Controller', icon: Sliders, section: 'SYSTEM' },
-  { path: '/health', label: 'System Health', icon: Activity, section: 'SYSTEM' },
-  { path: '/driver', label: 'Driver Interface', icon: Smartphone, section: 'SYSTEM' },
-];
-
 import { Logo } from '../Logo';
 
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { current_decision, isConnected } = useArohanStore();
+  const { current_decision, logout } = useArohanStore();
 
   const hasPending = current_decision?.status === 'PENDING';
-  const sections = ['OVERVIEW', 'OPERATIONS', 'ANALYTICS', 'SYSTEM'];
+
+  const navItems = [
+    { path: '/command', label: 'Dashboard Overview', icon: LayoutDashboard },
+    { path: '/multimodal', label: 'Multimodal Operations', icon: Boxes },
+    { path: '/risk', label: 'Risk Dashboard', icon: ShieldAlert },
+    { path: '/mission', label: 'Mission Detail', icon: Package },
+    { path: '/action', label: 'Action Center', icon: Zap, alert: hasPending },
+    { path: '/reports', label: 'Risk Intelligence Reports', icon: FileText },
+    { path: '/history', label: 'Decision History', icon: History },
+    { path: '/baseline', label: 'Baseline Comparison', icon: BarChart3 },
+    { path: '/demo', label: 'Demo Controller', icon: Sliders },
+  ];
 
   return (
     <aside className="sidebar">
-      {/* Sidebar Header with Official Logo Emblem */}
-      <div className="sidebar-header" onClick={() => navigate('/')} style={{ cursor: 'pointer', padding: '16px 14px' }}>
-        <Logo size={34} variant="dark" />
+      {/* 1. TOP LOGO & DEVICE SWITCHER */}
+      <div className="sidebar-header">
+        {/* Main Logo Button */}
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          title="AROHAN Public Portal"
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            padding: 0
+          }}
+        >
+          <Logo size={28} showText={false} variant="dark" />
+        </button>
+
+        {/* Sub-Button: Public Portal / Device Toggle */}
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          title="Return to Public Portal"
+          style={{
+            width: 38,
+            height: 28,
+            borderRadius: 8,
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.02)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#6b7280'
+          }}
+        >
+          <Compass size={14} />
+        </button>
       </div>
 
-      {/* Navigation Groups */}
+      {/* 2. CENTER NAVIGATION ICON DOCK */}
       <nav className="sidebar-nav">
-        {sections.map((section) => (
-          <div key={section} style={{ marginBottom: 8 }}>
-            <div className="sidebar-section-title">
-              {section}
-            </div>
-            {navItems
-              .filter((item) => item.section === section)
-              .map((item) => {
-                const isActive = location.pathname === item.path;
-                const Icon = item.icon;
-                const showBadge = item.alertKey === 'pending' && hasPending;
-                return (
-                  <button
-                    key={item.path}
-                    className={`sidebar-link ${isActive ? 'active' : ''}`}
-                    onClick={() => navigate(item.path)}
-                  >
-                    <Icon className="sidebar-link-icon" />
-                    <span>{item.label}</span>
-                    {showBadge && (
-                      <span className="badge badge-warning" style={{ marginLeft: 'auto', padding: '1px 4px', fontSize: '0.6rem' }}>
-                        ACTION
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-          </div>
-        ))}
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.path}
+              type="button"
+              className={`sidebar-link ${isActive ? 'active' : ''}`}
+              onClick={() => navigate(item.path)}
+              title={item.label}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: isActive ? '50%' : 14,
+                backgroundColor: isActive ? '#181a18' : 'transparent',
+                color: isActive ? '#ffffff' : '#64748b',
+                boxShadow: isActive ? '0 4px 14px rgba(24, 26, 24, 0.3)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative'
+              }}
+            >
+              <Icon size={18} />
+              {item.alert && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    backgroundColor: '#dc2626',
+                    boxShadow: '0 0 6px #dc2626'
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      {/* Sidebar Footer — Pure White & Royal Blue Glass Card */}
-      <div style={{
-        margin: '12px 10px',
-        padding: '10px 12px',
-        borderRadius: 10,
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        boxShadow: '0 2px 8px rgba(30, 58, 138, 0.05)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#16a34a', boxShadow: '0 0 8px #16a34a' }} />
-          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.72rem', letterSpacing: '0.02em' }}>
-            System Online
-          </span>
-        </div>
-        <div style={{ fontSize: '0.65rem', color: '#1d4ed8', fontWeight: 700 }}>v1.0.0</div>
-        <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 500 }}>Arohan NER Logistics Control</div>
+      {/* 3. BOTTOM UTILITIES: DRIVER INTERFACE & LOGOUT */}
+      <div className="sidebar-footer">
+        {/* Driver Interface / Messaging */}
+        <button
+          type="button"
+          onClick={() => navigate('/driver')}
+          title="Driver Console & Messaging"
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 14,
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.02)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Smartphone size={17} />
+        </button>
+
+        {/* Logout Button */}
+        <button
+          type="button"
+          onClick={() => {
+            logout();
+            navigate('/login');
+          }}
+          title="Sign Out"
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 14,
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.02)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <LogOut size={16} />
+        </button>
       </div>
     </aside>
   );
