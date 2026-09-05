@@ -195,7 +195,7 @@ export function MultimodalMapView({ mode, onModeChange }: MultimodalMapViewProps
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       
-      {/* Top Transport Mode Selector Bar */}
+      {/* Top Map Header Strip */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -207,47 +207,18 @@ export function MultimodalMapView({ mode, onModeChange }: MultimodalMapViewProps
         borderTopRightRadius: 8,
         borderBottom: '2px solid #1d4ed8'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <strong style={{ fontSize: '0.82rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#93c5fd' }}>
-            OPERATIONAL TRANSPORT MODE:
-          </strong>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['LAND', 'RAIL', 'WATER', 'AIR'] as TransportMode[]).map((m) => {
-              const isActive = mode === m;
-              return (
-                <button
-                  key={m}
-                  onClick={() => onModeChange && onModeChange(m)}
-                  style={{
-                    padding: '4px 12px',
-                    borderRadius: 4,
-                    fontSize: '0.75rem',
-                    fontWeight: isActive ? 900 : 700,
-                    border: '1px solid',
-                    borderColor: isActive ? '#38bdf8' : '#334155',
-                    backgroundColor: isActive ? '#1d4ed8' : '#1e293b',
-                    color: isActive ? '#ffffff' : '#cbd5e1',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {m === 'LAND' && <Truck size={14} />}
-                  {m === 'RAIL' && <Train size={14} />}
-                  {m === 'WATER' && <Ship size={14} />}
-                  {m === 'AIR' && <Plane size={14} />}
-                  <span>[{m}]</span>
-                </button>
-              );
-            })}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span className="badge badge-info" style={{ fontSize: '0.7rem', fontWeight: 800 }}>
+            {mode} CORRIDOR GIS DISPLAY
+          </span>
+          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc' }}>
+            {config.primaryCorridor}
+          </span>
         </div>
 
         {/* Data Source Status Indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>DATA SOURCE:</span>
+          <span style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>DATA SOURCE:</span>
           {getStatusBadge(config.dataSourceStatus)}
         </div>
       </div>

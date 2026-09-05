@@ -31,6 +31,8 @@ const navItems = [
   { path: '/driver', label: 'Driver Interface', icon: Smartphone, section: 'SYSTEM' },
 ];
 
+import { Logo } from '../Logo';
+
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,17 +43,9 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      {/* Sidebar Header */}
-      <div className="sidebar-header" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-        <div className="sidebar-logo-mark">A</div>
-        <div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.04em' }}>
-            AROHAN
-          </div>
-          <div style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>
-            NER GIS CONTROL ROOM
-          </div>
-        </div>
+      {/* Sidebar Header with Official Logo Emblem */}
+      <div className="sidebar-header" onClick={() => navigate('/')} style={{ cursor: 'pointer', padding: '16px 14px' }}>
+        <Logo size={34} variant="light" />
       </div>
 
       {/* Navigation Groups */}

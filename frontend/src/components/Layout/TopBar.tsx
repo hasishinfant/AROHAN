@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../../stores/arohanStore';
 import { Shield, AlertTriangle, CheckCircle2, Clock, Radio, Search, LogOut, Truck } from 'lucide-react';
 
+import { Logo } from '../Logo';
+
 export function TopBar() {
   const navigate = useNavigate();
   const { shipment, shipmentsList, selectedShipmentId, selectShipment, scenario_status, scenario_step, user, logout } = useArohanStore();
@@ -25,15 +27,10 @@ export function TopBar() {
 
   return (
     <header className="topbar" style={{ height: 64, padding: '0 20px', borderBottom: '1px solid #cbd5e1', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-      {/* 1. LEFT BRANDING */}
+      {/* 1. LEFT BRANDING WITH LOGO */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f172a', letterSpacing: '0.04em', lineHeight: 1.1 }}>
-            AROHAN
-          </div>
-          <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            NER GIS CONTROL ROOM
-          </div>
+        <div onClick={() => navigate('/')}>
+          <Logo size={32} variant="dark" />
         </div>
 
         <div style={{ width: 1, height: 28, backgroundColor: '#e2e8f0' }} />
