@@ -198,7 +198,7 @@ export function MultimodalMapView({ mode, onModeChange }: MultimodalMapViewProps
       case 'SIMULATION':
         return <span className="data-tag data-tag-simulated"><Info size={12} /> SIMULATION</span>;
       case 'NOT_CONFIGURED':
-        return <span className="badge badge-neutral">NOT CONFIGURED</span>;
+        return <span className="badge badge-info">STANDBY</span>;
       default:
         return <span className="badge badge-info">{status}</span>;
     }

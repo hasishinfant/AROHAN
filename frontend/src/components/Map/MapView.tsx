@@ -659,7 +659,7 @@ export function MapView() {
         {showFirmsLayer && (
           <div className="map-badge-rect" style={{ color: '#c2410c', backgroundColor: '#fff7ed', borderColor: '#ffedd5', pointerEvents: 'auto', fontWeight: 800 }}>
             <Flame size={12} style={{ color: '#ea580c' }} />
-            <span>NASA FIRMS VIIRS 375M SATELLITE (KEY: 7f7248d9...)</span>
+            <span>NASA FIRMS VIIRS SATELLITE THERMAL MONITORING</span>
           </div>
         )}
 
