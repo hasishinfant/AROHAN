@@ -22,7 +22,10 @@ export function TopBar() {
     scenario_step,
     user,
     logout,
-    isConnected
+    isConnected,
+    activeRoleLevel,
+    setActiveRoleLevel,
+    openWhatsAppModal,
   } = useArohanStore();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -159,8 +162,71 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* 3. RIGHT: STATUS PILL, ICONS & USER AVATAR */}
+      {/* 3. RIGHT: MULTI-LEVEL ROLE SWITCHER, WHATSAPP DISPATCH & STATUS */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* Multi-Level Role Switcher */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #CBD5E1',
+            borderRadius: 10,
+            padding: '4px 10px',
+          }}
+        >
+          <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
+            TIER:
+          </span>
+          <select
+            value={activeRoleLevel || 1}
+            onChange={(e) => {
+              const lvl = Number(e.target.value);
+              setActiveRoleLevel(lvl);
+              if (lvl === 5) navigate('/driver');
+            }}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              color: '#0F172A',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value={1}>L1: Regional Command (NER Node)</option>
+            <option value={2}>L2: State Control (SDMA)</option>
+            <option value={3}>L3: District Control (DDMA)</option>
+            <option value={4}>L4: Logistics Coordinator</option>
+            <option value={5}>L5: Driver (Field Mobile)</option>
+          </select>
+        </div>
+
+        {/* WhatsApp Dispatch Button */}
+        <button
+          type="button"
+          onClick={() => openWhatsAppModal()}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            borderRadius: 10,
+            backgroundColor: '#ECFDF5',
+            border: '1px solid #A7F3D0',
+            color: '#047857',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+          title="Compose and Preview WhatsApp Emergency Instructions"
+        >
+          <MessageSquare size={14} style={{ color: '#059669' }} />
+          <span>WhatsApp Dispatch</span>
+        </button>
+
         {/* Operational Status Pill */}
         <div
           style={{
@@ -208,10 +274,10 @@ export function TopBar() {
           {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
         </button>
 
-        {/* Team Communication */}
+        {/* Multi-Level Coordination Link */}
         <button
           type="button"
-          onClick={() => navigate('/action')}
+          onClick={() => navigate('/communications')}
           style={{
             width: 36,
             height: 36,
@@ -224,7 +290,7 @@ export function TopBar() {
             justifyContent: 'center',
             cursor: 'pointer'
           }}
-          title="Team Communication"
+          title="Multi-Level Government Coordination & WhatsApp Logs"
         >
           <MessageSquare size={16} />
         </button>

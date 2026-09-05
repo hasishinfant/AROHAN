@@ -237,3 +237,24 @@ class CorridorRiskForecast(Base):
     recommended_action: Mapped[str] = mapped_column(Text)
     data_source: Mapped[str] = mapped_column(String(50), default="SIMULATION_DATA")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class CommunicationLog(Base):
+    """WhatsApp and multi-level emergency coordination dispatch audit log."""
+    __tablename__ = "communication_logs"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dispatch_id: Mapped[str] = mapped_column(String(50), unique=True)
+    movement_code: Mapped[str] = mapped_column(String(50))
+    recipient_name: Mapped[str] = mapped_column(String(100))
+    recipient_role: Mapped[str] = mapped_column(String(50), default="DRIVER")
+    phone_masked: Mapped[str] = mapped_column(String(50))
+    message_type: Mapped[str] = mapped_column(String(50))
+    language_code: Mapped[str] = mapped_column(String(20))
+    language_name: Mapped[str] = mapped_column(String(50))
+    message_body: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(50), default="DELIVERED_SIMULATED")
+    dispatched_by: Mapped[str] = mapped_column(String(100), default="REGIONAL_COMMAND")
+    acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    delivery_channel: Mapped[str] = mapped_column(String(50), default="WHATSAPP_BUSINESS_SIMULATION")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+

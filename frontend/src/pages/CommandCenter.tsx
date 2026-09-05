@@ -34,7 +34,8 @@ import {
   Bell,
   Check,
   X,
-  Navigation
+  Navigation,
+  MessageSquare
 } from 'lucide-react';
 import {
   AreaChart,
@@ -70,7 +71,8 @@ export function CommandCenter() {
     dismissAlert,
     approveTransfer,
     isConnected,
-    events
+    events,
+    openWhatsAppModal
   } = useArohanStore();
 
   // Component state
@@ -532,6 +534,8 @@ export function CommandCenter() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {[
             { label: 'VIEW MAP OVERVIEW', path: '/map', icon: Compass, primary: true },
+            { label: 'WHATSAPP DISPATCH', action: () => openWhatsAppModal(), icon: MessageSquare, special: true },
+            { label: '5-TIER COORDINATION', path: '/communications', icon: Sparkles },
             { label: 'ANALYZE CORRIDOR RISK', path: '/risk', icon: ShieldAlert },
             { label: 'RUN DISASTER SCENARIO', path: '/demo', icon: Sliders },
             { label: 'FIND ALTERNATIVE ROUTE', path: '/replan', icon: Layers },
@@ -542,7 +546,7 @@ export function CommandCenter() {
             return (
               <button
                 key={i}
-                onClick={() => navigate(act.path)}
+                onClick={act.action ? act.action : () => navigate(act.path)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -551,9 +555,9 @@ export function CommandCenter() {
                   borderRadius: 6,
                   fontSize: '0.75rem',
                   fontWeight: 700,
-                  backgroundColor: act.primary ? '#059669' : '#F8FAFC',
-                  color: act.primary ? '#ffffff' : '#334155',
-                  border: `1px solid ${act.primary ? '#059669' : '#CBD5E1'}`,
+                  backgroundColor: act.primary ? '#059669' : act.special ? '#ECFDF5' : '#F8FAFC',
+                  color: act.primary ? '#ffffff' : act.special ? '#047857' : '#334155',
+                  border: `1px solid ${act.primary ? '#059669' : act.special ? '#A7F3D0' : '#CBD5E1'}`,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}

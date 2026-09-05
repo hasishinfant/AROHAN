@@ -9,9 +9,14 @@ import {
   Clock,
   Send,
   LogOut,
-  Volume2
+  Volume2,
+  CheckCheck,
+  MapPin,
+  Truck,
+  ArrowRight,
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
-
 import { MapView } from '../components/Map/MapView';
 
 const CONDITIONS = [
@@ -21,25 +26,74 @@ const CONDITIONS = [
   { key: 'BLOCKED', label: 'BLOCKED', color: '#dc2626', bg: '#fef2f2', desc: 'Total obstruction / landslip' },
 ];
 
+const HAZARD_TYPES = [
+  { id: 'LANDSLIDE', label: 'Landslide / Debris' },
+  { id: 'FLOOD', label: 'Water Surge / Inundation' },
+  { id: 'ROAD_BLOCKED', label: 'Stuck Freight / Blockage' },
+  { id: 'BRIDGE_DAMAGE', label: 'Bridge / Culvert Hazard' },
+];
+
+const LANGUAGE_OPTIONS = [
+  { code: 'en', label: 'EN', full: 'English' },
+  { code: 'as', label: 'অসমীয়া', full: 'Assamese' },
+  { code: 'mizo', label: 'Mizo', full: 'Mizo ṭawng' },
+  { code: 'kha', label: 'Khasi', full: 'Ka Ktien Khasi' },
+  { code: 'mni', label: 'মৈতৈলোন্', full: 'Meitei' },
+  { code: 'brx', label: 'बड़ो', full: 'Bodo' },
+  { code: 'bn', label: 'বাংলা', full: 'Bengali' },
+];
+
 export function DriverInterface() {
   const navigate = useNavigate();
-  const { shipment, routes, driver_status, driverAcknowledge, driverReport, scenario_step, current_recommendation, gpsUpdate, logout } = useArohanStore();
+  const {
+    shipment,
+    routes,
+    driver_status,
+    driverAcknowledge,
+    driverReport,
+    reportDriverIssue,
+    scenario_step,
+    current_recommendation,
+    gpsUpdate,
+    logout,
+  } = useArohanStore();
+
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
+  const [selectedHazardType, setSelectedHazardType] = useState<string>('LANDSLIDE');
   const [notes, setNotes] = useState('');
   const [reportSent, setReportSent] = useState(false);
-  const [lang, setLang] = useState<'en' | 'as'>('en');
+  const [lang, setLang] = useState<string>('en');
   const [audioAnnounced, setAudioAnnounced] = useState(false);
+  const [waAcknowledged, setWaAcknowledged] = useState(false);
 
   const step = scenario_step ?? -1;
   const assignedRoute = routes?.find((r) => r.id === shipment?.assigned_route_id);
-  const showAcknowledge = step >= 5 && driver_status === 'NOTIFIED';
-  const showReport = true;
-  const showRouteChange = step >= 5 && current_recommendation;
+  const showRouteChange = step >= 5 || Boolean(current_recommendation);
 
   const handleReport = async () => {
     if (!selectedCondition) return;
-    await driverReport(selectedCondition, notes || undefined);
-    setReportSent(true);
+    try {
+      await reportDriverIssue({
+        movement_code: shipment?.shipment_code || 'REL-001',
+        driver_id: 1,
+        issue_type: selectedHazardType,
+        condition: selectedCondition,
+        location_name: 'NH-6 Sector km 48 near Umiam Lake',
+        lat: gpsUpdate?.latitude || 25.682,
+        lon: gpsUpdate?.longitude || 91.905,
+        notes: notes || undefined,
+      });
+      await driverReport(selectedCondition, notes || undefined);
+      setReportSent(true);
+      setTimeout(() => setReportSent(false), 5000);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleWhatsAppAck = async () => {
+    await driverAcknowledge();
+    setWaAcknowledged(true);
   };
 
   const handleLogout = () => {
@@ -49,345 +103,608 @@ export function DriverInterface() {
 
   const toggleAudioHelp = () => {
     setAudioAnnounced(true);
-    setTimeout(() => setAudioAnnounced(false), 5000);
+    setTimeout(() => setAudioAnnounced(false), 6000);
   };
 
-  const textMap = {
+  // Multilingual UI dictionaries
+  const textMap: Record<string, any> = {
     en: {
-      title: 'AROHAN FIELD',
-      subtitle: 'Driver Execution & Verification Portal',
+      title: 'AROHAN FIELD CONSOLE',
+      subtitle: 'Driver Execution & Hazard Reporting Portal',
       driverName: 'Driver: Rahul Kumar (AS-01-A-1234)',
       destination: 'Destination:',
-      assignedRoute: 'Current Route:',
+      assignedRoute: 'Assigned Corridor:',
       eta: 'ETA:',
-      updateAlert: 'PROACTIVE ROUTE INSTRUCTION',
-      newRoute: 'Approved New Route:',
-      ackButton: 'ACKNOWLEDGE ROUTE INSTRUCTION',
+      waHeader: 'OFFICIAL WHATSAPP DISPATCH RECEIVED',
+      waDesc: 'Route diversion verified by Regional Disaster Command.',
+      waAckBtn: 'ACKNOWLEDGE ROUTE VIA WHATSAPP',
+      waAckDone: 'Route Acknowledged! State Command Notified.',
       reportTitle: 'TAP GROUND CONDITION TO REPORT',
       submitBtn: 'CONFIRM & TRANSMIT REPORT',
-      submittedAlert: 'Field observation logged! State update sent to Arohan Replanning Engine.',
-      autoTelemetry: 'GPS Location, Timestamp, Vehicle ID & Segment ID attached automatically. Zero typing required.',
-      unverifiedNotice: 'Field feedback enters system as UNVERIFIED OBSERVATION to be cross-verified.',
-      audioMsg: 'Audio Instruction: Reroute approved to Route B via Sonapur Ridge. Tap green button to acknowledge.',
+      submittedAlert: 'Observation transmitted to AROHAN Regional Command! Corroboration active.',
+      autoTelemetry: 'GPS Location, Timestamp, Vehicle ID & Corridor ID attached automatically.',
+      unverifiedNotice: 'Field feedback enters as UNVERIFIED OBSERVATION to prevent spoofing.',
+      audioMsg: 'Audio Instruction: Reroute approved to Route B via Sonapur Ridge. Maintain 40 km/h.',
     },
     as: {
-      title: 'আৰোহণ ফিল্ড (AROHAN FIELD)',
-      subtitle: 'চালক সম্পাদন আৰু প্ৰত্যক্ষ সত্যতা প্ৰতিবেদন',
+      title: 'আৰোহণ ফিল্ড মোবাইল কনচোল',
+      subtitle: 'চালক সম্পাদন আৰু জৰুৰী প্ৰতিবেদন পৰ্টেল',
       driverName: 'চালক: ৰাহুল কুমাৰ (AS-01-A-1234)',
       destination: 'গন্তব্যস্থান:',
-      assignedRoute: 'বৰ্তমান পথ:',
+      assignedRoute: 'নিৰ্ধাৰিত পথ:',
       eta: 'আনুমানিক সময় (ETA):',
-      updateAlert: 'আগতীয়া পথ নিৰ্দেশনা',
-      newRoute: 'অনুমোদিত নতুন পথ:',
-      ackButton: 'নতুন পথ স্বীকাৰ কৰক (ACKNOWLEDGE)',
-      reportTitle: 'পথৰ অৱস্থা বাছি লওক (TAP TO REPORT)',
-      submitBtn: 'প্ৰতিবেদন পঠাওক (CONFIRM REPORT)',
-      submittedAlert: 'পথৰ অৱস্থা নথিভুক্ত কৰা হ\'ল! ৰিপ্লেনিং ইঞ্জিনলৈ তথ্য প্ৰেৰণ কৰা হৈছে।',
-      autoTelemetry: 'GPS অৱস্থান, সময়, গাড়ীৰ নম্বৰ আৰু পথৰ অংশ স্বয়ংক্ৰিয়ভাৱে সংযুক্ত।',
-      unverifiedNotice: 'প্ৰতিবেদন প্ৰথমতে অসম্পূৰ্ণ/পৰীক্ষাধীন (UNVERIFIED) হিচাপে সংৰক্ষিত হয়।',
-      audioMsg: 'শ্রাব্য নিৰ্দেশনা: সোণাপুৰ হৈ বি পথলৈ নিৰ্দেশ দিয়া হৈছে। গ্ৰহণ কৰিবলৈ সেউজীয়া বুটামত টিপক।',
+      waHeader: 'হোৱাটছএপ জৰুৰী সাহায্য নিৰ্দেশনা প্ৰাপ্ত হ\'ল',
+      waDesc: 'দুৰ্যোগ ব্যৱস্থাপনা কোষে আপোনাৰ পথ সলনি অনুমোদন কৰিছে।',
+      waAckBtn: 'হোৱাটছএপ যোগে পথ স্বীকাৰ কৰক (ACKNOWLEDGE)',
+      waAckDone: 'নতুন পথ গ্ৰহণ কৰা হ\'ল! কৰ্তৃপক্ষলৈ তথ্য প্ৰেৰণ সম্পন্ন।',
+      reportTitle: 'পথৰ অৱস্থা বাছি লওক (TAP GROUND CONDITION)',
+      submitBtn: 'প্ৰতিবেদন নিশ্চিত আৰু প্ৰেৰণ কৰক',
+      submittedAlert: 'পথৰ তথ্য আৰোহণ আঞ্চলিক কমাণ্ডলৈ প্ৰেৰণ কৰা হ\'ল!',
+      autoTelemetry: 'GPS অৱস্থান, সময়, বাহনৰ নম্বৰ স্বয়ংক্ৰিয়ভাৱে সংযুক্ত হৈছে।',
+      unverifiedNotice: 'প্ৰতিবেদন প্ৰথমতে পৰীক্ষাধীন (UNVERIFIED) হিচাপে সংৰক্ষিত হয়।',
+      audioMsg: 'শ্রাব্য নিৰ্দেশনা: সোণাপুৰ হৈ বি পথলৈ নিৰ্দেশ দিয়া হৈছে। নতুন পথ অনুসৰণ কৰক।',
+    },
+    mizo: {
+      title: 'AROHAN FIELD MOBILE CONSOLE',
+      subtitle: 'Driver Execution & Chhiatrup Hriattirna Portal',
+      driverName: 'Khalhtu: Rahul Kumar (AS-01-A-1234)',
+      destination: 'Thlenna Tur:',
+      assignedRoute: 'Kalna Kawng:',
+      eta: 'Thlen Hun (ETA):',
+      waHeader: 'WHATSAPP TANPUI HRIATTIRNA THAR',
+      waDesc: 'Disaster Management Authority in kawng thar a approve ta.',
+      waAckBtn: 'WHATSAPP HMANGIN KAWNG PAWN RAWH',
+      waAckDone: 'Kawng thar pawm a ni ta! State Command hriattir a ni.',
+      reportTitle: 'KAWNG AWMDAN HRIATTIR RAWH',
+      submitBtn: 'HRIATTIRNA THAWN NGHAL RAWH',
+      submittedAlert: 'Arohan Command ah kawng awmdan thawn fel a ni!',
+      autoTelemetry: 'GPS hmun, hun leh motor number a in-attach nghal.',
+      unverifiedNotice: 'Hriattirna hi finfiah hmasak phawt tur a ni ang.',
+      audioMsg: 'Audio Instruction: Kawng thar him zawk Route B Sonapur lam zawh rawh le.',
+    },
+    kha: {
+      title: 'AROHAN FIELD CONSOLE',
+      subtitle: 'Portal ba pynpoi khubor lynti shngain',
+      driverName: 'Driver: Rahul Kumar (AS-01-A-1234)',
+      destination: 'Jaka Leit:',
+      assignedRoute: 'Ka Lynti ba la ai:',
+      eta: 'Por ba thikna (ETA):',
+      waHeader: 'JINGPYNTHIKNA KYRNGIEH HA WHATSAPP',
+      waDesc: 'La pynkylla ia ka lynti da ka Disaster Management Authority.',
+      waAckBtn: 'PYNDEP JINGPYNTHIKNA HA WHATSAPP',
+      waAckDone: 'La pdiang ia ka lynti bathymmai!',
+      reportTitle: 'BUH JINGTIP SHAPHANG KA LYNTI',
+      submitBtn: 'PHAH JINGTIP SHA KORTIPHON',
+      submittedAlert: 'La pynpoi ia ka khubor sha AROHAN Command!',
+      autoTelemetry: 'GPS bad Vehicle ID la thep beit dalade.',
+      unverifiedNotice: 'Ka jingtip kan leit kum UNVERIFIED shuwa ban da pynskhem.',
+      audioMsg: 'Audio: Sngewbha bud ia ka lynti bathymmai Route B lyngba Sonapur.',
+    },
+    mni: {
+      title: 'অৰোহান ফিল্ড মোবাইল কন্সোল',
+      subtitle: 'লমজিং অমসুং খুদোংথিবা পাউজেল পোৰ্টেল',
+      driverName: 'গাড়ী থৌবা: Rahul Kumar (AS-01-A-1234)',
+      destination: 'য়ৌফম মফম:',
+      assignedRoute: 'চৎফম লম্বী:',
+      eta: 'মতম (ETA):',
+      waHeader: 'WHATSAPP ইমর্জেন্সী রিলীফ পাউজেল ফংলে',
+      waDesc: 'ডিজাস্টার ম্যানেজমেন্টনা অনৌবা লম্বী অয়াবা পীখ্রে।',
+      waAckBtn: 'লম্বী অসি অয়াবা পীয়ু (ACKNOWLEDGE)',
+      waAckDone: 'অনৌবা লম্বী খন্দোক্লে! কম্মাণ্ডদা পাউ পীখ্রে।',
+      reportTitle: 'লম্বীগী ফীভম খন্দোক্তুনা পাউ পীবীয়ু',
+      submitBtn: 'পাউজেল খুদক্তা থাপীয়ু',
+      submittedAlert: 'অৰোহান কম্মাণ্ডদা লম্বীগী ফীভম য়ৌখ্রে!',
+      autoTelemetry: 'GPS অমসুং মতম মশামক য়াওখ্রে।',
+      unverifiedNotice: 'পাউজেল অসি অহানবদা অচুম-অরান থিজিনগনি।',
+      audioMsg: 'সোণাপুৰ লম্বীদা অনৌবা সেফ রুট ফিল্ডদা চৎপীয়ু।',
+    },
+    brx: {
+      title: 'AROHAN फील्ड मोबाइल कनसोल',
+      subtitle: 'लामा बिथोन आरो खौरां फोरमायग्रा',
+      driverName: 'थांदै सालायग्रा: Rahul Kumar (AS-01-A-1234)',
+      destination: 'थांनांगौ जायगा:',
+      assignedRoute: 'मोननाय लामा:',
+      eta: 'सम (ETA):',
+      waHeader: 'WHATSAPP खौरां मोनहैबाय',
+      waDesc: 'आपद ब्यवस्थापनाव गोदान लामा फोसावबाय।',
+      waAckBtn: 'गोदान लामाखौ रोखा खालाम (ACKNOWLEDGE)',
+      waAckDone: 'गोदान लामाखौ रोखा खालामबाय!',
+      reportTitle: 'लामाखौ नायना खौरां हर',
+      submitBtn: 'खौरां रोखा खालामना दैथाय',
+      submittedAlert: 'AROHAN कमान्दाव लामानि खौरां मोनहैबाय!',
+      autoTelemetry: 'GPS जायगा आरो सम गावआरि रोखा जाना दं।',
+      unverifiedNotice: 'गिबियाव बे खौरांआ आनजाद जासिगोन।',
+      audioMsg: 'गोदान लामा Route B जों मोजांयै थां।',
+    },
+    bn: {
+      title: 'আরোহণ ফিল্ড মোবাইল কনসোল',
+      subtitle: 'ড্রাইভার নির্দেশনা ও গ্রাউন্ড রিপোর্ট পোর্টাল',
+      driverName: 'চালক: রাহুল কুমার (AS-01-A-1234)',
+      destination: 'গন্তব্যস্থল:',
+      assignedRoute: 'নির্ধারিত রুট:',
+      eta: 'পৌঁছানোর সময় (ETA):',
+      waHeader: 'হোয়াটসঅ্যাপ জরুরী ত্রাণ বার্তা প্রাপ্ত হয়েছে',
+      waDesc: 'দুর্যোগ ব্যবস্থাপনা কর্তৃপক্ষ নতুন নিরাপদ রুট বরাদ্দ করেছে।',
+      waAckBtn: 'হোয়াটসঅ্যাপ রুট গ্রহণ করুন (ACKNOWLEDGE)',
+      waAckDone: 'নতুন রুট গৃহীত হয়েছে! স্টেট কমান্ডকে অবহিত করা হয়েছে।',
+      reportTitle: 'রাস্তার বর্তমান পরিস্থিতি নির্বাচন করুন',
+      submitBtn: 'রিপোর্ট নিশ্চিত ও প্রেরণ করুন',
+      submittedAlert: 'রাস্তার পরিস্থিতি আরোহণ আঞ্চলিক কমান্ডে প্রেরণ করা হয়েছে!',
+      autoTelemetry: 'GPS অবস্থান, সময় ও গাড়ির নম্বর স্বয়ংক্রিয়ভাবে সংযুক্ত।',
+      unverifiedNotice: 'রিপোর্ট প্রাথমিকভাবে যাঁচাইকরণাধীন (UNVERIFIED) হিসেবে সংরক্ষিত হয়।',
+      audioMsg: 'নির্দেশনা: সোনাপুর রিজ দিয়ে রুট বি অনুসরণ করুন।',
     },
   };
 
-  const t = textMap[lang];
+  const t = textMap[lang] || textMap.en;
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-canvas)', minHeight: '100vh', padding: '12px', fontFamily: "'Inter', sans-serif" }}>
-      <div className="driver-container">
-        
-        {/* Field App Header Bar */}
-        <div className="driver-header">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#93c5fd' }}>
-              AROHAN FIELD MOBILE CONSOLE
+    <div style={{ backgroundColor: '#0B131E', minHeight: '100vh', padding: '12px', fontFamily: "'Inter', sans-serif", color: '#F1F5F9' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* FIELD CONSOLE TOP HEADER */}
+        <div
+          style={{
+            backgroundColor: '#1E293B',
+            borderRadius: 14,
+            padding: '12px 14px',
+            border: '1px solid #334155',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  backgroundColor: '#059669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFFFFF',
+                }}
+              >
+                <Smartphone size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#F8FAFC' }}>
+                  {t.title}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>
+                  SIH26002 • Relief Convoy Operator Unit
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {/* Language Switcher */}
-              <div style={{ display: 'flex', gap: 2, backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 2 }}>
-                <button
-                  type="button"
-                  onClick={() => setLang('en')}
-                  style={{
-                    border: 'none',
-                    background: lang === 'en' ? '#ffffff' : 'transparent',
-                    color: lang === 'en' ? '#0f172a' : '#ffffff',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    padding: '2px 6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  EN
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLang('as')}
-                  style={{
-                    border: 'none',
-                    background: lang === 'as' ? '#ffffff' : 'transparent',
-                    color: lang === 'as' ? '#0f172a' : '#ffffff',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    padding: '2px 6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  অসমীয়া
-                </button>
-              </div>
-
-              {/* Voice Assistance */}
               <button
                 type="button"
                 onClick={toggleAudioHelp}
                 style={{
+                  backgroundColor: audioAnnounced ? '#059669' : '#334155',
                   border: 'none',
-                  backgroundColor: audioAnnounced ? '#ea580c' : 'rgba(255, 255, 255, 0.15)',
-                  color: '#ffffff',
-                  width: 28,
-                  height: 28,
+                  color: '#FFFFFF',
+                  borderRadius: 8,
+                  width: 32,
+                  height: 32,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
                 }}
-                title="Voice Assistance"
+                title="Play Audio Assistance"
               >
-                <Volume2 size={14} />
+                <Volume2 size={16} />
               </button>
 
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => navigate('/command')}
                 style={{
+                  backgroundColor: '#334155',
                   border: 'none',
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  color: '#ffffff',
-                  width: 28,
-                  height: 28,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  color: '#94A3B8',
+                  borderRadius: 8,
+                  padding: '6px 10px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
                 }}
-                title="Logout"
               >
-                <LogOut size={13} />
+                Command
               </button>
             </div>
           </div>
 
-          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff', textTransform: 'uppercase' }}>
-            {t.title}
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#93c5fd', marginTop: 2, fontWeight: 700 }}>
-            {t.subtitle} &nbsp;·&nbsp; {t.driverName}
+          {/* AUDIO ASSISTANCE TOAST */}
+          {audioAnnounced && (
+            <div
+              style={{
+                backgroundColor: '#064E3B',
+                border: '1px solid #059669',
+                borderRadius: 8,
+                padding: '8px 12px',
+                fontSize: '0.72rem',
+                color: '#D1FAE5',
+                marginBottom: 10,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <Volume2 size={16} style={{ color: '#34D399', flexShrink: 0 }} />
+              <span>{t.audioMsg}</span>
+            </div>
+          )}
+
+          {/* MULTILINGUAL REGIONAL LANGUAGE SELECTOR BAR */}
+          <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 2 }}>
+            {LANGUAGE_OPTIONS.map((item) => {
+              const isActive = lang === item.code;
+              return (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => setLang(item.code)}
+                  style={{
+                    border: 'none',
+                    borderRadius: 6,
+                    backgroundColor: isActive ? '#059669' : 'rgba(255,255,255,0.06)',
+                    color: isActive ? '#FFFFFF' : '#94A3B8',
+                    padding: '4px 8px',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={item.full}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Audio Announcement Alert Banner */}
-        {audioAnnounced && (
-          <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fdba74', padding: '8px 12px', color: '#7c2d12', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Volume2 size={16} style={{ flexShrink: 0, color: '#ea580c' }} />
-            <div>
-              <strong>🔊 Voice Assistant Spoken Audio:</strong>
-              <div>"{t.audioMsg}"</div>
-            </div>
-          </div>
-        )}
-
-        {/* Active Journey Information Table & Real-Time Telemetry */}
-        <div style={{ padding: '12px' }}>
-          {shipment ? (
-            <div className="card" style={{ padding: '12px', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-medium)', paddingBottom: 6 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase' }}>
-                  <Smartphone size={14} />
-                  <span>MY JOURNEY — {shipment.shipment_code}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <span className="data-tag data-tag-real" style={{ fontSize: '0.62rem' }}>MODE: LAND</span>
-                  <span className={`badge ${gpsUpdate?.simulated_status === 'DELIVERED' ? 'badge-success' : 'badge-info'}`}>
-                    [{gpsUpdate?.simulated_status || driver_status}]
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {gpsUpdate && (
-                <div style={{ backgroundColor: '#f8fafc', padding: 8, border: '1px solid var(--border-medium)', borderRadius: 6 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 800, marginBottom: 4 }}>
-                    <span>JOURNEY PROGRESS</span>
-                    <span style={{ color: 'var(--primary-blue)' }}>{gpsUpdate.progress_pct}% ({gpsUpdate.distance_covered_km} / {gpsUpdate.total_distance_km} km)</span>
-                  </div>
-                  <div style={{ width: '100%', height: 8, backgroundColor: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ width: `${gpsUpdate.progress_pct}%`, height: '100%', backgroundColor: gpsUpdate.progress_pct >= 100 ? '#16a34a' : '#2563eb', transition: 'width 0.4s ease' }} />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 700 }}>
-                    <span>Speed: {gpsUpdate.speed_kmh} km/h ({gpsUpdate.heading_cardinal})</span>
-                    <span>ETA: {gpsUpdate.eta_formatted}</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="table-container">
-                <table className="table">
-                  <tbody>
-                    <tr>
-                      <td style={{ fontWeight: 800, width: '40%', color: 'var(--text-muted)' }}>{t.destination}</td>
-                      <td style={{ fontWeight: 800, color: 'var(--text-main)' }}>{shipment.destination}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{t.assignedRoute}</td>
-                      <td style={{ fontWeight: 800, color: 'var(--primary-navy)' }}>{assignedRoute?.name ?? 'NH-6 Corridor'}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{t.eta}</td>
-                      <td style={{ fontWeight: 800, color: '#16a34a', fontFamily: 'monospace' }}>{gpsUpdate?.eta_formatted ?? (shipment.updated_eta ?? shipment.planned_eta)}</td>
-                    </tr>
-                    {gpsUpdate?.current_risk_level && (
-                      <tr>
-                        <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>CURRENT RISK</td>
-                        <td style={{ fontWeight: 800, color: gpsUpdate.current_risk_level === 'HIGH' ? '#dc2626' : '#16a34a' }}>
-                          [{gpsUpdate.current_risk_level} RISK]
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Embedded GIS Navigation Map View */}
-              <div style={{ marginTop: 4, height: 280, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border-medium)' }}>
-                <MapView />
-              </div>
-            </div>
-          ) : (
-            <div className="card" style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              No active shipment assigned.
-            </div>
-          )}
-
-          {/* Proactive Reroute Instruction Panel */}
-          {showRouteChange && (
-            <div className="card" style={{ backgroundColor: '#fff7ed', borderColor: '#ffedd5', marginTop: 10 }}>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <Shield size={18} style={{ color: '#ea580c', flexShrink: 0, marginTop: 2 }} />
-                <div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#7c2d12', textTransform: 'uppercase' }}>
-                    {t.updateAlert}
-                  </div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
-                    {t.newRoute} <strong>Route B (Ridge Bypass via Sonapur)</strong>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: 4 }}>
-                    Reason: {current_recommendation?.reason}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Large Action Button: ACKNOWLEDGE */}
-          {showAcknowledge && (
-            <button
-              type="button"
-              className="btn btn-success btn-lg"
-              onClick={driverAcknowledge}
+        {/* ACTIVE CONVOY SUMMARY CARD */}
+        <div
+          style={{
+            backgroundColor: '#1E293B',
+            borderRadius: 14,
+            padding: '14px',
+            border: '1px solid #334155',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span
               style={{
-                width: '100%',
-                padding: '12px 0',
-                marginTop: 10,
-                fontSize: '0.9rem',
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                backgroundColor: '#064E3B',
+                color: '#6EE7B7',
+                border: '1px solid #059669',
+                borderRadius: 6,
+                padding: '2px 8px',
               }}
             >
-              <CheckCircle2 size={18} />
-              <span>{t.ackButton}</span>
-            </button>
-          )}
+              {shipment?.shipment_code || 'REL-001'} (DISASTER RELIEF)
+            </span>
+            <span style={{ fontSize: '0.7rem', color: '#38BDF8', fontWeight: 700 }}>
+              {t.eta} {shipment?.updated_eta || shipment?.planned_eta || '13:12 IST'}
+            </span>
+          </div>
 
-          {/* GROUND CONDITION REPORTING PANEL */}
-          {showReport && (
-            <div className="card" style={{ marginTop: 10 }}>
-              <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase' }}>
-                  <AlertTriangle size={14} style={{ color: '#ea580c' }} />
-                  <span>{t.reportTitle}</span>
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                  {t.autoTelemetry}
-                </div>
+          <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#F8FAFC', marginBottom: 2 }}>
+            {shipment?.cargo_type || 'Emergency Medical Supplies & Kits'}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: 10 }}>
+            {t.driverName}
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#0F172A',
+              padding: '8px 12px',
+              borderRadius: 8,
+              fontSize: '0.72rem',
+            }}
+          >
+            <div>
+              <div style={{ color: '#64748B', fontSize: '0.65rem' }}>FROM</div>
+              <div style={{ fontWeight: 700, color: '#E2E8F0' }}>
+                {shipment?.origin?.split('(')[0] || 'Guwahati Depot'}
               </div>
-
-              {/* Auto Telemetry Attachment Metadata Banner */}
-              <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-medium)', padding: '6px 10px', fontSize: '0.68rem', marginBottom: 10 }}>
-                <div style={{ fontWeight: 800, color: 'var(--primary-navy)' }}>📍 AUTO-ATTACHED TELEMETRY</div>
-                <div>GPS: 25.82°N, 91.95°E (NH-6 KM 42) · Vehicle: TRUCK-07</div>
+            </div>
+            <ArrowRight size={14} style={{ color: '#059669' }} />
+            <div>
+              <div style={{ color: '#64748B', fontSize: '0.65rem' }}>TO</div>
+              <div style={{ fontWeight: 700, color: '#E2E8F0' }}>
+                {shipment?.destination?.split('(')[0] || 'Shillong Hub'}
               </div>
+            </div>
+          </div>
+        </div>
 
-              {/* 4 Touch Condition Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
-                {CONDITIONS.map((cond) => {
-                  const isSelected = selectedCondition === cond.key;
-                  return (
-                    <button
-                      key={cond.key}
-                      type="button"
-                      onClick={() => setSelectedCondition(cond.key)}
-                      style={{
-                        border: isSelected ? `2px solid ${cond.color}` : '1px solid var(--border-medium)',
-                        backgroundColor: isSelected ? cond.bg : '#ffffff',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: 10,
-                        minHeight: 64,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                      }}
-                    >
-                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: cond.color }}>
-                        [{cond.label}]
-                      </div>
-                      <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>
-                        {cond.desc}
-                      </div>
-                    </button>
-                  );
-                })}
+        {/* INCOMING SIMULATED WHATSAPP CARD */}
+        <div
+          style={{
+            backgroundColor: '#064E3B',
+            border: '1.5px solid #059669',
+            borderRadius: 14,
+            padding: '14px',
+            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.25)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                backgroundColor: '#10B981',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF',
+              }}
+            >
+              <MessageSquare size={13} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 900, color: '#A7F3D0' }}>
+                {t.waHeader}
               </div>
+              <div style={{ fontSize: '0.65rem', color: '#D1FAE5' }}>
+                {t.waDesc}
+              </div>
+            </div>
+          </div>
 
-              <input
-                className="form-input"
-                type="text"
-                placeholder="Optional field notes..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                style={{ marginBottom: 10 }}
-              />
+          <div
+            style={{
+              backgroundColor: '#005C4B',
+              borderRadius: 8,
+              padding: '10px 12px',
+              fontSize: '0.78rem',
+              color: '#F0FDF4',
+              lineHeight: 1.5,
+              marginBottom: 10,
+              border: '1px solid #047857',
+            }}
+          >
+            {lang === 'as' && (
+              <div>
+                ⚠️ <strong>আৰোহণ জৰুৰী সাহায্য নিৰ্দেশ:</strong> বাহন REL-001। ভূমিস্খলনৰ বাবে আপোনাৰ পথ সলনি কৰা হৈছে।
+                <br />• নতুন নিৰ্ধাৰিত সুৰক্ষিত পথ: <strong>Route B (Sonapur Ridge Highland Corridor)</strong>
+                <br />• সাহায্য গন্তব্য: শ্বিলং কোৰ হাব (Shillong Core Relief Hub)
+              </div>
+            )}
+            {lang === 'mizo' && (
+              <div>
+                ⚠️ <strong>AROHAN CHHIATRUP TANPUI HRIATTIRNA:</strong> REL-001 phurh kawng thlak nghal a ni.
+                <br />• Kawng thar him zawk: <strong>Route B (Sonapur Ridge Highland Corridor)</strong>
+                <br />• Thlenna tur: Shillong Core Relief Hub
+              </div>
+            )}
+            {lang === 'kha' && (
+              <div>
+                ⚠️ <strong>AROHAN JINGPYNTHIKNA KYRNGIEH:</strong> REL-001 la pynkylla lynti namar landslide ha NH-6.
+                <br />• Ka lynti ba shngain: <strong>Route B (Sonapur Ridge Highland Corridor)</strong>
+                <br />• Ka jaka leit: Shillong Core Relief Hub
+              </div>
+            )}
+            {lang === 'mni' && (
+              <div>
+                ⚠️ <strong>অৰোহান ইমর্জেন্সী রিলীফ পাউজেল:</strong> REL-001 গী লম্বী অহোংবা লাক্লে।
+                <br />• অনৌবা সেফ ওইবা লম্বী: <strong>Route B (Sonapur Ridge Highland Corridor)</strong>
+              </div>
+            )}
+            {lang === 'brx' && (
+              <div>
+                ⚠️ <strong>AROHAN खौरां:</strong> REL-001 नि लामाया सोलायबाय।
+                <br />• गोदान रैखाथिगोनां लामा: <strong>Route B (Sonapur Ridge Highland Corridor)</strong>
+              </div>
+            )}
+            {lang === 'bn' && (
+              <div>
+                ⚠️ <strong>আরোহণ জরুরী ত্রাণ বার্তা:</strong> কনভয় REL-001 এর রুট পরিবর্তিত হয়েছে।
+                <br />• নতুন নির্ধারিত নিরাপদ রুট: <strong>Route B (Sonapur Ridge Highland Corridor)</strong>
+                <br />• গন্তব্য: শিলং কোর রিলিফ হাব
+              </div>
+            )}
+            {lang === 'en' && (
+              <div>
+                ⚠️ <strong>AROHAN EMERGENCY RELIEF DISPATCH:</strong> Movement REL-001 rerouted due to slope failure at NH-6 km 48.
+                <br />• Assigned Safe Corridor: <strong>Route B (Sonapur Ridge Highland Bypass)</strong>
+                <br />• Destination: Shillong Core Relief Hub
+              </div>
+            )}
 
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 4, fontSize: '0.62rem', color: '#8696A0' }}>
+              <span>Just now</span>
+              <CheckCheck size={12} style={{ color: '#53BDEB' }} />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleWhatsAppAck}
+            disabled={waAcknowledged}
+            style={{
+              width: '100%',
+              backgroundColor: waAcknowledged ? '#047857' : '#10B981',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 14px',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: waAcknowledged ? 'default' : 'pointer',
+            }}
+          >
+            <CheckCircle2 size={16} />
+            <span>{waAcknowledged ? t.waAckDone : t.waAckBtn}</span>
+          </button>
+        </div>
+
+        {/* ONE-TAP FIELD GROUND CONDITION & INCIDENT REPORTER */}
+        <div
+          style={{
+            backgroundColor: '#1E293B',
+            borderRadius: 14,
+            padding: '14px',
+            border: '1px solid #334155',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <AlertTriangle size={16} style={{ color: '#F59E0B' }} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#F8FAFC' }}>
+              {t.reportTitle}
+            </span>
+          </div>
+
+          {/* Hazard Type Selector */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+            {HAZARD_TYPES.map((h) => (
               <button
+                key={h.id}
                 type="button"
-                className="btn btn-primary btn-lg"
-                onClick={handleReport}
-                disabled={!selectedCondition || reportSent}
-                style={{ width: '100%' }}
+                onClick={() => setSelectedHazardType(h.id)}
+                style={{
+                  border: `1px solid ${selectedHazardType === h.id ? '#059669' : '#334155'}`,
+                  borderRadius: 8,
+                  backgroundColor: selectedHazardType === h.id ? '#064E3B' : '#0F172A',
+                  color: selectedHazardType === h.id ? '#A7F3D0' : '#94A3B8',
+                  padding: '7px 8px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
               >
-                <Send size={16} />
-                <span>{reportSent ? 'OBSERVATION TRANSMITTED' : t.submitBtn}</span>
+                {h.label}
               </button>
+            ))}
+          </div>
 
-              {reportSent && (
-                <div style={{ fontSize: '0.75rem', marginTop: 8, padding: 8, backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#14532d', fontWeight: 700 }}>
-                  {t.submittedAlert}
-                </div>
-              )}
+          {/* Condition Severity Buttons */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
+            {CONDITIONS.map((c) => {
+              const isSelected = selectedCondition === c.key;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setSelectedCondition(c.key)}
+                  style={{
+                    borderRadius: 8,
+                    border: `1.5px solid ${isSelected ? c.color : '#334155'}`,
+                    backgroundColor: isSelected ? c.color : '#0F172A',
+                    color: isSelected ? '#FFFFFF' : '#94A3B8',
+                    padding: '8px 4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 2,
+                  }}
+                >
+                  <span>{c.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Optional Observation Notes */}
+          <input
+            type="text"
+            placeholder="Notes: e.g., 20m debris on carriageway km 48..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            style={{
+              width: '100%',
+              backgroundColor: '#0F172A',
+              border: '1px solid #334155',
+              borderRadius: 8,
+              padding: '8px 10px',
+              fontSize: '0.74rem',
+              color: '#F8FAFC',
+              outline: 'none',
+              marginBottom: 10,
+              boxSizing: 'border-box',
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={handleReport}
+            disabled={!selectedCondition}
+            style={{
+              width: '100%',
+              backgroundColor: selectedCondition ? '#DC2626' : '#475569',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 14px',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: selectedCondition ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <Send size={15} />
+            <span>{t.submitBtn}</span>
+          </button>
+
+          {reportSent && (
+            <div
+              style={{
+                marginTop: 10,
+                padding: '8px 10px',
+                borderRadius: 8,
+                backgroundColor: '#064E3B',
+                border: '1px solid #059669',
+                fontSize: '0.72rem',
+                color: '#6EE7B7',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <CheckCircle2 size={15} />
+              <span>{t.submittedAlert}</span>
             </div>
           )}
 
+          <div style={{ fontSize: '0.64rem', color: '#64748B', marginTop: 8, textAlign: 'center' }}>
+            {t.autoTelemetry}
+          </div>
+        </div>
+
+        {/* MAP ROUTE PREVIEW */}
+        <div
+          style={{
+            backgroundColor: '#1E293B',
+            borderRadius: 14,
+            overflow: 'hidden',
+            border: '1px solid #334155',
+            height: 240,
+          }}
+        >
+          <MapView />
         </div>
       </div>
     </div>

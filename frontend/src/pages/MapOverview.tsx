@@ -31,7 +31,8 @@ import {
   Sliders,
   Flame,
   CloudRain,
-  Navigation
+  Navigation,
+  MessageSquare
 } from 'lucide-react';
 
 // Coordinates of key NER nodes
@@ -234,6 +235,7 @@ export function MapOverview() {
     fetchResources,
     fetchFieldReports,
     fetchFloodVulnerabilities,
+    openWhatsAppModal,
   } = useArohanStore();
 
   // Search & Filters state
@@ -1068,6 +1070,36 @@ export function MapOverview() {
               >
                 <span>ANALYZE ALTERNATIVE ROUTE</span>
                 <ArrowRight size={15} />
+              </button>
+
+              <button
+                onClick={() =>
+                  openWhatsAppModal({
+                    movement_code: selectedFeature.movementCode || 'REL-001',
+                    reason: selectedFeature.reason || `${selectedFeature.name || 'Corridor'}: Landslide / Access Risk Warning`,
+                    old_route: selectedFeature.name || 'NH-6 Corridor',
+                    new_route: 'Route B (Sonapur Ridge Highland Corridor)',
+                    destination: selectedFeature.destination || 'Shillong Core Relief Hub',
+                  })
+                }
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: 6,
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  backgroundColor: '#ECFDF5',
+                  color: '#047857',
+                  border: '1px solid #A7F3D0',
+                  cursor: 'pointer',
+                }}
+              >
+                <MessageSquare size={14} style={{ color: '#059669' }} />
+                <span>SEND DRIVER WHATSAPP ALERT</span>
               </button>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>

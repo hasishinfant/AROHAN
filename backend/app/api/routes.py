@@ -31,7 +31,8 @@ from datetime import datetime
 from app.database import get_db
 from app.models import (
     Route, Shipment, NetworkEvent, Decision, RiskPrediction, RoadSegment,
-    ResourceStock, ResourceTransfer, OperationalAlert, CorridorRiskForecast, DriverReport
+    ResourceStock, ResourceTransfer, OperationalAlert, CorridorRiskForecast, DriverReport,
+    CommunicationLog
 )
 from app.schemas import (
     RouteOut, ShipmentOut, NetworkEventOut, DecisionOut,
@@ -39,7 +40,12 @@ from app.schemas import (
     DecisionModifyRequest, DriverReportCreate,
     ResourceStockOut, ResourceTransferOut, ResourceTransferApproveRequest,
     OperationalAlertOut, AlertReviewRequest, AlertApproveRequest, AlertDismissRequest,
-    CorridorRiskForecastOut
+    CorridorRiskForecastOut, CommunicationPreviewRequest, CommunicationPreviewOut,
+    CommunicationSendRequest, CommunicationLogOut, DriverIssueReportRequest
+)
+from app.services.communication_service import (
+    SUPPORTED_LANGUAGES, VERIFIED_TEMPLATES, mask_phone_number,
+    render_localized_message, generate_whatsapp_payload
 )
 from app.engines.decision_engine import approve_decision, reject_decision
 from app.engines.resource_engine import calculate_redistribution_recommendations
@@ -865,5 +871,279 @@ async def get_field_reports(db: AsyncSession = Depends(get_db)) -> list[dict]:
             "created_at": datetime.utcnow().isoformat(),
         }
     ]
+
+
+# ── Multilingual WhatsApp Communication & Coordination ──────────────────────────
+
+@router.get("/communications/languages")
+async def get_communication_languages() -> list[dict]:
+    """Returns official supported regional languages and verification status."""
+    return SUPPORTED_LANGUAGES
+
+
+@router.get("/communications/templates")
+async def get_communication_templates() -> dict:
+    """Returns available verified templates and their supported languages."""
+    return {
+        "templates": list(VERIFIED_TEMPLATES.keys()),
+        "languages": SUPPORTED_LANGUAGES,
+        "sample_template_keys": {
+            k: list(v.keys()) for k, v in VERIFIED_TEMPLATES.items()
+        }
+    }
+
+
+@router.post("/communications/preview")
+async def preview_communication(body: CommunicationPreviewRequest) -> CommunicationPreviewOut:
+    """Renders localized WhatsApp template preview with verified NER regional script."""
+    ctx = {
+        "movement_code": body.movement_code,
+        "driver_name": body.driver_name or "Rahul Kumar",
+        "reason": body.reason or "Severe landslide hazard detected on primary corridor",
+        "old_route": body.old_route or "NH-6 via Umiam Escarpment",
+        "new_route": body.new_route or "Route B (Sonapur Ridge Highland Corridor)",
+        "destination": body.destination or "Shillong Core Relief Hub",
+        "eta": body.eta or "4h 15m",
+        "resource": body.resource or "Emergency Medical Supplies & Water Purification",
+        "origin": body.origin or "Guwahati Buffer Depot",
+    }
+    rendered = render_localized_message(body.message_type, body.language_code, ctx)
+    masked_phone = mask_phone_number(body.driver_phone or "+91 98765 43210")
+    
+    payload = generate_whatsapp_payload(
+        recipient_phone=body.driver_phone or "+919876543210",
+        rendered_text=rendered["rendered_body"],
+        movement_code=body.movement_code
+    )
+    
+    return CommunicationPreviewOut(
+        message_type=rendered["message_type"],
+        language_code=rendered["language_code"],
+        language_name=rendered["language_name"],
+        language_native=rendered["language_native"],
+        rendered_body=rendered["rendered_body"],
+        fallback_used=rendered["fallback_used"],
+        verification_status=rendered["verification_status"],
+        masked_phone=masked_phone,
+        movement_code=body.movement_code,
+        interactive_buttons=["Acknowledge Route", "Report Road Block"],
+        whatsapp_payload=payload
+    )
+
+
+@router.post("/communications/send")
+async def send_communication(body: CommunicationSendRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    """
+    Simulates sending WhatsApp Business message to field driver / official.
+    Logs dispatch audit event and system network event.
+    """
+    ctx = body.context_data or {
+        "movement_code": body.movement_code,
+        "driver_name": body.recipient_name,
+        "reason": "Hazard detected on primary corridor",
+        "old_route": "NH-6 via Umiam Escarpment",
+        "new_route": "Route B (Sonapur Ridge Highland Corridor)",
+        "destination": "Shillong Core Relief Hub",
+        "eta": "4h 15m",
+    }
+    rendered = render_localized_message(body.message_type, body.language_code, ctx)
+    masked_phone = mask_phone_number(body.recipient_phone)
+    dispatch_id = f"WA-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{body.movement_code}"
+
+    log_entry = CommunicationLog(
+        dispatch_id=dispatch_id,
+        movement_code=body.movement_code,
+        recipient_name=body.recipient_name,
+        recipient_role=body.recipient_role,
+        phone_masked=masked_phone,
+        message_type=body.message_type,
+        language_code=rendered["language_code"],
+        language_name=rendered["language_name"],
+        message_body=rendered["rendered_body"],
+        status="DELIVERED_SIMULATED",
+        dispatched_by=body.dispatched_by,
+        delivery_channel="WHATSAPP_BUSINESS_SIMULATION",
+        created_at=datetime.utcnow(),
+    )
+    db.add(log_entry)
+
+    # Also log NetworkEvent for audit timeline
+    event = NetworkEvent(
+        event_type="DRIVER_NOTIFIED",
+        title=f"WhatsApp Alert Dispatched ({rendered['language_name']})",
+        description=f"Sent {body.message_type} notification to {body.recipient_name} ({masked_phone}) via WhatsApp Cloud API Simulation.",
+        triggered_by=body.dispatched_by,
+        metadata_json=f'{{"dispatch_id": "{dispatch_id}", "language": "{rendered["language_code"]}", "movement": "{body.movement_code}"}}',
+        time_label="T+0h",
+        created_at=datetime.utcnow()
+    )
+    db.add(event)
+    await db.commit()
+
+    return {
+        "success": True,
+        "dispatch_id": dispatch_id,
+        "status": "DELIVERED_SIMULATED",
+        "channel": "WHATSAPP_BUSINESS_SIMULATION",
+        "language": rendered["language_name"],
+        "recipient_masked": masked_phone,
+        "notice": "DISPATCH SIMULATED — Meta WhatsApp Cloud API Ready (Sandbox Compliant)"
+    }
+
+
+@router.get("/communications/history")
+async def get_communication_history(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    """Returns chronological audit trail of WhatsApp communications."""
+    try:
+        result = await db.execute(select(CommunicationLog).order_by(desc(CommunicationLog.created_at)).limit(50))
+        logs = result.scalars().all()
+        if logs:
+            return [
+                {
+                    "id": l.id,
+                    "dispatch_id": l.dispatch_id,
+                    "movement_code": l.movement_code,
+                    "recipient_name": l.recipient_name,
+                    "recipient_role": l.recipient_role,
+                    "phone_masked": l.phone_masked,
+                    "message_type": l.message_type,
+                    "language_code": l.language_code,
+                    "language_name": l.language_name,
+                    "message_body": l.message_body,
+                    "status": l.status,
+                    "dispatched_by": l.dispatched_by,
+                    "acknowledged_at": l.acknowledged_at.isoformat() if l.acknowledged_at else None,
+                    "delivery_channel": l.delivery_channel,
+                    "created_at": l.created_at.isoformat() if l.created_at else datetime.utcnow().isoformat(),
+                }
+                for l in logs
+            ]
+    except Exception:
+        pass
+    
+    # Return seed history if empty or table initializing
+    return [
+        {
+            "id": 1,
+            "dispatch_id": "WA-20260905-REL-001",
+            "movement_code": "REL-001",
+            "recipient_name": "Rahul Kumar",
+            "recipient_role": "DRIVER",
+            "phone_masked": "+91 98*** ***10",
+            "message_type": "ROUTE_CHANGE",
+            "language_code": "as",
+            "language_name": "Assamese",
+            "message_body": "⚠️ আৰোহণ জৰুৰী সাহায্য নিৰ্দেশ: নিযুক্ত বাহন REL-001। ভূমিস্খলনৰ বাবে আপোনাৰ পথ সলনি কৰা হৈছে। নতুন পথ: Route B (Sonapur Ridge Highland Corridor)।",
+            "status": "ACKNOWLEDGED",
+            "dispatched_by": "REGIONAL_COMMAND",
+            "acknowledged_at": datetime.utcnow().isoformat(),
+            "delivery_channel": "WHATSAPP_BUSINESS_SIMULATION",
+            "created_at": datetime.utcnow().isoformat(),
+        },
+        {
+            "id": 2,
+            "dispatch_id": "WA-20260905-REL-002",
+            "movement_code": "REL-002",
+            "recipient_name": "Lalthanga Ralte",
+            "recipient_role": "DRIVER",
+            "phone_masked": "+91 94*** ***44",
+            "message_type": "ROAD_DISRUPTION",
+            "language_code": "mizo",
+            "language_name": "Mizo",
+            "message_body": "⚠️ AROHAN CHHIATRUP TANPUI HRIATTIRNA: Kolasib Bridge ah tui a lian avangin motor lian tan kawng khar a ni.",
+            "status": "DELIVERED_SIMULATED",
+            "dispatched_by": "STATE_CONTROL_MIZORAM",
+            "acknowledged_at": None,
+            "delivery_channel": "WHATSAPP_BUSINESS_SIMULATION",
+            "created_at": datetime.utcnow().isoformat(),
+        },
+        {
+            "id": 3,
+            "dispatch_id": "WA-20260905-REL-003",
+            "movement_code": "REL-003",
+            "recipient_name": "Baphang Lyngdoh",
+            "recipient_role": "DRIVER",
+            "phone_masked": "+91 97*** ***82",
+            "message_type": "ROUTE_CHANGE",
+            "language_code": "kha",
+            "language_name": "Khasi",
+            "message_body": "⚠️ AROHAN JINGPYNTHIKNA KYRNGIEH: La pynkylla ia ka lynti namar landslide ha NH-6.",
+            "status": "ACKNOWLEDGED",
+            "dispatched_by": "DISTRICT_CONTROL_RI_BHOI",
+            "acknowledged_at": datetime.utcnow().isoformat(),
+            "delivery_channel": "WHATSAPP_BUSINESS_SIMULATION",
+            "created_at": datetime.utcnow().isoformat(),
+        }
+    ]
+
+
+@router.post("/communications/acknowledge/{dispatch_id}")
+async def acknowledge_communication(dispatch_id: str, db: AsyncSession = Depends(get_db)) -> dict:
+    """Driver acknowledges receipt of route change or emergency advisory."""
+    try:
+        result = await db.execute(select(CommunicationLog).where(CommunicationLog.dispatch_id == dispatch_id))
+        log_entry = result.scalar_one_or_none()
+        if log_entry:
+            log_entry.status = "ACKNOWLEDGED"
+            log_entry.acknowledged_at = datetime.utcnow()
+            await db.commit()
+    except Exception:
+        pass
+
+    # Log network event
+    event = NetworkEvent(
+        event_type="DRIVER_ACKNOWLEDGED",
+        title=f"Driver Acknowledged ({dispatch_id})",
+        description=f"Driver confirmed comprehension and adherence to updated emergency routing instructions.",
+        triggered_by="DRIVER",
+        time_label="T+0h",
+        created_at=datetime.utcnow()
+    )
+    db.add(event)
+    await db.commit()
+
+    return {"success": True, "dispatch_id": dispatch_id, "status": "ACKNOWLEDGED"}
+
+
+@router.post("/driver/report-issue")
+async def report_driver_issue(body: DriverIssueReportRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    """
+    Field driver reports roadblock/hazard directly back to AROHAN command system.
+    This completes the bi-directional feedback loop.
+    """
+    report = DriverReport(
+        driver_id=body.driver_id,
+        shipment_id=1,
+        route_id=1,
+        condition=body.condition,
+        verification_status="UNVERIFIED",
+        notes=f"[{body.issue_type}] {body.location_name}: {body.notes or 'Driver reported hazard on route'}",
+        lat=body.lat or 25.682,
+        lon=body.lon or 91.905,
+        created_at=datetime.utcnow()
+    )
+    db.add(report)
+
+    # Log network event
+    event = NetworkEvent(
+        event_type="FIELD_REPORT",
+        title=f"Field Alert: {body.issue_type} Reported by Driver",
+        description=f"Driver on movement {body.movement_code} reported {body.condition} condition at {body.location_name}. Corroboration and replan evaluation initiated.",
+        triggered_by="DRIVER",
+        metadata_json=f'{{"movement": "{body.movement_code}", "issue": "{body.issue_type}", "lat": {body.lat}, "lon": {body.lon}}}',
+        time_label="T+0h",
+        created_at=datetime.utcnow()
+    )
+    db.add(event)
+    await db.commit()
+
+    return {
+        "success": True,
+        "report_id": report.id,
+        "movement_code": body.movement_code,
+        "verification_status": "UNVERIFIED",
+        "system_response": "Hazard registered. Regional Command notified. Alternate corridor contingency standby."
+    }
+
 
 

@@ -290,3 +290,85 @@ class CorridorRiskForecastOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ── Multilingual WhatsApp Communication Schemas ──────────────────────────
+class CommunicationTemplateOut(BaseModel):
+    code: str
+    name: str
+    native: str
+    status: str
+    region: str
+
+
+class CommunicationPreviewRequest(BaseModel):
+    message_type: str = "ROUTE_CHANGE"
+    language_code: str = "as"
+    movement_code: str = "REL-001"
+    driver_name: Optional[str] = "Rahul Kumar"
+    driver_phone: Optional[str] = "+91 98765 43210"
+    reason: Optional[str] = "Severe landslide blocking NH-6 km 48"
+    old_route: Optional[str] = "NH-6 via Umiam Escarpment"
+    new_route: Optional[str] = "Route B (Sonapur Ridge Highland Corridor)"
+    destination: Optional[str] = "Shillong Core Relief Hub"
+    eta: Optional[str] = "4h 15m"
+    resource: Optional[str] = "Emergency Medical Supplies & Kits"
+    origin: Optional[str] = "Guwahati Buffer Depot"
+
+
+class CommunicationPreviewOut(BaseModel):
+    message_type: str
+    language_code: str
+    language_name: str
+    language_native: str
+    rendered_body: str
+    fallback_used: bool
+    verification_status: str
+    masked_phone: str
+    movement_code: str
+    interactive_buttons: list[str]
+    whatsapp_payload: dict
+
+
+class CommunicationSendRequest(BaseModel):
+    movement_code: str = "REL-001"
+    recipient_name: str = "Rahul Kumar"
+    recipient_role: str = "DRIVER"
+    recipient_phone: str = "+91 98765 43210"
+    message_type: str = "ROUTE_CHANGE"
+    language_code: str = "as"
+    dispatched_by: str = "REGIONAL_COMMAND"
+    context_data: Optional[dict] = None
+
+
+class CommunicationLogOut(BaseModel):
+    id: int
+    dispatch_id: str
+    movement_code: str
+    recipient_name: str
+    recipient_role: str
+    phone_masked: str
+    message_type: str
+    language_code: str
+    language_name: str
+    message_body: str
+    status: str
+    dispatched_by: str
+    acknowledged_at: Optional[datetime] = None
+    delivery_channel: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class DriverIssueReportRequest(BaseModel):
+    movement_code: str = "REL-001"
+    driver_id: int = 1
+    issue_type: str = "ROAD_BLOCKED"  # ROAD_BLOCKED | LANDSLIDE | INUNDATION | VEHICLE_BREAKDOWN
+    condition: str = "BLOCKED"  # CLEAR | SLOW | PARTIAL | BLOCKED
+    location_name: str = "NH-6 km 48 Near Umiam Lake"
+    lat: Optional[float] = 25.682
+    lon: Optional[float] = 91.905
+    notes: Optional[str] = None
+

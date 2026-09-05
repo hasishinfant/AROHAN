@@ -17,6 +17,8 @@ import { ReportPage } from './pages/ReportPage';
 import { MultimodalOperations } from './pages/MultimodalOperations';
 import { RiskDashboard } from './pages/RiskDashboard';
 import { ResourceDashboard } from './pages/ResourceDashboard';
+import { CommunicationCenter } from './pages/CommunicationCenter';
+import { WhatsAppPreviewModal } from './components/Communication/WhatsAppPreviewModal';
 import { LoginPage } from './pages/LoginPage';
 import { useArohanStore } from './stores/arohanStore';
 import { useWebSocket } from './hooks/useWebSocket';
@@ -52,6 +54,7 @@ function AppShell() {
             <Route path="/command" element={<CommandCenter />} />
             <Route path="/map" element={<MapOverview />} />
             <Route path="/resources" element={<ResourceDashboard />} />
+            <Route path="/communications" element={<CommunicationCenter />} />
             <Route path="/alerts" element={<ActionCenter />} />
             <Route path="/multimodal" element={<MultimodalOperations />} />
             <Route path="/risk" element={<RiskDashboard />} />
@@ -67,6 +70,7 @@ function AppShell() {
           </Routes>
         </main>
       </div>
+      <WhatsAppPreviewModal />
     </div>
   );
 }

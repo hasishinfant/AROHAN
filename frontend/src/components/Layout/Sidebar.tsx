@@ -17,7 +17,8 @@ import {
   Layers,
   Activity,
   Globe,
-  Compass
+  Compass,
+  MessageSquare
 } from 'lucide-react';
 import { Logo } from '../Logo';
 
@@ -39,6 +40,13 @@ export function Sidebar() {
         { path: '/replan', label: 'Disaster Route Discovery', icon: Layers },
         { path: '/multimodal', label: 'Multimodal Hub (Rail/River)', icon: Activity },
         { path: '/mission', label: 'Relief Movement Details', icon: Package },
+      ]
+    },
+    {
+      title: 'COORDINATION & DISPATCH',
+      items: [
+        { path: '/communications', label: 'Driver WhatsApp Dispatch', icon: MessageSquare },
+        { path: '/driver', label: 'Driver Field Console', icon: Smartphone },
       ]
     },
     {

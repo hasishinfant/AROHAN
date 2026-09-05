@@ -648,6 +648,94 @@ export const DEFAULT_FIELD_REPORTS: FieldReportData[] = [
   },
 ];
 
+export const DEFAULT_COMMUNICATION_LOGS = [
+  {
+    id: 1,
+    dispatch_id: 'WA-20260905-REL-001',
+    movement_code: 'REL-001',
+    recipient_name: 'Rahul Kumar',
+    recipient_role: 'DRIVER',
+    phone_masked: '+91 98*** ***10',
+    message_type: 'ROUTE_CHANGE',
+    language_code: 'as',
+    language_name: 'Assamese',
+    message_body: '⚠️ আৰোহণ জৰুৰী সাহায্য নিৰ্দেশ: নিযুক্ত বাহন REL-001। ভূমিস্খলনৰ বাবে আপোনাৰ পথ সলনি কৰা হৈছে। নতুন পথ: Route B (Sonapur Ridge Highland Corridor)।',
+    status: 'ACKNOWLEDGED',
+    dispatched_by: 'REGIONAL_COMMAND',
+    acknowledged_at: new Date(Date.now() - 1200000).toISOString(),
+    delivery_channel: 'WHATSAPP_BUSINESS_SIMULATION',
+    created_at: new Date(Date.now() - 1800000).toISOString(),
+  },
+  {
+    id: 2,
+    dispatch_id: 'WA-20260905-REL-002',
+    movement_code: 'REL-002',
+    recipient_name: 'Lalthanga Ralte',
+    recipient_role: 'DRIVER',
+    phone_masked: '+91 94*** ***44',
+    message_type: 'ROAD_DISRUPTION',
+    language_code: 'mizo',
+    language_name: 'Mizo',
+    message_body: '⚠️ AROHAN CHHIATRUP TANPUI HRIATTIRNA: Kolasib Bridge ah tui a lian avangin motor lian tan kawng khar a ni.',
+    status: 'DELIVERED_SIMULATED',
+    dispatched_by: 'STATE_CONTROL_MIZORAM',
+    acknowledged_at: null,
+    delivery_channel: 'WHATSAPP_BUSINESS_SIMULATION',
+    created_at: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: 3,
+    dispatch_id: 'WA-20260905-REL-003',
+    movement_code: 'REL-003',
+    recipient_name: 'Baphang Lyngdoh',
+    recipient_role: 'DRIVER',
+    phone_masked: '+91 97*** ***82',
+    message_type: 'ROUTE_CHANGE',
+    language_code: 'kha',
+    language_name: 'Khasi',
+    message_body: '⚠️ AROHAN JINGPYNTHIKNA KYRNGIEH: La pynkylla ia ka lynti namar landslide ha NH-6.',
+    status: 'ACKNOWLEDGED',
+    dispatched_by: 'DISTRICT_CONTROL_RI_BHOI',
+    acknowledged_at: new Date(Date.now() - 5000000).toISOString(),
+    delivery_channel: 'WHATSAPP_BUSINESS_SIMULATION',
+    created_at: new Date(Date.now() - 5400000).toISOString(),
+  },
+  {
+    id: 4,
+    dispatch_id: 'WA-20260905-REL-004',
+    movement_code: 'REL-004',
+    recipient_name: 'Nanao Singh',
+    recipient_role: 'DRIVER',
+    phone_masked: '+91 96*** ***19',
+    message_type: 'FLOOD_ALERT',
+    language_code: 'mni',
+    language_name: 'Meitei',
+    message_body: '⚠️ অৰোহান ইমর্জেন্সী রিলীফ পাউজেল: ইম্ফাল লম্বীদা ঈচাও থোক্লে, সেফ জোনদা লৈবীয়ু।',
+    status: 'DELIVERED_SIMULATED',
+    dispatched_by: 'STATE_CONTROL_MANIPUR',
+    acknowledged_at: null,
+    delivery_channel: 'WHATSAPP_BUSINESS_SIMULATION',
+    created_at: new Date(Date.now() - 7200000).toISOString(),
+  },
+  {
+    id: 5,
+    dispatch_id: 'WA-20260905-REL-005',
+    movement_code: 'REL-005',
+    recipient_name: 'Bwrai Boro',
+    recipient_role: 'DRIVER',
+    phone_masked: '+91 91*** ***65',
+    message_type: 'MOVEMENT_SUMMARY',
+    language_code: 'brx',
+    language_name: 'Bodo',
+    message_body: '📋 AROHAN खौरां: थांदै REL-005। नोंथांनि मुवाया रोखा खालामबाय।',
+    status: 'DELIVERED_SIMULATED',
+    dispatched_by: 'LOGISTICS_COORDINATOR',
+    acknowledged_at: null,
+    delivery_channel: 'WHATSAPP_BUSINESS_SIMULATION',
+    created_at: new Date(Date.now() - 9000000).toISOString(),
+  }
+];
+
 export const DEFAULT_EVENTS: NetworkEvent[] = [
   {
     id: 1,
@@ -819,6 +907,15 @@ interface ArohanStore extends Partial<AppState> {
   floodVulnerabilities: DistrictFloodVulnerability[];
   floodSummary: any;
 
+  // Multi-Level Coordination & WhatsApp Dispatch
+  activeRoleLevel: number;
+  setActiveRoleLevel: (level: number) => void;
+  isWhatsAppModalOpen: boolean;
+  whatsAppModalContext: any;
+  openWhatsAppModal: (context?: any) => void;
+  closeWhatsAppModal: () => void;
+  communicationLogs: any[];
+
   // Actions
   setGpsUpdate: (update: GPSUpdate | null) => void;
   selectShipment: (id: number) => void;
@@ -835,6 +932,10 @@ interface ArohanStore extends Partial<AppState> {
   fetchFieldReports: () => Promise<void>;
   fetchCorridorRiskForecasts: () => Promise<void>;
   fetchFloodVulnerabilities: (nerOnly?: boolean) => Promise<void>;
+  fetchCommunicationHistory: () => Promise<void>;
+  sendWhatsAppMessage: (data: any) => Promise<any>;
+  acknowledgeWhatsAppMessage: (dispatchId: string) => Promise<any>;
+  reportDriverIssue: (data: any) => Promise<any>;
   scenarioStart: () => Promise<void>;
   scenarioNext: () => Promise<void>;
   scenarioPause: () => Promise<void>;
@@ -883,6 +984,14 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
   corridorRiskForecasts: DEFAULT_TERRAIN_RISKS.current_risks,
   floodVulnerabilities: [],
   floodSummary: null,
+
+  activeRoleLevel: 1,
+  setActiveRoleLevel: (level: number) => set({ activeRoleLevel: level }),
+  isWhatsAppModalOpen: false,
+  whatsAppModalContext: null,
+  openWhatsAppModal: (context = null) => set({ isWhatsAppModalOpen: true, whatsAppModalContext: context }),
+  closeWhatsAppModal: () => set({ isWhatsAppModalOpen: false, whatsAppModalContext: null }),
+  communicationLogs: DEFAULT_COMMUNICATION_LOGS,
 
   setGpsUpdate: (update) => set({ gpsUpdate: update }),
 
@@ -1155,6 +1264,49 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
       });
     } catch (e) {
       console.warn('Failed to fetch flood vulnerability data:', e);
+    }
+  },
+
+  fetchCommunicationHistory: async () => {
+    try {
+      const data = await patch('/communications/history', 'GET');
+      if (Array.isArray(data) && data.length > 0) {
+        set({ communicationLogs: data });
+      }
+    } catch (e) {
+      console.warn('Failed to fetch communication history:', e);
+    }
+  },
+
+  sendWhatsAppMessage: async (data: any) => {
+    try {
+      const res = await patch('/communications/send', 'POST', data);
+      await get().fetchCommunicationHistory();
+      return res;
+    } catch (e) {
+      console.warn('Failed to send WhatsApp message:', e);
+      throw e;
+    }
+  },
+
+  acknowledgeWhatsAppMessage: async (dispatchId: string) => {
+    try {
+      const res = await patch(`/communications/acknowledge/${dispatchId}`, 'POST');
+      await get().fetchCommunicationHistory();
+      return res;
+    } catch (e) {
+      console.warn('Failed to acknowledge message:', e);
+    }
+  },
+
+  reportDriverIssue: async (data: any) => {
+    try {
+      const res = await patch('/driver/report-issue', 'POST', data);
+      await get().fetchFieldReports();
+      return res;
+    } catch (e) {
+      console.warn('Failed to report driver issue:', e);
+      throw e;
     }
   },
 }));
