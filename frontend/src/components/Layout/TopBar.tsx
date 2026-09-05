@@ -35,60 +35,48 @@ export function TopBar() {
 
         <div style={{ width: 1, height: 28, backgroundColor: '#e2e8f0' }} />
 
-        {/* 2. CENTER: CURRENT MISSION CONTEXT & SELECTOR */}
+        {/* 2. CENTER: UNIFIED ACTIVE MISSION SELECTOR */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              CURRENT MISSION
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: '0.6rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              ACTIVE MISSION
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: '#1d4ed8' }}>{shipment?.shipment_code || 'SHP-002'}</span>
-              <span style={{ color: '#cbd5e1' }}>·</span>
-              <span>{shipment ? `${shipment.origin.split(' ')[0]} → ${shipment.destination.split(' ')[0]}` : 'Guwahati → Silchar'}</span>
-              {shipment?.cargo_type && (
-                <>
-                  <span style={{ color: '#cbd5e1' }}>·</span>
-                  <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>{shipment.cargo_type.split(' ')[0]}</span>
-                </>
-              )}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              padding: '4px 10px',
+              minWidth: 280,
+              maxWidth: 320
+            }}>
+              <Truck size={14} style={{ color: '#1d4ed8', flexShrink: 0 }} />
+              <select
+                value={selectedShipmentId || 1}
+                onChange={(e) => selectShipment(Number(e.target.value))}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  fontWeight: 800,
+                  fontSize: '0.8rem',
+                  color: '#0f172a',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  width: '100%',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {shipmentsList?.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.shipment_code} · {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]} ({s.cargo_type.split(' ')[0]})
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
-
-          {/* Compact Mission Selector Dropdown */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            backgroundColor: '#f8fafc',
-            border: '1px solid #cbd5e1',
-            borderRadius: 6,
-            padding: '3px 8px',
-            width: 240
-          }}>
-            <Truck size={13} style={{ color: '#1d4ed8', flexShrink: 0 }} />
-            <select
-              value={selectedShipmentId || 1}
-              onChange={(e) => selectShipment(Number(e.target.value))}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                color: '#0f172a',
-                outline: 'none',
-                cursor: 'pointer',
-                width: '100%',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {shipmentsList?.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.shipment_code} · {s.origin.split(' ')[0]} → {s.destination.split(' ')[0]}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
       </div>
