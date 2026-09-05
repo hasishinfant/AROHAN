@@ -713,14 +713,14 @@ export function LandingPage() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
             {/* Left 8-State List */}
-            <div className="card" style={{ padding: 16, borderRadius: 8 }}>
+            <div className="card" style={{ padding: 16, borderRadius: 8, height: 550, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 12, paddingBottom: 6, borderBottom: '1px solid #e2e8f0' }}>
                 SELECT STATE TO INSPECT LOGISTICS CORRIDOR:
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, overflowY: 'auto', paddingRight: 4 }}>
                 {nerStates.map((st) => (
                   <div
                     key={st.name}
@@ -751,14 +751,14 @@ export function LandingPage() {
             </div>
 
             {/* Right Real Map Display */}
-            <div className="card" style={{ padding: 12, borderRadius: 8, height: 500, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div className="card" style={{ padding: 12, borderRadius: 8, height: 550, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
                 <strong style={{ fontSize: '0.82rem', color: '#0f172a', textTransform: 'uppercase' }}>
                   ACTIVE CORRIDOR MONITORING DISPLAY — {selectedState.toUpperCase()}
                 </strong>
                 <span className="data-tag data-tag-real">OSM & SRTM DEM DATA</span>
               </div>
-              <div style={{ flex: 1, width: '100%', borderRadius: 6, overflow: 'hidden' }}>
+              <div style={{ flex: 1, width: '100%', borderRadius: 6, overflow: 'hidden', position: 'relative', minHeight: 460 }}>
                 <MapView />
               </div>
             </div>

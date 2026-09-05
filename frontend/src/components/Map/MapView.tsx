@@ -394,6 +394,18 @@ export function MapView() {
     }
   }, [selectedShipmentId, currentConfig, gpsUpdate, followTruck, showHazardLayer, showFirmsLayer]);
 
+  // Auto-resize MapLibre GL map when container dimensions change
+  React.useEffect(() => {
+    if (!mapContainer.current) return;
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    });
+    resizeObserver.observe(mapContainer.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const isSimulating = gpsSimulationService.isSimulating();
   const simStatus = gpsSimulationService.getStatus();
   const activeSpeed = gpsSimulationService.getSpeedMultiplier();
@@ -407,19 +419,23 @@ export function MapView() {
       {/* TOP-LEFT: GPS Simulation Control Panel Toolbar with High Z-Index & Explicit Pointer Events */}
       <div style={{
         position: 'absolute',
-        top: 12,
-        left: 12,
+        top: 10,
+        left: 10,
+        maxWidth: 'calc(100% - 20px)',
         zIndex: 50,
         pointerEvents: 'auto',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
         border: '1px solid var(--border-medium)',
         borderRadius: 'var(--radius-md)',
-        padding: '6px 12px',
+        padding: '5px 10px',
         boxShadow: 'var(--shadow-md)',
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
+        gap: 6,
         flexWrap: 'wrap',
+        overflowX: 'auto',
+        maxHeight: '130px',
       }}>
         {/* Source Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', fontWeight: 800, color: 'var(--primary-navy)', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '3px 7px', borderRadius: 4 }}>

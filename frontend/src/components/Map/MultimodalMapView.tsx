@@ -33,6 +33,18 @@ export function MultimodalMapView({ mode, onModeChange }: MultimodalMapViewProps
     return () => unsubscribe();
   }, [mode]);
 
+  // Auto-resize MapLibre GL map when container dimensions change
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    });
+    resizeObserver.observe(mapContainerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
   // Initialize MapLibre GL map
   useEffect(() => {
     if (!mapContainerRef.current) return;
