@@ -28,10 +28,12 @@ export function Sidebar() {
 
   const navItems = [
     { path: '/command', label: 'Command Center', icon: LayoutDashboard },
-    { path: '/multimodal', label: 'Multimodal Hub', icon: Boxes },
+    { path: '/resources', label: 'Resource Allocation', icon: Boxes },
     { path: '/risk', label: 'Risk Intelligence', icon: ShieldAlert },
+    { path: '/action', label: 'Action & Coordination', icon: Zap, alert: hasPending },
+    { path: '/replan', label: 'Intelligent Rerouting', icon: Layers },
+    { path: '/multimodal', label: 'Multimodal Hub', icon: Activity },
     { path: '/mission', label: 'Mission Operations', icon: Package },
-    { path: '/action', label: 'AI Action Center', icon: Zap, alert: hasPending },
     { path: '/reports', label: 'Corridor Analytics', icon: FileText },
     { path: '/history', label: 'Decision Audit', icon: History },
     { path: '/baseline', label: 'SLA Baseline', icon: BarChart3 },

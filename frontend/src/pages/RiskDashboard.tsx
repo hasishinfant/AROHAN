@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../stores/arohanStore';
+import { DecisionFlowStepper } from '../components/DecisionFlowStepper';
 import { gpsSimulationService, GPSUpdate } from '../services/gpsSimulationService';
 import { MULTIMODAL_NETWORKS, JOGIGHOPA_MULTIMODAL_DEMO } from '../config/multimodalRoutes';
 import { TransportMode } from '../types/multimodalTypes';
@@ -55,7 +56,17 @@ interface ShipmentRiskRow {
 
 export function RiskDashboard() {
   const navigate = useNavigate();
-  const { shipmentsList, selectedShipmentId, selectShipment, scenario_step, isConnected } = useArohanStore();
+  const {
+    shipmentsList,
+    selectedShipmentId,
+    selectShipment,
+    scenario_step,
+    isConnected,
+    terrainRisks,
+    fetchTerrainRisks
+  } = useArohanStore();
+
+  const [riskWindowTab, setRiskWindowTab] = useState<'CURRENT' | 'FORECAST'>('CURRENT');
 
   const [gpsUpdate, setGpsUpdate] = useState<GPSUpdate | null>(
     gpsSimulationService.getLastUpdate()
@@ -65,6 +76,10 @@ export function RiskDashboard() {
   const [selectedRiskFilter, setSelectedRiskFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedShipmentId, setExpandedShipmentId] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchTerrainRisks();
+  }, []);
 
   // Subscribe to live GPS updates
   useEffect(() => {
@@ -246,6 +261,9 @@ export function RiskDashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 1600, margin: '0 auto', width: '100%' }}>
       
+      {/* End-to-End Decision Flow Stepper */}
+      <DecisionFlowStepper />
+
       {/* 1. Page Header */}
       <div className="page-header">
         <div>
@@ -347,6 +365,154 @@ export function RiskDashboard() {
           </div>
         </div>
 
+      </div>
+
+      {/* 2B. FEATURE 1: PREDICTIVE TERRAIN RISK (CURRENT VS FORECAST) */}
+      <div className="card" style={{ padding: 18, border: '1px solid #059669', backgroundColor: '#FAFAF9' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase' }}>
+                PREDICTIVE TERRAIN RISK & ACCESSIBILITY FORECAST (NER CORRIDORS)
+              </div>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  backgroundColor: '#FEF3C7',
+                  color: '#92400E',
+                  border: '1px solid #FCD34D',
+                  padding: '2px 8px',
+                  borderRadius: 9999,
+                }}
+              >
+                PROTOTYPE DATA (IMD AWS & SRTM DEM)
+              </span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: 2 }}>
+              Combines forecast precipitation intensity, slope gradients (42°), and NRSC landslide zonation
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className="btn btn-sm"
+              onClick={() => setRiskWindowTab('CURRENT')}
+              style={{
+                backgroundColor: riskWindowTab === 'CURRENT' ? '#064E3B' : '#FFFFFF',
+                color: riskWindowTab === 'CURRENT' ? '#FFFFFF' : '#475569',
+                border: '1px solid #CBD5E1',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+              }}
+            >
+              CURRENT ACTIVE HAZARDS ({terrainRisks?.current_risks.length ?? 2})
+            </button>
+            <button
+              className="btn btn-sm"
+              onClick={() => setRiskWindowTab('FORECAST')}
+              style={{
+                backgroundColor: riskWindowTab === 'FORECAST' ? '#064E3B' : '#FFFFFF',
+                color: riskWindowTab === 'FORECAST' ? '#FFFFFF' : '#475569',
+                border: '1px solid #CBD5E1',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+              }}
+            >
+              UPCOMING FORECAST WINDOWS 6h–24h ({terrainRisks?.forecast_risks.length ?? 3})
+            </button>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 12 }}>
+          {((riskWindowTab === 'CURRENT' ? terrainRisks?.current_risks : terrainRisks?.forecast_risks) || []).map((risk) => {
+            const isCritical = risk.severity === 'CRITICAL';
+            const isHigh = risk.severity === 'HIGH';
+            const sevColor = isCritical ? '#DC2626' : isHigh ? '#EA580C' : '#2563EB';
+            const sevBg = isCritical ? '#FEE2E2' : isHigh ? '#FFEDD5' : '#EFF6FF';
+
+            return (
+              <div
+                key={risk.id}
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: `1px solid ${isCritical ? '#FCA5A5' : '#E2E8F0'}`,
+                  borderLeft: `4px solid ${sevColor}`,
+                  borderRadius: 10,
+                  padding: 14,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        backgroundColor: sevBg,
+                        color: sevColor,
+                        padding: '2px 6px',
+                        borderRadius: 9999,
+                      }}
+                    >
+                      {risk.severity} {risk.risk_type}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600 }}>
+                      Window: {risk.time_window.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: sevColor }}>
+                    Disruption P: {(risk.disruption_probability * 100).toFixed(0)}%
+                  </span>
+                </div>
+
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>
+                  {risk.corridor_name} ({risk.state_name})
+                </div>
+
+                <div style={{ fontSize: '0.75rem', color: '#475569' }}>
+                  <strong>Sector:</strong> {risk.affected_segment} · Confidence: <strong>{risk.confidence}</strong>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: '0.72rem',
+                    color: '#1E3A8A',
+                    backgroundColor: '#F0F9FF',
+                    border: '1px solid #BAE6FD',
+                    borderRadius: 6,
+                    padding: '6px 10px',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  <strong>Directive:</strong> {risk.recommended_action}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => navigate('/command')}
+                    style={{ fontSize: '0.7rem', padding: '3px 8px' }}
+                  >
+                    <Compass size={12} />
+                    <span>VIEW ON MAP</span>
+                  </button>
+
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => navigate('/replan')}
+                    style={{ backgroundColor: '#059669', borderColor: '#047857', fontSize: '0.7rem', padding: '3px 8px' }}
+                  >
+                    <ArrowRight size={12} />
+                    <span>EVALUATE REROUTE</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* 3. Proactive Re-plan Alert Banner (If High Risk Exists) */}

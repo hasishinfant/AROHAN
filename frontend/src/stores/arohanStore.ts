@@ -1,5 +1,13 @@
 import { create } from 'zustand';
-import { AppState, ScenarioStatus, ShipmentData } from '../types';
+import {
+  AppState,
+  ScenarioStatus,
+  ShipmentData,
+  ResourceStockData,
+  ResourceTransferData,
+  OperationalAlertData,
+  CorridorRiskForecastData
+} from '../types';
 import { GPSUpdate, gpsSimulationService } from '../services/gpsSimulationService';
 
 const API = '/api';
@@ -138,10 +146,30 @@ interface ArohanStore extends Partial<AppState> {
   selectedShipmentId: number;
   gpsUpdate: GPSUpdate | null;
 
+  // Institutional State
+  resourceStocks: ResourceStockData[];
+  resourceTransfers: ResourceTransferData[];
+  operationalAlerts: OperationalAlertData[];
+  terrainRisks: {
+    current_risks: CorridorRiskForecastData[];
+    forecast_risks: CorridorRiskForecastData[];
+    total_active_hazards: number;
+    total_forecast_windows: number;
+    data_notice?: string;
+  } | null;
+
   // Actions
   setGpsUpdate: (update: GPSUpdate | null) => void;
   selectShipment: (id: number) => void;
   fetchState: () => Promise<void>;
+  fetchResources: () => Promise<void>;
+  matchResources: () => Promise<void>;
+  approveTransfer: (id: number) => Promise<void>;
+  fetchAlerts: () => Promise<void>;
+  reviewAlert: (id: number) => Promise<void>;
+  approveAlert: (id: number) => Promise<void>;
+  dismissAlert: (id: number, reason: string) => Promise<void>;
+  fetchTerrainRisks: () => Promise<void>;
   scenarioStart: () => Promise<void>;
   scenarioNext: () => Promise<void>;
   scenarioPause: () => Promise<void>;
@@ -176,6 +204,10 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
   shipmentsList: DEFAULT_SHIPMENTS,
   selectedShipmentId: 1,
   gpsUpdate: gpsSimulationService.getLastUpdate(),
+  resourceStocks: [],
+  resourceTransfers: [],
+  operationalAlerts: [],
+  terrainRisks: null,
 
   setGpsUpdate: (update) => set({ gpsUpdate: update }),
 
@@ -258,6 +290,11 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
         isLoading: false,
         error: null,
       });
+
+      // Synchronously load institutional modules
+      get().fetchResources();
+      get().fetchAlerts();
+      get().fetchTerrainRisks();
     } catch (e) {
       set({ isLoading: false, error: String(e) });
     }
@@ -327,5 +364,70 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
     });
     set({ driver_status: 'REPORTING' });
     await get().fetchState();
+  },
+
+  fetchResources: async () => {
+    try {
+      const data = await patch('/resources', 'GET');
+      const transfers = await patch('/resources/transfers', 'GET');
+      set({ resourceStocks: data.stocks || [], resourceTransfers: transfers || [] });
+    } catch (e) {
+      console.warn('Failed to fetch resources:', e);
+    }
+  },
+
+  matchResources: async () => {
+    try {
+      const res = await patch('/resources/match', 'POST');
+      if (res.transfers) {
+        set((s) => ({ resourceTransfers: [...res.transfers, ...s.resourceTransfers] }));
+      }
+      await get().fetchResources();
+    } catch (e) {
+      console.warn('Failed to match resources:', e);
+    }
+  },
+
+  approveTransfer: async (id: number) => {
+    await patch(`/resources/transfers/${id}/approve`, 'POST', { dispatcher_id: 1 });
+    await get().fetchResources();
+    await get().fetchState();
+  },
+
+  fetchAlerts: async () => {
+    try {
+      const data = await patch('/alerts', 'GET');
+      set({ operationalAlerts: data || [] });
+    } catch (e) {
+      console.warn('Failed to fetch alerts:', e);
+    }
+  },
+
+  reviewAlert: async (id: number) => {
+    await patch(`/alerts/${id}/review`, 'POST', { officer_id: 1 });
+    await get().fetchAlerts();
+  },
+
+  approveAlert: async (id: number) => {
+    await patch(`/alerts/${id}/approve`, 'POST', {
+      officer_id: 1,
+      department: 'Disaster Management Authority'
+    });
+    await get().fetchAlerts();
+    await get().fetchState();
+  },
+
+  dismissAlert: async (id: number, reason: string) => {
+    await patch(`/alerts/${id}/dismiss`, 'POST', { officer_id: 1, reason });
+    await get().fetchAlerts();
+  },
+
+  fetchTerrainRisks: async () => {
+    try {
+      const data = await patch('/risks/terrain', 'GET');
+      set({ terrainRisks: data });
+    } catch (e) {
+      console.warn('Failed to fetch terrain risks:', e);
+    }
   },
 }));

@@ -4,6 +4,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { useArohanStore } from '../stores/arohanStore';
 import { useNavigate } from 'react-router-dom';
 import { gpsSimulationService } from '../services/gpsSimulationService';
+import { DecisionFlowStepper } from '../components/DecisionFlowStepper';
 import {
   Clock,
   Radio,
@@ -98,6 +99,9 @@ export function CommandCenter() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%', paddingBottom: 40 }}>
       
+      {/* End-to-End Decision Flow Stepper */}
+      <DecisionFlowStepper />
+
       {/* 1. TOP HEADER: TITLE & CONTROLS (Sanchar AI Style) */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>

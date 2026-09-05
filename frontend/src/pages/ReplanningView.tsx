@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useArohanStore } from '../stores/arohanStore';
-import { RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Shield, GitCompare } from 'lucide-react';
+import { DecisionFlowStepper } from '../components/DecisionFlowStepper';
+import {
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight,
+  Shield,
+  GitCompare,
+  ShieldAlert,
+  Boxes,
+  Truck,
+  Train,
+  Ship,
+  PhoneCall,
+  Sliders
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function ReplanningView() {
-  const {
-    shipment, scenario_step,
-  } = useArohanStore();
+  const { shipment, scenario_step } = useArohanStore();
+  const navigate = useNavigate();
+
+  const [simulateTotalBlockage, setSimulateTotalBlockage] = useState(false);
 
   const step = scenario_step ?? -1;
   const replanComplete = step >= 8;
@@ -22,20 +39,261 @@ export function ReplanningView() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* End-to-End Decision Flow Stepper */}
+      <DecisionFlowStepper />
+
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">REPLANNING VIEW — CLOSED-LOOP FIELD REACTION</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h1 className="page-title">INTELLIGENT REROUTING & DYNAMIC ADAPTATION</h1>
+            <span
+              style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                backgroundColor: '#ECFDF5',
+                color: '#065F46',
+                border: '1px solid #A7F3D0',
+                padding: '2px 8px',
+                borderRadius: 9999,
+              }}
+            >
+              FEASIBILITY ENGINE
+            </span>
+          </div>
           <div className="page-description">
-            Verification & Dynamic Network Adaptation · Field Feedback → State Update → Automatic Replanning
+            Objective: Safe + Feasible + Reliable Delivery (Not merely shortest distance)
           </div>
         </div>
-        {replanComplete && (
-          <span className="badge badge-success" style={{ padding: '4px 8px' }}>
-            <CheckCircle2 size={12} />
-            <span>REPLANNING CYCLE COMPLETE</span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => setSimulateTotalBlockage(!simulateTotalBlockage)}
+            style={{
+              borderColor: simulateTotalBlockage ? '#DC2626' : '#CBD5E1',
+              color: simulateTotalBlockage ? '#DC2626' : '#475569',
+            }}
+          >
+            <ShieldAlert size={13} />
+            <span>{simulateTotalBlockage ? 'RESTORE CORRIDOR PASSABILITY' : 'SIMULATE TOTAL NETWORK BLOCKAGE'}</span>
+          </button>
+
+          {replanComplete && (
+            <span className="badge badge-success" style={{ padding: '4px 8px' }}>
+              <CheckCircle2 size={12} />
+              <span>REPLANNING CYCLE COMPLETE</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* EMERGENCY ESCALATION BANNER (When No Reliable Route Exists) */}
+      {simulateTotalBlockage && (
+        <div
+          style={{
+            backgroundColor: '#FEF2F2',
+            border: '2px solid #DC2626',
+            borderRadius: 12,
+            padding: 18,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 14,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <div
+              style={{
+                backgroundColor: '#DC2626',
+                color: '#FFFFFF',
+                padding: 10,
+                borderRadius: '50%',
+                flexShrink: 0,
+              }}
+            >
+              <ShieldAlert size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '1rem', fontWeight: 900, color: '#991B1B', letterSpacing: '0.02em' }}>
+                NO RELIABLE ROUTE FOUND — MANDATORY DISPATCH ESCALATION
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#7F1D1D', marginTop: 4, maxWidth: 740, lineHeight: 1.4 }}>
+                Primary Corridor (NH-6) is BLOCKED. Secondary Ridge Route (Route B) has exceeded safety risk threshold (Disruption P &gt; 85%).
+                The algorithm refuses to force an unsafe route recommendation. System has escalated the situation to the Ministry of Development of North Eastern Region (MDoNER) Emergency Operations Centre.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => navigate('/resources')}
+              style={{ fontWeight: 800 }}
+            >
+              <Boxes size={14} />
+              <span>DISPATCH AIRLIFT / LOCAL SURPLUS</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* FEATURE 2: ROUTE FEASIBILITY EVALUATION MATRIX */}
+      <div className="card" style={{ padding: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase' }}>
+              CORRIDOR FEASIBILITY & SAFETY EVALUATION
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
+              Multi-factor assessment: Distance, Travel Duration, Slope Gradient, Flood Hazard & Transport Mode
+            </div>
+          </div>
+          <span
+            style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              backgroundColor: '#EFF6FF',
+              color: '#1E40AF',
+              padding: '2px 8px',
+              borderRadius: 9999,
+            }}
+          >
+            OR-TOOLS GRAPH ALGORITHM
           </span>
-        )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
+          {/* Normal Route */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #FECACA',
+              borderRadius: 10,
+              padding: 14,
+              borderLeft: '4px solid #DC2626',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#DC2626' }}>NORMAL LIFELINE ROUTE</span>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  backgroundColor: '#FEE2E2',
+                  color: '#DC2626',
+                  padding: '2px 6px',
+                  borderRadius: 9999,
+                }}
+              >
+                BLOCKED / SEVERE RISK
+              </span>
+            </div>
+
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0F172A', marginTop: 6 }}>
+              Route A — NH-6 via Jorabat–Umiam
+            </div>
+
+            <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: 4 }}>
+              Distance: <strong>102 km</strong> · Normal ETA: <strong>3.0h</strong>
+            </div>
+
+            <div style={{ fontSize: '0.75rem', color: '#DC2626', marginTop: 4, fontWeight: 700 }}>
+              Disruption Probability: 74% · Peak Slope: 42° (Low Valley Cut)
+            </div>
+
+            <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 6, lineHeight: 1.4 }}>
+              Active landslide threat km 68–74. Escarpment saturated by continuous 38 mm/h rainfall. Infeasible for heavy goods transit.
+            </div>
+          </div>
+
+          {/* Alternative Route B (Recommended) */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #A7F3D0',
+              borderRadius: 10,
+              padding: 14,
+              borderLeft: '4px solid #059669',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#059669' }}>RECOMMENDED ALTERNATIVE</span>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  backgroundColor: '#ECFDF5',
+                  color: '#059669',
+                  padding: '2px 6px',
+                  borderRadius: 9999,
+                }}
+              >
+                PASSABLE & SAFE
+              </span>
+            </div>
+
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0F172A', marginTop: 6 }}>
+              Route B — Ridge Road via Sonapur
+            </div>
+
+            <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: 4 }}>
+              Distance: <strong>128 km (+26 km)</strong> · Updated ETA: <strong>4.2h (+1.2h)</strong>
+            </div>
+
+            <div style={{ fontSize: '0.75rem', color: '#059669', marginTop: 4, fontWeight: 700 }}>
+              Disruption Probability: 22% · Peak Slope: 18° (High Ridge Drainage)
+            </div>
+
+            <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 6, lineHeight: 1.4 }}>
+              <strong>Recommendation Rationale:</strong> Higher elevation ridge corridor avoids low-lying catchment flooding. 26 km detour preserves 100% mission SLA and prevents 12h+ blockage.
+            </div>
+          </div>
+
+          {/* Alternative Corridor 3: Rail Link */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #CBD5E1',
+              borderRadius: 10,
+              padding: 14,
+              borderLeft: '4px solid #475569',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569' }}>MULTIMODAL RAIL BYPASS</span>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  padding: '2px 6px',
+                  borderRadius: 9999,
+                }}
+              >
+                STANDBY BACKUP
+              </span>
+            </div>
+
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0F172A', marginTop: 6 }}>
+              NFR Lumding–Badarpur Hill Freight
+            </div>
+
+            <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: 4 }}>
+              Mode: <strong>RAILWAY</strong> · Transit: <strong>7.5h</strong> · Cap: <strong>2,400 MT</strong>
+            </div>
+
+            <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: 4 }}>
+              Subsidence Risk: 44% · Track Condition: INSPECTED
+            </div>
+
+            <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 6, lineHeight: 1.4 }}>
+              Feasible for heavy bulk grains and fuel reallocation to Southern Assam and Tripura if road corridors collapse.
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Core Loop Visualizer */}
@@ -43,9 +301,9 @@ export function ReplanningView() {
         <div className="card-header">
           <div className="card-title">
             <GitCompare size={14} />
-            <span>AROHAN CORE DECISION LOOP</span>
+            <span>AROHAN CLOSED-LOOP GOVERNANCE ENGINE</span>
           </div>
-          <span className="data-tag data-tag-real">LOGISTICS ENGINE</span>
+          <span className="data-tag data-tag-real">AUTOMATION PIPELINE</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', flexWrap: 'wrap', gap: 6 }}>
@@ -57,25 +315,25 @@ export function ReplanningView() {
                     width: 28,
                     height: 28,
                     borderRadius: 'var(--radius-sm)',
-                    backgroundColor: node.done ? 'var(--primary-navy)' : 'var(--bg-panel)',
+                    backgroundColor: node.done ? '#064E3B' : 'var(--bg-panel)',
                     color: node.done ? '#ffffff' : 'var(--text-muted)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 800,
                     fontSize: '0.75rem',
-                    border: `1px solid ${node.done ? 'var(--primary-navy)' : 'var(--border-medium)'}`,
+                    border: `1px solid ${node.done ? '#064E3B' : 'var(--border-medium)'}`,
                   }}
                 >
                   0{i + 1}
                 </div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: node.done ? 'var(--primary-navy)' : 'var(--text-muted)', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: node.done ? '#064E3B' : 'var(--text-muted)', textTransform: 'uppercase' }}>
                   {node.label}
                 </div>
                 <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>{node.desc}</div>
               </div>
               {i < loopNodes.length - 1 && (
-                <ArrowRight size={14} style={{ color: node.done ? 'var(--primary-navy)' : 'var(--border-medium)', opacity: node.done ? 1 : 0.4 }} />
+                <ArrowRight size={14} style={{ color: node.done ? '#064E3B' : 'var(--border-medium)', opacity: node.done ? 1 : 0.4 }} />
               )}
             </React.Fragment>
           ))}

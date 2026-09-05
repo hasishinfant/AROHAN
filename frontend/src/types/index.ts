@@ -165,3 +165,76 @@ export const EVENT_ICONS: Record<string, string> = {
   NETWORK_UPDATED: 'RefreshCw',
   REPLANNING: 'GitCompare',
 };
+
+// ── Institutional Extended Types ──────────────────────────────────────
+export type ResourceStatus = 'SURPLUS' | 'ADEQUATE' | 'LOW' | 'SHORTAGE' | 'CRITICAL';
+
+export interface ResourceStockData {
+  id: number;
+  district_name: string;
+  state_name: string;
+  resource_type: string;
+  available_qty: number;
+  required_qty: number;
+  unit: string;
+  status: ResourceStatus;
+  priority: number;
+  storage_facility: string;
+  data_source: string;
+  updated_at: string;
+}
+
+export interface ResourceTransferData {
+  id: number;
+  transfer_code: string;
+  source_district: string;
+  destination_district: string;
+  resource_type: string;
+  quantity: number;
+  unit: string;
+  distance_km: number;
+  route_risk_level: string;
+  eta_hours: number;
+  recommended_route_label: string;
+  transport_mode: string;
+  status: 'PENDING' | 'APPROVED' | 'DISPATCHED' | 'COMPLETED' | 'REJECTED';
+  reason: string;
+  created_at: string;
+  approved_at: string | null;
+}
+
+export interface OperationalAlertData {
+  id: number;
+  alert_code: string;
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  title: string;
+  description: string;
+  location_district: string;
+  affected_corridor: string;
+  affected_resource: string;
+  suggested_source_district: string;
+  recommended_route: string;
+  estimated_eta: string;
+  recommended_action: string;
+  responsible_department: string;
+  status: 'ACTIVE' | 'REVIEWED' | 'APPROVED' | 'DISMISSED';
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  data_source: string;
+  created_at: string;
+}
+
+export interface CorridorRiskForecastData {
+  id: number;
+  corridor_name: string;
+  state_name: string;
+  risk_type: 'LANDSLIDE' | 'FLOOD' | 'HEAVY_RAINFALL' | 'ROAD_ACCESSIBILITY' | 'OVERALL_CORRIDOR';
+  severity: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW';
+  time_window: 'CURRENT' | 'FORECAST_6H' | 'FORECAST_12H' | 'FORECAST_24H';
+  disruption_probability: number;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  affected_segment: string;
+  recommended_action: string;
+  data_source: string;
+  created_at: string;
+}
+

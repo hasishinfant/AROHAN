@@ -185,3 +185,108 @@ class KPIOut(BaseModel):
     replan_count: int
     proactive_actions: int
     reactive_actions: int
+
+
+# ── Institutional Resource & Redistribution Schemas ─────────────────────
+class ResourceStockOut(BaseModel):
+    id: int
+    district_name: str
+    state_name: str
+    resource_type: str
+    available_qty: float
+    required_qty: float
+    unit: str
+    status: str  # SURPLUS | ADEQUATE | LOW | SHORTAGE | CRITICAL
+    priority: int
+    storage_facility: str
+    data_source: str
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ResourceTransferOut(BaseModel):
+    id: int
+    transfer_code: str
+    source_district: str
+    destination_district: str
+    resource_type: str
+    quantity: float
+    unit: str
+    distance_km: float
+    route_risk_level: str
+    eta_hours: float
+    recommended_route_label: str
+    transport_mode: str
+    status: str
+    reason: str
+    created_at: datetime
+    approved_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+
+class ResourceTransferApproveRequest(BaseModel):
+    dispatcher_id: int = 1
+    notes: Optional[str] = None
+
+
+# ── Operational Actionable Alert Schemas ─────────────────────────────────
+class OperationalAlertOut(BaseModel):
+    id: int
+    alert_code: str
+    priority: str
+    title: str
+    description: str
+    location_district: str
+    affected_corridor: str
+    affected_resource: str
+    suggested_source_district: str
+    recommended_route: str
+    estimated_eta: str
+    recommended_action: str
+    responsible_department: str
+    status: str
+    confidence: str
+    data_source: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AlertReviewRequest(BaseModel):
+    officer_id: int = 1
+    remarks: Optional[str] = None
+
+
+class AlertApproveRequest(BaseModel):
+    officer_id: int = 1
+    department: str = "Disaster Management Authority"
+    notes: Optional[str] = None
+
+
+class AlertDismissRequest(BaseModel):
+    officer_id: int = 1
+    reason: str
+
+
+# ── Corridor Risk Forecast Schemas ───────────────────────────────────────
+class CorridorRiskForecastOut(BaseModel):
+    id: int
+    corridor_name: str
+    state_name: str
+    risk_type: str
+    severity: str
+    time_window: str
+    disruption_probability: float
+    confidence: str
+    affected_segment: str
+    recommended_action: str
+    data_source: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

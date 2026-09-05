@@ -29,14 +29,20 @@ from typing import Any
 
 from app.database import get_db
 from app.models import (
-    Route, Shipment, NetworkEvent, Decision, RiskPrediction, RoadSegment
+    Route, Shipment, NetworkEvent, Decision, RiskPrediction, RoadSegment,
+    ResourceStock, ResourceTransfer, OperationalAlert, CorridorRiskForecast
 )
 from app.schemas import (
     RouteOut, ShipmentOut, NetworkEventOut, DecisionOut,
     RiskPredictionOut, DecisionApproveRequest, DecisionRejectRequest,
     DecisionModifyRequest, DriverReportCreate,
+    ResourceStockOut, ResourceTransferOut, ResourceTransferApproveRequest,
+    OperationalAlertOut, AlertReviewRequest, AlertApproveRequest, AlertDismissRequest,
+    CorridorRiskForecastOut
 )
 from app.engines.decision_engine import approve_decision, reject_decision
+from app.engines.resource_engine import calculate_redistribution_recommendations
+from app.engines.alert_engine import generate_operational_alerts
 from app.scenario.demo_scenario import (
     advance_step, reset_scenario, pause_scenario, resume_scenario,
     get_current_state, memory, STEPS
@@ -417,4 +423,183 @@ async def get_multimodal_status() -> dict:
         "system_layer": "AROHAN Multimodal Transport Intelligence Extension",
         "compliance": "PM GatiShakti & ULIP Framework Aligned"
     }
+
+
+# ── Feature 1: Predictive Terrain Risk (Current vs Forecast) ─────────────────
+
+@router.get("/risks/terrain")
+async def get_terrain_risks(db: AsyncSession = Depends(get_db)) -> dict:
+    """Returns predictive terrain risks separated into Current Risks vs Forecast Risks."""
+    result = await db.execute(
+        select(CorridorRiskForecast).order_by(desc(CorridorRiskForecast.disruption_probability))
+    )
+    all_risks = result.scalars().all()
+    all_out = [CorridorRiskForecastOut.model_validate(r).model_dump() for r in all_risks]
+
+    current_risks = [r for r in all_out if r["time_window"] == "CURRENT"]
+    forecast_risks = [r for r in all_out if r["time_window"] != "CURRENT"]
+
+    return {
+        "current_risks": current_risks,
+        "forecast_risks": forecast_risks,
+        "total_active_hazards": len(current_risks),
+        "total_forecast_windows": len(forecast_risks),
+        "data_notice": "Simulation / Prototype Data — Aligned with IMD AWS & Copernicus DEM telemetry"
+    }
+
+
+# ── Feature 3: Government Resource Management & Redistribution ────────────────
+
+@router.get("/resources")
+async def get_resources(db: AsyncSession = Depends(get_db)) -> dict:
+    """Returns district inventory with government statuses (SURPLUS, SHORTAGE, CRITICAL)."""
+    result = await db.execute(select(ResourceStock).order_by(ResourceStock.priority.desc()))
+    stocks = result.scalars().all()
+    stocks_out = [ResourceStockOut.model_validate(s).model_dump() for s in stocks]
+
+    surplus_count = sum(1 for s in stocks_out if s["status"] == "SURPLUS")
+    shortage_count = sum(1 for s in stocks_out if s["status"] in ("SHORTAGE", "CRITICAL"))
+    critical_count = sum(1 for s in stocks_out if s["status"] == "CRITICAL")
+
+    return {
+        "stocks": stocks_out,
+        "summary": {
+            "total_commodities": len(stocks_out),
+            "surplus_count": surplus_count,
+            "shortage_count": shortage_count,
+            "critical_count": critical_count,
+            "managed_districts": list(set(s["district_name"] for s in stocks_out)),
+        },
+        "data_notice": "Institutional Resource Inventory — Prototype Data (FCI & MDoNER Aligned)"
+    }
+
+
+@router.post("/resources/match")
+async def match_resources(db: AsyncSession = Depends(get_db)) -> dict:
+    """Triggers the redistribution engine to calculate surplus-to-shortage transfer recommendations."""
+    new_transfers = await calculate_redistribution_recommendations(db)
+    return {
+        "status": "success",
+        "generated_count": len(new_transfers),
+        "transfers": [ResourceTransferOut.model_validate(t).model_dump() for t in new_transfers]
+    }
+
+
+@router.get("/resources/transfers")
+async def get_resource_transfers(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    """Returns inter-district transfer recommendations and history."""
+    result = await db.execute(
+        select(ResourceTransfer).order_by(desc(ResourceTransfer.created_at))
+    )
+    transfers = result.scalars().all()
+    return [ResourceTransferOut.model_validate(t).model_dump() for t in transfers]
+
+
+@router.post("/resources/transfers/{transfer_id}/approve")
+async def approve_resource_transfer(
+    transfer_id: int,
+    body: ResourceTransferApproveRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Dispatcher approves inter-district resource reallocation transfer."""
+    result = await db.execute(select(ResourceTransfer).where(ResourceTransfer.id == transfer_id))
+    transfer = result.scalar_one_or_none()
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Resource transfer recommendation not found")
+
+    transfer.status = "APPROVED"
+    transfer.approved_at = datetime.utcnow()
+
+    # Log event
+    event = NetworkEvent(
+        event_type="RESOURCE_TRANSFER_APPROVED",
+        title=f"TRANSFER APPROVED — {transfer.transfer_code}",
+        description=f"Approved transfer of {transfer.quantity} {transfer.unit} of {transfer.resource_type} from {transfer.source_district} to {transfer.destination_district} via {transfer.recommended_route_label}.",
+        triggered_by="DISPATCHER",
+        time_label=datetime.utcnow().strftime("%H:%M"),
+    )
+    db.add(event)
+    await db.commit()
+
+    return {
+        "status": "approved",
+        "transfer": ResourceTransferOut.model_validate(transfer).model_dump()
+    }
+
+
+# ── Feature 4: Automated Coordination & Actionable Alerts ────────────────────
+
+@router.get("/alerts")
+async def get_alerts(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    """Returns actionable operational alerts."""
+    result = await db.execute(
+        select(OperationalAlert).order_by(desc(OperationalAlert.created_at))
+    )
+    alerts = result.scalars().all()
+    if not alerts:
+        alerts = await generate_operational_alerts(db)
+    return [OperationalAlertOut.model_validate(a).model_dump() for a in alerts]
+
+
+@router.post("/alerts/{alert_id}/review")
+async def review_alert(
+    alert_id: int,
+    body: AlertReviewRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Marks operational alert as under formal administrative review."""
+    result = await db.execute(select(OperationalAlert).where(OperationalAlert.id == alert_id))
+    alert = result.scalar_one_or_none()
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    alert.status = "REVIEWED"
+    await db.commit()
+    return {"status": "reviewed", "alert": OperationalAlertOut.model_validate(alert).model_dump()}
+
+
+@router.post("/alerts/{alert_id}/approve")
+async def approve_alert(
+    alert_id: int,
+    body: AlertApproveRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Executive officer approves recommended alert action."""
+    result = await db.execute(select(OperationalAlert).where(OperationalAlert.id == alert_id))
+    alert = result.scalar_one_or_none()
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    alert.status = "APPROVED"
+
+    # Log to institutional audit timeline
+    event = NetworkEvent(
+        event_type="COORDINATION_ALERT_APPROVED",
+        title=f"ALERT ACTION APPROVED — {alert.alert_code}",
+        description=f"Action initiated by {body.department}: {alert.recommended_action}",
+        triggered_by="DISPATCHER",
+        time_label=datetime.utcnow().strftime("%H:%M"),
+    )
+    db.add(event)
+    await db.commit()
+
+    return {"status": "approved", "alert": OperationalAlertOut.model_validate(alert).model_dump()}
+
+
+@router.post("/alerts/{alert_id}/dismiss")
+async def dismiss_alert(
+    alert_id: int,
+    body: AlertDismissRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Dismisses alert with recorded operational justification."""
+    result = await db.execute(select(OperationalAlert).where(OperationalAlert.id == alert_id))
+    alert = result.scalar_one_or_none()
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    alert.status = "DISMISSED"
+    await db.commit()
+    return {"status": "dismissed", "reason": body.reason, "alert": OperationalAlertOut.model_validate(alert).model_dump()}
+
 

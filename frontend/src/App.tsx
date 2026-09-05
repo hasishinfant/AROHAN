@@ -15,6 +15,7 @@ import { SystemHealth } from './pages/SystemHealth';
 import { ReportPage } from './pages/ReportPage';
 import { MultimodalOperations } from './pages/MultimodalOperations';
 import { RiskDashboard } from './pages/RiskDashboard';
+import { ResourceDashboard } from './pages/ResourceDashboard';
 import { LoginPage } from './pages/LoginPage';
 import { useArohanStore } from './stores/arohanStore';
 import { useWebSocket } from './hooks/useWebSocket';
@@ -48,6 +49,8 @@ function AppShell() {
         <main className="app-content">
           <Routes>
             <Route path="/command" element={<CommandCenter />} />
+            <Route path="/resources" element={<ResourceDashboard />} />
+            <Route path="/alerts" element={<ActionCenter />} />
             <Route path="/multimodal" element={<MultimodalOperations />} />
             <Route path="/risk" element={<RiskDashboard />} />
             <Route path="/mission" element={<MissionDetail />} />

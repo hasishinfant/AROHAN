@@ -160,3 +160,80 @@ class ScenarioState(Base):
     status: Mapped[str] = mapped_column(String(20), default="IDLE")  # IDLE | RUNNING | PAUSED | COMPLETE
     started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ResourceStock(Base):
+    """District-level logistics resource inventory."""
+    __tablename__ = "resource_stocks"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    district_name: Mapped[str] = mapped_column(String(100))
+    state_name: Mapped[str] = mapped_column(String(50))
+    resource_type: Mapped[str] = mapped_column(String(100))
+    available_qty: Mapped[float] = mapped_column(Float)
+    required_qty: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str] = mapped_column(String(30))  # MT | Kits | Cylinders | KL
+    status: Mapped[str] = mapped_column(String(30))  # SURPLUS | ADEQUATE | LOW | SHORTAGE | CRITICAL
+    priority: Mapped[int] = mapped_column(Integer, default=3)  # 1 (low) - 5 (critical)
+    storage_facility: Mapped[str] = mapped_column(String(150))
+    data_source: Mapped[str] = mapped_column(String(50), default="PROTOTYPE_DATA")
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ResourceTransfer(Base):
+    """Inter-district resource redistribution recommendations and approved movements."""
+    __tablename__ = "resource_transfers"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    transfer_code: Mapped[str] = mapped_column(String(30), unique=True)
+    source_district: Mapped[str] = mapped_column(String(100))
+    destination_district: Mapped[str] = mapped_column(String(100))
+    resource_type: Mapped[str] = mapped_column(String(100))
+    quantity: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str] = mapped_column(String(30))
+    distance_km: Mapped[float] = mapped_column(Float)
+    route_risk_level: Mapped[str] = mapped_column(String(20), default="LOW")  # LOW | MODERATE | HIGH
+    eta_hours: Mapped[float] = mapped_column(Float)
+    recommended_route_label: Mapped[str] = mapped_column(String(150))
+    transport_mode: Mapped[str] = mapped_column(String(30), default="ROAD")  # ROAD | RAIL | WATER | MULTIMODAL
+    status: Mapped[str] = mapped_column(String(30), default="PENDING")  # PENDING | APPROVED | DISPATCHED | COMPLETED | REJECTED
+    reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+class OperationalAlert(Base):
+    """Institutional actionable alert for automated coordination."""
+    __tablename__ = "operational_alerts"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    alert_code: Mapped[str] = mapped_column(String(30), unique=True)
+    priority: Mapped[str] = mapped_column(String(20))  # CRITICAL | HIGH | MEDIUM | LOW
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text)
+    location_district: Mapped[str] = mapped_column(String(100))
+    affected_corridor: Mapped[str] = mapped_column(String(150))
+    affected_resource: Mapped[str] = mapped_column(String(150))
+    suggested_source_district: Mapped[str] = mapped_column(String(100))
+    recommended_route: Mapped[str] = mapped_column(String(150))
+    estimated_eta: Mapped[str] = mapped_column(String(50))
+    recommended_action: Mapped[str] = mapped_column(Text)
+    responsible_department: Mapped[str] = mapped_column(String(150))
+    status: Mapped[str] = mapped_column(String(30), default="ACTIVE")  # ACTIVE | REVIEWED | APPROVED | DISMISSED
+    confidence: Mapped[str] = mapped_column(String(10), default="HIGH")  # HIGH | MEDIUM | LOW
+    data_source: Mapped[str] = mapped_column(String(50), default="SIMULATION_DATA")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class CorridorRiskForecast(Base):
+    """Predictive terrain risk forecasting across NER corridors."""
+    __tablename__ = "corridor_risk_forecasts"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    corridor_name: Mapped[str] = mapped_column(String(150))
+    state_name: Mapped[str] = mapped_column(String(50))
+    risk_type: Mapped[str] = mapped_column(String(50))  # LANDSLIDE | FLOOD | HEAVY_RAINFALL | ROAD_ACCESSIBILITY | OVERALL_CORRIDOR
+    severity: Mapped[str] = mapped_column(String(20))  # CRITICAL | HIGH | MODERATE | LOW
+    time_window: Mapped[str] = mapped_column(String(30))  # CURRENT | FORECAST_6H | FORECAST_12H | FORECAST_24H
+    disruption_probability: Mapped[float] = mapped_column(Float)
+    confidence: Mapped[str] = mapped_column(String(10), default="HIGH")  # HIGH | MEDIUM | LOW
+    affected_segment: Mapped[str] = mapped_column(String(200))
+    recommended_action: Mapped[str] = mapped_column(Text)
+    data_source: Mapped[str] = mapped_column(String(50), default="SIMULATION_DATA")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
