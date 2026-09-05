@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useArohanStore } from '../stores/arohanStore';
 import { Logo } from '../components/Logo';
-import { Shield, Smartphone, Lock, Mail, Eye, EyeOff, LogIn, CheckCircle2, Radio, ArrowRight, Zap, Key } from 'lucide-react';
+import { Shield, Smartphone, Lock, Mail, Eye, EyeOff, LogIn, CheckCircle2, Radio, ArrowRight, Zap } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -61,24 +61,24 @@ export function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #021210 0%, #052622 35%, #083832 70%, #031614 100%)',
+        background: 'linear-gradient(135deg, #091e3a 0%, #1e3a8a 40%, #2563eb 75%, #0f172a 100%)',
         padding: 24,
         position: 'relative',
         overflow: 'hidden',
         fontFamily: "'Inter', sans-serif",
       }}
     >
-      {/* Ambient Glowing Background Orbs for Glassmorphism Effect */}
+      {/* Ambient Glowing Royal Blue Background Orbs */}
       <div
         style={{
           position: 'absolute',
           top: '15%',
           left: '20%',
-          width: 380,
-          height: 380,
+          width: 420,
+          height: 420,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(20, 184, 166, 0.25) 0%, rgba(0, 0, 0, 0) 70%)',
-          filter: 'blur(60px)',
+          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(0, 0, 0, 0) 70%)',
+          filter: 'blur(70px)',
           pointerEvents: 'none',
         }}
       />
@@ -87,24 +87,24 @@ export function LoginPage() {
           position: 'absolute',
           bottom: '10%',
           right: '18%',
-          width: 420,
-          height: 420,
+          width: 450,
+          height: 450,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
-          filter: 'blur(70px)',
+          background: 'radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(0, 0, 0, 0) 70%)',
+          filter: 'blur(80px)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Main Glassmorphic Split Container */}
+      {/* Main Glassmorphic Split Container — White & Blue Theme */}
       <div
         style={{
           width: '100%',
           maxWidth: 1040,
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
-          border: '1px solid rgba(45, 212, 191, 0.3)',
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+          border: '1px solid rgba(147, 197, 253, 0.35)',
           borderRadius: 24,
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 25px 60px rgba(15, 23, 42, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
           overflow: 'hidden',
@@ -122,7 +122,7 @@ export function LoginPage() {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            background: 'rgba(2, 20, 18, 0.45)',
+            background: 'rgba(15, 23, 42, 0.55)',
           }}
         >
           <div>
@@ -146,16 +146,16 @@ export function LoginPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,
-                  backgroundColor: 'rgba(20, 184, 166, 0.15)',
-                  border: '1px solid rgba(45, 212, 191, 0.3)',
-                  padding: '4px 10px',
+                  backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                  border: '1px solid rgba(96, 165, 250, 0.4)',
+                  padding: '4px 12px',
                   borderRadius: 20,
                   fontSize: '0.68rem',
                   fontWeight: 800,
-                  color: '#2dd4bf',
+                  color: '#60a5fa',
                 }}
               >
-                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#34d399', boxShadow: '0 0 6px #34d399' }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#3b82f6', boxShadow: '0 0 6px #3b82f6' }} />
                 <span>AUTHENTICATION SECURE</span>
               </div>
             </div>
@@ -165,17 +165,17 @@ export function LoginPage() {
               <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.01em', margin: 0 }}>
                 LOGISTICS CONTROL PORTAL
               </h1>
-              <p style={{ fontSize: '0.8rem', color: '#99f6e4', opacity: 0.8, marginTop: 4 }}>
+              <p style={{ fontSize: '0.8rem', color: '#bfdbfe', opacity: 0.85, marginTop: 4 }}>
                 Select your operational role to access real-time dispatch telemetry and risk engines.
               </p>
             </div>
 
-            {/* Glassmorphic Role Switcher Tabs */}
+            {/* Glassmorphic Blue Role Switcher Tabs */}
             <div
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.35)',
                 padding: 4,
-                border: '1px solid rgba(45, 212, 191, 0.25)',
+                border: '1px solid rgba(96, 165, 250, 0.3)',
                 borderRadius: 14,
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
@@ -187,12 +187,11 @@ export function LoginPage() {
                 type="button"
                 onClick={() => handleRoleChange('ADMIN')}
                 style={{
-                  border: activeRole === 'ADMIN' ? '1px solid rgba(45, 212, 191, 0.5)' : '1px solid transparent',
+                  border: activeRole === 'ADMIN' ? '1px solid rgba(96, 165, 250, 0.6)' : '1px solid transparent',
                   padding: '10px 14px',
                   borderRadius: 10,
-                  backgroundColor: activeRole === 'ADMIN' ? 'linear-gradient(135deg, rgba(20, 184, 166, 0.35) 0%, rgba(13, 148, 136, 0.2) 100%)' : 'transparent',
-                  background: activeRole === 'ADMIN' ? 'rgba(20, 184, 166, 0.3)' : 'transparent',
-                  color: activeRole === 'ADMIN' ? '#ffffff' : '#99f6e4',
+                  background: activeRole === 'ADMIN' ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.4) 0%, rgba(29, 78, 216, 0.25) 100%)' : 'transparent',
+                  color: activeRole === 'ADMIN' ? '#ffffff' : '#bfdbfe',
                   fontWeight: activeRole === 'ADMIN' ? 900 : 700,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
@@ -201,10 +200,10 @@ export function LoginPage() {
                   justifyContent: 'center',
                   gap: 8,
                   transition: 'all 0.2s ease',
-                  boxShadow: activeRole === 'ADMIN' ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none',
+                  boxShadow: activeRole === 'ADMIN' ? '0 4px 14px rgba(37, 99, 235, 0.3)' : 'none',
                 }}
               >
-                <Shield size={16} style={{ color: activeRole === 'ADMIN' ? '#2dd4bf' : '#99f6e4' }} />
+                <Shield size={16} style={{ color: activeRole === 'ADMIN' ? '#60a5fa' : '#bfdbfe' }} />
                 <span>COMMANDER / ADMIN</span>
               </button>
 
@@ -212,12 +211,11 @@ export function LoginPage() {
                 type="button"
                 onClick={() => handleRoleChange('DRIVER')}
                 style={{
-                  border: activeRole === 'DRIVER' ? '1px solid rgba(45, 212, 191, 0.5)' : '1px solid transparent',
+                  border: activeRole === 'DRIVER' ? '1px solid rgba(96, 165, 250, 0.6)' : '1px solid transparent',
                   padding: '10px 14px',
                   borderRadius: 10,
-                  backgroundColor: activeRole === 'DRIVER' ? 'linear-gradient(135deg, rgba(20, 184, 166, 0.35) 0%, rgba(13, 148, 136, 0.2) 100%)' : 'transparent',
-                  background: activeRole === 'DRIVER' ? 'rgba(20, 184, 166, 0.3)' : 'transparent',
-                  color: activeRole === 'DRIVER' ? '#ffffff' : '#99f6e4',
+                  background: activeRole === 'DRIVER' ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.4) 0%, rgba(29, 78, 216, 0.25) 100%)' : 'transparent',
+                  color: activeRole === 'DRIVER' ? '#ffffff' : '#bfdbfe',
                   fontWeight: activeRole === 'DRIVER' ? 900 : 700,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
@@ -226,10 +224,10 @@ export function LoginPage() {
                   justifyContent: 'center',
                   gap: 8,
                   transition: 'all 0.2s ease',
-                  boxShadow: activeRole === 'DRIVER' ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none',
+                  boxShadow: activeRole === 'DRIVER' ? '0 4px 14px rgba(37, 99, 235, 0.3)' : 'none',
                 }}
               >
-                <Smartphone size={16} style={{ color: activeRole === 'DRIVER' ? '#2dd4bf' : '#99f6e4' }} />
+                <Smartphone size={16} style={{ color: activeRole === 'DRIVER' ? '#60a5fa' : '#bfdbfe' }} />
                 <span>FIELD DRIVER</span>
               </button>
             </div>
@@ -260,7 +258,7 @@ export function LoginPage() {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {/* Email */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', marginBottom: 5, letterSpacing: '0.04em' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#60a5fa', marginBottom: 5, letterSpacing: '0.04em' }}>
                   OPERATIONAL EMAIL ADDRESS
                 </label>
                 <div
@@ -269,13 +267,12 @@ export function LoginPage() {
                     alignItems: 'center',
                     gap: 10,
                     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                    border: '1px solid rgba(45, 212, 191, 0.3)',
+                    border: '1px solid rgba(96, 165, 250, 0.35)',
                     borderRadius: 12,
                     padding: '10px 14px',
-                    transition: 'border-color 0.2s ease',
                   }}
                 >
-                  <Mail size={16} style={{ color: '#5eead4', flexShrink: 0 }} />
+                  <Mail size={16} style={{ color: '#93c5fd', flexShrink: 0 }} />
                   <input
                     type="email"
                     value={email}
@@ -296,7 +293,7 @@ export function LoginPage() {
 
               {/* Password */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', marginBottom: 5, letterSpacing: '0.04em' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#60a5fa', marginBottom: 5, letterSpacing: '0.04em' }}>
                   SYSTEM ACCESS PASSWORD
                 </label>
                 <div
@@ -305,12 +302,12 @@ export function LoginPage() {
                     alignItems: 'center',
                     gap: 10,
                     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                    border: '1px solid rgba(45, 212, 191, 0.3)',
+                    border: '1px solid rgba(96, 165, 250, 0.35)',
                     borderRadius: 12,
                     padding: '10px 14px',
                   }}
                 >
-                  <Lock size={16} style={{ color: '#5eead4', flexShrink: 0 }} />
+                  <Lock size={16} style={{ color: '#93c5fd', flexShrink: 0 }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -329,14 +326,14 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#5eead4', display: 'flex' }}
+                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#93c5fd', display: 'flex' }}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {/* Royal Blue Primary Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -345,7 +342,7 @@ export function LoginPage() {
                   padding: '12px 18px',
                   borderRadius: 12,
                   border: 'none',
-                  background: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                   color: '#ffffff',
                   fontWeight: 900,
                   fontSize: '0.88rem',
@@ -355,7 +352,7 @@ export function LoginPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
-                  boxShadow: '0 6px 20px rgba(13, 148, 136, 0.35)',
+                  boxShadow: '0 6px 20px rgba(37, 99, 235, 0.4)',
                   transition: 'transform 0.15s ease, box-shadow 0.15s ease',
                 }}
               >
@@ -365,9 +362,9 @@ export function LoginPage() {
             </form>
           </div>
 
-          {/* Quick Demo One-Click Login Cards */}
-          <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(45, 212, 191, 0.15)' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#2dd4bf', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+          {/* Quick Demo One-Click Login Cards — Blue Glass */}
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(96, 165, 250, 0.2)' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
               ONE-CLICK DEMO AUTHENTICATION CARDS
             </div>
 
@@ -377,8 +374,8 @@ export function LoginPage() {
                 type="button"
                 onClick={() => handleQuickLogin('ADMIN', 'admin@arohan.gov.in')}
                 style={{
-                  backgroundColor: 'rgba(20, 184, 166, 0.12)',
-                  border: '1px solid rgba(45, 212, 191, 0.3)',
+                  backgroundColor: 'rgba(37, 99, 235, 0.18)',
+                  border: '1px solid rgba(96, 165, 250, 0.35)',
                   borderRadius: 12,
                   padding: '10px 12px',
                   textAlign: 'left',
@@ -391,11 +388,11 @@ export function LoginPage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#34d399' }}>DISPATCH COMMANDER</span>
-                  <Zap size={13} style={{ color: '#34d399' }} />
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#60a5fa' }}>DISPATCH COMMANDER</span>
+                  <Zap size={13} style={{ color: '#60a5fa' }} />
                 </div>
                 <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>Arjun Sharma</div>
-                <div style={{ fontSize: '0.65rem', color: '#99f6e4', opacity: 0.7 }}>admin@arohan.gov.in</div>
+                <div style={{ fontSize: '0.65rem', color: '#bfdbfe', opacity: 0.8 }}>admin@arohan.gov.in</div>
               </button>
 
               {/* Demo Driver */}
@@ -403,8 +400,8 @@ export function LoginPage() {
                 type="button"
                 onClick={() => handleQuickLogin('DRIVER', 'driver.rahul@arohan.gov.in')}
                 style={{
-                  backgroundColor: 'rgba(20, 184, 166, 0.12)',
-                  border: '1px solid rgba(45, 212, 191, 0.3)',
+                  backgroundColor: 'rgba(37, 99, 235, 0.18)',
+                  border: '1px solid rgba(96, 165, 250, 0.35)',
                   borderRadius: 12,
                   padding: '10px 12px',
                   textAlign: 'left',
@@ -417,11 +414,11 @@ export function LoginPage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8' }}>HEAVY TRUCK DRIVER</span>
-                  <Smartphone size={13} style={{ color: '#38bdf8' }} />
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#93c5fd' }}>HEAVY TRUCK DRIVER</span>
+                  <Smartphone size={13} style={{ color: '#93c5fd' }} />
                 </div>
                 <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>Rahul Verma (TRK-001)</div>
-                <div style={{ fontSize: '0.65rem', color: '#99f6e4', opacity: 0.7 }}>driver.rahul@arohan.gov.in</div>
+                <div style={{ fontSize: '0.65rem', color: '#bfdbfe', opacity: 0.8 }}>driver.rahul@arohan.gov.in</div>
               </button>
             </div>
           </div>
@@ -431,11 +428,11 @@ export function LoginPage() {
         <div
           style={{
             padding: '36px 36px',
-            background: 'linear-gradient(180deg, rgba(4, 34, 30, 0.8) 0%, rgba(2, 20, 18, 0.9) 100%)',
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 58, 138, 0.9) 100%)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            borderLeft: '1px solid rgba(45, 212, 191, 0.2)',
+            borderLeft: '1px solid rgba(96, 165, 250, 0.25)',
           }}
         >
           <div>
@@ -446,11 +443,11 @@ export function LoginPage() {
                 gap: 6,
                 padding: '4px 12px',
                 borderRadius: 20,
-                backgroundColor: 'rgba(20, 184, 166, 0.2)',
-                border: '1px solid rgba(45, 212, 191, 0.4)',
+                backgroundColor: 'rgba(37, 99, 235, 0.25)',
+                border: '1px solid rgba(96, 165, 250, 0.4)',
                 fontSize: '0.7rem',
                 fontWeight: 800,
-                color: '#2dd4bf',
+                color: '#60a5fa',
                 marginBottom: 20,
               }}
             >
@@ -462,11 +459,11 @@ export function LoginPage() {
               INTELLIGENT HAZARD PREDICTION & MULTIMODAL FREIGHT REROUTING
             </h2>
 
-            <p style={{ fontSize: '0.8rem', color: '#99f6e4', opacity: 0.85, lineHeight: 1.6, marginBottom: 24 }}>
+            <p style={{ fontSize: '0.8rem', color: '#bfdbfe', opacity: 0.85, lineHeight: 1.6, marginBottom: 24 }}>
               AROHAN connects IMD weather radar feeds, SRTM topography, and live truck GPS telemetry to detect highway landslides before failure occurs.
             </p>
 
-            {/* Feature Highlights Grid */}
+            {/* Feature Highlights Grid — Blue Highlights */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div
                 style={{
@@ -475,14 +472,14 @@ export function LoginPage() {
                   gap: 12,
                   padding: 12,
                   borderRadius: 12,
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(45, 212, 191, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(96, 165, 250, 0.25)',
                 }}
               >
-                <CheckCircle2 size={18} style={{ color: '#34d399', flexShrink: 0, marginTop: 2 }} />
+                <CheckCircle2 size={18} style={{ color: '#60a5fa', flexShrink: 0, marginTop: 2 }} />
                 <div>
                   <strong style={{ fontSize: '0.82rem', color: '#ffffff', display: 'block' }}>Proactive Landslide Avoidance</strong>
-                  <span style={{ fontSize: '0.72rem', color: '#99f6e4', opacity: 0.75 }}>
+                  <span style={{ fontSize: '0.72rem', color: '#bfdbfe', opacity: 0.8 }}>
                     Evaluates rainfall intensity and slope factors to trigger alternate corridor rerouting.
                   </span>
                 </div>
@@ -495,14 +492,14 @@ export function LoginPage() {
                   gap: 12,
                   padding: 12,
                   borderRadius: 12,
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(45, 212, 191, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(96, 165, 250, 0.25)',
                 }}
               >
-                <CheckCircle2 size={18} style={{ color: '#34d399', flexShrink: 0, marginTop: 2 }} />
+                <CheckCircle2 size={18} style={{ color: '#60a5fa', flexShrink: 0, marginTop: 2 }} />
                 <div>
                   <strong style={{ fontSize: '0.82rem', color: '#ffffff', display: 'block' }}>Multimodal IWAI NW-2 Transfer</strong>
-                  <span style={{ fontSize: '0.72rem', color: '#99f6e4', opacity: 0.75 }}>
+                  <span style={{ fontSize: '0.72rem', color: '#bfdbfe', opacity: 0.8 }}>
                     Integrates Brahmaputra riverine barges and Jogighopa MMLP for landslide-immune passage.
                   </span>
                 </div>
@@ -515,14 +512,14 @@ export function LoginPage() {
                   gap: 12,
                   padding: 12,
                   borderRadius: 12,
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(45, 212, 191, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(96, 165, 250, 0.25)',
                 }}
               >
-                <CheckCircle2 size={18} style={{ color: '#34d399', flexShrink: 0, marginTop: 2 }} />
+                <CheckCircle2 size={18} style={{ color: '#60a5fa', flexShrink: 0, marginTop: 2 }} />
                 <div>
                   <strong style={{ fontSize: '0.82rem', color: '#ffffff', display: 'block' }}>Human-in-the-Loop Approval</strong>
-                  <span style={{ fontSize: '0.72rem', color: '#99f6e4', opacity: 0.75 }}>
+                  <span style={{ fontSize: '0.72rem', color: '#bfdbfe', opacity: 0.8 }}>
                     Dispatchers review ML recommendations with complete audit trail and decision logs.
                   </span>
                 </div>
@@ -534,13 +531,13 @@ export function LoginPage() {
           <div
             style={{
               paddingTop: 16,
-              borderTop: '1px solid rgba(45, 212, 191, 0.15)',
+              borderTop: '1px solid rgba(96, 165, 250, 0.2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               fontSize: '0.7rem',
-              color: '#5eead4',
-              opacity: 0.7,
+              color: '#93c5fd',
+              opacity: 0.8,
             }}
           >
             <span>PM GATISHAKTI ALIGNED</span>

@@ -83,26 +83,26 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Sidebar Footer — Translucent Glass Card */}
+      {/* Sidebar Footer — Translucent Blue Glass Card */}
       <div style={{
         margin: '12px 10px',
         padding: '10px 12px',
         borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid rgba(45, 212, 191, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(96, 165, 250, 0.25)',
         backdropFilter: 'blur(10px)',
         display: 'flex',
         flexDirection: 'column',
         gap: 3
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+          <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#3b82f6', boxShadow: '0 0 8px #3b82f6' }} />
           <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.72rem', letterSpacing: '0.02em' }}>
             System Online
           </span>
         </div>
-        <div style={{ fontSize: '0.65rem', color: '#99f6e4', opacity: 0.8, fontWeight: 600 }}>v1.0.0</div>
-        <div style={{ fontSize: '0.62rem', color: '#5eead4', opacity: 0.6, fontWeight: 500 }}>Arohan NER Logistics Control</div>
+        <div style={{ fontSize: '0.65rem', color: '#bfdbfe', opacity: 0.85, fontWeight: 600 }}>v1.0.0</div>
+        <div style={{ fontSize: '0.62rem', color: '#93c5fd', opacity: 0.7, fontWeight: 500 }}>Arohan NER Logistics Control</div>
       </div>
     </aside>
   );
