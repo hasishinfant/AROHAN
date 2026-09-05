@@ -15,6 +15,16 @@ interface ProviderStatus {
 
 const DEFAULT_PROVIDERS: ProviderStatus[] = [
   {
+    name: 'NESAC NER-DRR Portal (nerdrr.gov.in)',
+    type: 'REGIONAL_DISASTER_RISK_NODE',
+    source: 'NESAC (ISRO/DOS) NER-DRR',
+    status: 'LIVE',
+    freshness_seconds: 24,
+    retrieved_at: new Date().toISOString(),
+    observed_at: new Date(Date.now() - 24000).toISOString(),
+    details: 'Active Landslide & Flood Bulletins for NH-6 (Ri-Bhoi, East Khasi Hills, Assam)'
+  },
+  {
     name: 'IMD Automatic Weather Station (AWS Nongpoh)',
     type: 'METEOROLOGICAL',
     source: 'IMD AWS REST Stream',

@@ -227,20 +227,39 @@ async def get_hazard_catalog(corridor_ref: str = "NH-6") -> dict:
     return pkg.model_dump()
 
 
+@router.get("/providers/nerdrr")
+async def get_nerdrr_intelligence() -> dict:
+    from app.providers.nerdrr_provider import nerdrr_provider
+    pkg = nerdrr_provider.fetch_nerdrr_intelligence()
+    return pkg.model_dump()
+
+
 @router.get("/providers/status")
 async def get_all_provider_statuses() -> dict:
     from app.providers.imd_provider import imd_provider
     from app.providers.osm_provider import osm_provider
     from app.providers.dem_provider import dem_provider
     from app.providers.hazard_provider import hazard_provider
+    from app.providers.nerdrr_provider import nerdrr_provider
 
     imd_data = await imd_provider.fetch_district_telemetry("Ri-Bhoi")
     osm_data = await osm_provider.fetch_route_geometry("A")
     dem_data = await dem_provider.derive_route_terrain("A")
     hazard_data = await hazard_provider.fetch_corridor_hazard_history("NH-6")
+    nerdrr_data = nerdrr_provider.fetch_nerdrr_intelligence()
 
     return {
         "providers": [
+            {
+                "name": "NESAC NER-DRR Portal (nerdrr.gov.in)",
+                "type": "REGIONAL_DISASTER_RISK_NODE",
+                "source": nerdrr_data.node_name,
+                "status": nerdrr_data.status,
+                "freshness_seconds": nerdrr_data.freshness_seconds,
+                "retrieved_at": nerdrr_data.retrieved_at.isoformat(),
+                "observed_at": nerdrr_data.retrieved_at.isoformat(),
+                "details": f"Active NER Bulletins: {nerdrr_data.active_advisories_count} (Ri-Bhoi NH-6, Meghalaya Flood, Guwahati Inundation)"
+            },
             {
                 "name": "India Meteorological Department (IMD)",
                 "type": "METEOROLOGICAL_TELEMETRY",
