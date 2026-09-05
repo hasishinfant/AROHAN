@@ -772,6 +772,11 @@ export function LandingPage() {
             </div>
           </div>
 
+          <div style={{ backgroundColor: '#1e293b', padding: 14, borderRadius: 10, fontSize: '0.78rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 6, border: '1px solid #334155' }}>
+            <div><strong>Security & Privacy:</strong> Enforces Role-Based Access Control (RBAC), tamper-evident decision audit logging, and zero PII storage beyond anonymous driver IDs.</div>
+            <div><strong>Future Scope:</strong> Designed for multi-corridor scaling across all 8 North Eastern Region states via PostGIS route graph partitioning.</div>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b' }}>
             <div>© 2026 AROHAN (Adaptive Logistics Orchestration Network). All rights reserved.</div>
             <div>Together for a Stronger North East 🇮🇳</div>

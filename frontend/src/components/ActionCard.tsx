@@ -108,7 +108,15 @@ export function ActionCard({ decision, routes, onApprove, onReject, onModify }: 
 
       {/* Decision Actions */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        {isPending ? (
+        {decision.status === 'DEFERRED' || decision.decision_type === 'HUMAN_REVIEW_REQUIRED' ? (
+          <div className="alert alert-warning" style={{ width: '100%', alignItems: 'center' }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+            <div>
+              <strong>HUMAN REVIEW REQUIRED (CONFIDENCE GATED)</strong><br />
+              System gating rule enforced: Prediction confidence is <strong>LOW</strong> (below <strong>MEDIUM</strong> threshold). Auto-reroute recommendation gated. Deferred to dispatcher manual review.
+            </div>
+          </div>
+        ) : isPending ? (
           <>
             <button className="btn btn-success" onClick={onApprove} style={{ flex: 1 }}>
               <CheckCircle2 size={16} />

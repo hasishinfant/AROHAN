@@ -579,3 +579,115 @@ def pause_scenario():
 def resume_scenario():
     if memory.status == "PAUSED":
         memory.status = "RUNNING"
+
+
+async def run_low_confidence_scenario(db: AsyncSession) -> dict:
+    """
+    Demo Scenario for Low Prediction Confidence Gating.
+    Proves that when risk prediction confidence is LOW, the system gates the proactive auto-recommendation
+    and explicitly DEFERS to human dispatcher manual review.
+    """
+    await reset_scenario(db)
+    memory.status = "RUNNING"
+    memory.current_step = 2
+
+    # Ingest low-intensity / sparse telemetry
+    memory.rainfall_data = {
+        "intensity_mmh": 14.0,
+        "cumulative_24h_mm": 32.0,
+        "source": "SIMULATED_SPARSE",
+    }
+
+    # Fetch routes
+    routes_result = await db.execute(select(Route))
+    routes = routes_result.scalars().all()
+    current_route = next((r for r in routes if r.label == "A"), routes[0])
+
+    # Compute risk with explicitly LOW confidence
+    risk_a = compute_disruption_probability(
+        route_id=current_route.id,
+        route_label="A",
+        slope_factor=current_route.slope_factor,
+        historical_disruption_index=current_route.historical_disruption_index,
+        vulnerability_score=current_route.vulnerability_score,
+        rainfall_intensity_mmh=14.0,
+        cumulative_24h_mm=32.0,
+        horizon_h=18,
+    )
+    # Force LOW confidence for demonstration of gating rule
+    risk_a.confidence = "LOW"
+    risk_a.disruption_probability = 0.45
+    memory.risk_results[current_route.id] = risk_a
+
+    for r in routes:
+        if r.id != current_route.id:
+            memory.risk_results[r.id] = compute_disruption_probability(
+                route_id=r.id,
+                route_label=r.label,
+                slope_factor=r.slope_factor,
+                historical_disruption_index=r.historical_disruption_index,
+                vulnerability_score=r.vulnerability_score,
+                rainfall_intensity_mmh=5.0,
+                cumulative_24h_mm=10.0,
+                horizon_h=18,
+            )
+
+    # Evaluate confidence gating
+    score_current = 65.0
+    score_alt = 35.0
+    should_trigger, gating_reason = should_trigger_proactive_replan(
+        risk=risk_a,
+        current_mission_score=score_current,
+        alternative_mission_score=score_alt,
+    )
+
+    # System explicitly DEFERS because should_trigger is False due to LOW confidence
+    ship_result = await db.execute(select(Shipment).limit(1))
+    shipment = ship_result.scalar_one_or_none()
+
+    rec_reason = (
+        "HUMAN REVIEW REQUIRED (CONFIDENCE GATED): Risk Engine predicted 45% disruption probability with LOW confidence. "
+        "Confidence rating (LOW) is below the required threshold (MEDIUM). "
+        "Proactive auto-reroute recommendation GATED to prevent false diversion. Deferred to dispatcher manual inspection."
+    )
+
+    # Create decision with DEFERRED status
+    decision = Decision(
+        shipment_id=shipment.id if shipment else 1,
+        current_route_id=current_route.id,
+        recommended_route_id=current_route.id,  # No route change auto-recommended
+        status="DEFERRED",
+        reason=rec_reason,
+        mission_score_current=score_current,
+        mission_score_recommended=score_current,
+        disruption_probability=0.45,
+        expected_delay_h=3.5,
+        confidence="LOW",
+        horizon_h=18,
+        decision_type="HUMAN_REVIEW_REQUIRED",
+    )
+    db.add(decision)
+    await db.commit()
+    await db.refresh(decision)
+
+    memory.current_decision_id = decision.id
+
+    # Log event
+    event = NetworkEvent(
+        event_type="CONFIDENCE_GATED_DEFERRAL",
+        title="Proactive Auto-Reroute Gated — Low Confidence",
+        description=rec_reason,
+        triggered_by="SYSTEM",
+        scenario_step=2,
+        time_label="09:10",
+    )
+    db.add(event)
+    await db.commit()
+
+    # Broadcast updated state
+    if hasattr(ds, "_broadcast") and ds._broadcast:
+        import asyncio
+        asyncio.create_task(ds._broadcast(_build_state_dict()))
+
+    return _build_state_dict()
+

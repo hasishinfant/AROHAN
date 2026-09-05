@@ -41,7 +41,7 @@ export function DemoController() {
   const {
     scenario_step, scenario_status, all_steps,
     step_label, step_description,
-    scenarioStart, scenarioNext, scenarioPause, scenarioResume, scenarioReset,
+    scenarioStart, scenarioNext, scenarioPause, scenarioResume, scenarioReset, scenarioLowConfidence,
   } = useArohanStore();
 
   const step = scenario_step ?? -1;
@@ -62,7 +62,7 @@ export function DemoController() {
         <div>
           <h1 className="page-title">DEMO SCENARIO CONTROLLER</h1>
           <div className="page-description">
-            Deterministic 9-Step Event Sequencer · Evaluator Demonstration Panel
+            Deterministic Event Sequencer · Evaluator Demonstration & Confidence Gating Test Panel
           </div>
         </div>
         <span className={`badge ${isComplete ? 'badge-success' : isRunning ? 'badge-warning' : isPaused ? 'badge-info' : 'badge-neutral'}`} style={{ padding: '6px 12px' }}>
@@ -109,6 +109,11 @@ export function DemoController() {
               <span>RESUME</span>
             </button>
           )}
+
+          <button className="btn btn-warning btn-lg" onClick={scenarioLowConfidence} style={{ backgroundColor: '#eab308', color: '#000', fontWeight: 700 }}>
+            <Shield size={18} />
+            <span>TEST LOW-CONFIDENCE GATING SCENARIO</span>
+          </button>
 
           <button className="btn btn-danger btn-lg" onClick={scenarioReset}>
             <RotateCcw size={18} />

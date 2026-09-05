@@ -45,7 +45,7 @@ export function BaselineComparison() {
       expectedDelay: '+1.5 hours',
       riskExposure: '21% (Low)',
       leadTime: '18 hours (Pre-disruption)',
-      missionSuccess: '100% (Guaranteed delivery)',
+      missionSuccess: '0 missed deliveries in scenario',
       lossScore: '34 pts',
       bgClass: 'var(--status-success-bg)',
       borderClass: 'var(--status-success-border)',
@@ -93,7 +93,7 @@ export function BaselineComparison() {
         <div className="kpi-tile">
           <div className="kpi-label">
             <span>DECISION LEAD TIME</span>
-            <span className="data-tag data-tag-real">REAL TIME</span>
+            <span className="data-tag data-tag-simulated">SIMULATED SCENARIO</span>
           </div>
           <div className="kpi-value" style={{ color: 'var(--primary-navy)' }}>
             18 Hours
@@ -103,13 +103,13 @@ export function BaselineComparison() {
 
         <div className="kpi-tile">
           <div className="kpi-label">
-            <span>MISSION SUCCESS RATE</span>
+            <span>MISSED DELIVERIES</span>
             <span className="data-tag data-tag-derived">DERIVED</span>
           </div>
           <div className="kpi-value" style={{ color: 'var(--status-success-text)' }}>
-            100%
+            0 Missed
           </div>
-          <div className="kpi-subtext">Proactive delivery assurance</div>
+          <div className="kpi-subtext">0 missed deliveries in simulated scenario</div>
         </div>
       </div>
 

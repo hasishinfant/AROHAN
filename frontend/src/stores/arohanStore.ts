@@ -43,6 +43,7 @@ interface ArohanStore extends Partial<AppState> {
   scenarioPause: () => Promise<void>;
   scenarioResume: () => Promise<void>;
   scenarioReset: () => Promise<void>;
+  scenarioLowConfidence: () => Promise<void>;
   approveDecision: (id: number) => Promise<void>;
   rejectDecision: (id: number, reason: string) => Promise<void>;
   driverAcknowledge: () => Promise<void>;
@@ -135,6 +136,12 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
 
   scenarioReset: async () => {
     const data = await patch('/scenario/reset');
+    set({ ...data });
+    await get().fetchState();
+  },
+
+  scenarioLowConfidence: async () => {
+    const data = await patch('/scenario/low-confidence');
     set({ ...data });
     await get().fetchState();
   },
