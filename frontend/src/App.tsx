@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './components/Layout/Sidebar';
 import { TopBar } from './components/Layout/TopBar';
 import { LandingPage } from './pages/LandingPage';
@@ -21,6 +21,8 @@ import './styles/globals.css';
 
 function AppShell() {
   const { fetchState, isLoading } = useArohanStore();
+  const location = useLocation();
+  const isMapPage = location.pathname === '/map';
 
   // Connect WebSocket
   useWebSocket();
@@ -42,9 +44,9 @@ function AppShell() {
   return (
     <div className="app-container">
       <Sidebar />
-      <div className="app-main">
+      <div className="app-main" style={{ overflow: isMapPage ? 'hidden' : 'auto' }}>
         <TopBar />
-        <main className="app-content">
+        <main className={isMapPage ? "app-content app-content-flush" : "app-content"}>
           <Routes>
             <Route path="/command" element={<CommandCenter />} />
             <Route path="/map" element={<MapOverview />} />

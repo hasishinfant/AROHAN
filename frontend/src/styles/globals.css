@@ -210,6 +210,14 @@ body {
   background-color: #F5F7FB;
 }
 
+.app-content.app-content-flush {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
 /* ── Sanchar AI Enterprise Sidebar (260px) ─────────────────── */
 .sidebar {
   width: 260px;
