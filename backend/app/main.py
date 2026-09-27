@@ -38,14 +38,32 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+import asyncio
+import os
+from fastapi import Request
+
+# ── Safe Database Readiness for Serverless Cold Starts ───────────────────────
+
+_db_ready = False
+_db_lock = asyncio.Lock()
+
+
+async def ensure_db_ready():
+    global _db_ready
+    if not _db_ready:
+        async with _db_lock:
+            if not _db_ready:
+                await init_db()
+                async with AsyncSessionLocal() as db:
+                    await seed_database(db)
+                _db_ready = True
+
 
 # ── Lifespan ──────────────────────────────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    async with AsyncSessionLocal() as db:
-        await seed_database(db)
+    await ensure_db_ready()
     yield
 
 
@@ -56,7 +74,15 @@ app = FastAPI(
     description="SIH 2026 Prototype — NER Proactive Logistics Decision System",
     version="1.0.0",
     lifespan=lifespan,
+    docs_url="/docs",
+    openapi_url="/openapi.json",
 )
+
+@app.middleware("http")
+async def ensure_db_middleware(request: Request, call_next):
+    # Ensure tables and seed data are ready on serverless cold starts
+    await ensure_db_ready()
+    return await call_next(request)
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +92,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount both with and without /api prefix so Vercel rewrites and direct calls resolve cleanly
 app.include_router(router, prefix="/api")
+app.include_router(router)
 
 
 # ── WebSocket ─────────────────────────────────────────────────────────────────
@@ -103,11 +131,13 @@ ds._broadcast = broadcast_state
 
 
 @app.get("/")
+@app.get("/api")
 async def root():
     return {
         "system": "AROHAN",
         "subtitle": "Adaptive Logistics Orchestration Network",
         "version": "1.0.0",
         "status": "operational",
+        "environment": "vercel" if os.environ.get("VERCEL") else "standard",
         "docs": "/docs",
     }

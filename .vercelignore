@@ -1,0 +1,23 @@
+# Vercel deployment ignore rules
+node_modules
+frontend/node_modules
+backend/venv
+venv
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+dist
+frontend/dist
+.git
+.gitignore
+.github
+*.db
+*.sqlite
+*.sqlite3
+arohan.db
+backend/arohan.db

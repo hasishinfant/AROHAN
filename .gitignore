@@ -6,15 +6,20 @@ frontend/node_modules/
 # Build outputs
 dist/
 **/dist/
+frontend/dist/
 build/
 *.egg-info/
 
 # Python & Virtual Environments
 __pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 venv/
+**/venv/
+backend/venv/
 .venv/
+**/.venv/
 env/
 
 # Database & Storage
@@ -22,11 +27,14 @@ env/
 *.sqlite
 *.sqlite3
 arohan.db
+backend/arohan.db
 
 # Environment Variables & Secrets
 .env
+**/.env
 .env.local
 .env.*.local
+backend/.env
 
 # IDE & OS Files
 .DS_Store

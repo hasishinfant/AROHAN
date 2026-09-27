@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings
 from typing import List
 
@@ -25,6 +26,20 @@ class Settings(BaseSettings):
     DELAY_MULTIPLIER: float = 8.0
     URGENCY_RISK_MULTIPLIER: float = 15.0
     MAX_BLOCKAGE_DELAY_H: float = 12.0  # assumed delay if route is blocked
+
+    @property
+    def async_database_url(self) -> str:
+        url = self.DATABASE_URL
+        is_vercel = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+        # In Vercel serverless environment, local cwd is read-only. Fall back to /tmp/arohan.db for SQLite.
+        if is_vercel and ("./arohan.db" in url or (url.endswith("arohan.db") and not url.startswith("sqlite+aiosqlite:////tmp"))):
+            return "sqlite+aiosqlite:////tmp/arohan.db"
+        # Normalize Postgres URL prefixes for asyncpg
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        if url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
 
     class Config:
         env_file = ".env"
