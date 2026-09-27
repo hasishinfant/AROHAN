@@ -1060,7 +1060,6 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
   },
 
   fetchState: async () => {
-    set({ isLoading: true });
     try {
       const data = await patch('/state', 'GET');
       const s = get();
@@ -1081,14 +1080,16 @@ export const useArohanStore = create<ArohanStore>((set, get) => ({
         error: null,
       });
 
-      // Synchronously load institutional modules
-      get().fetchResources();
-      get().fetchAlerts();
-      get().fetchTerrainRisks();
-      get().fetchCommandKpis();
-      get().fetchFieldReports();
-      get().fetchCorridorRiskForecasts();
-      get().fetchFloodVulnerabilities();
+      // Load institutional modules on initial state load
+      if (!s.floodSummary) {
+        get().fetchResources();
+        get().fetchAlerts();
+        get().fetchTerrainRisks();
+        get().fetchCommandKpis();
+        get().fetchFieldReports();
+        get().fetchCorridorRiskForecasts();
+        get().fetchFloodVulnerabilities();
+      }
     } catch (e) {
       set({ isLoading: false, error: String(e) });
     }
